@@ -88,17 +88,19 @@ public class IndexNidKeywordsListService {
 	
 	// 添加document
 	public void addDoc(int nodeId, String keyListStr) {
-		Document doc = new Document();
-		doc.add(new StoredField("nodeId", nodeId));
-		
-		doc.add(new TextField("keywordList", keyListStr, Field.Store.YES));
-		
-		try {
-			indexWriter.addDocument(doc);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("添加索引失败而退出！！！");
-			System.exit(0);
+		String[] wordIdArr = keyListStr.split(",");
+		Document doc = null;
+		for(String st : wordIdArr) {
+			doc = new Document();
+			doc.add(new StoredField("nodeId", nodeId));
+			doc.add(new IntPoint("keywordIdList", Integer.parseInt(st)));
+			try {
+				indexWriter.addDocument(doc);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("添加索引失败而退出！！！");
+				System.exit(0);
+			}
 		}
 		
 	}
@@ -128,7 +130,8 @@ public class IndexNidKeywordsListService {
 	public ArrayList<Integer> searchKeywordIdReNodeIds(String searchedWordId){
 		ArrayList<Integer> resultList = null;
 		try {
-			TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
+//			TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
+			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("keywordIdList", Integer.parseInt(searchedWordId)), Integer.MAX_VALUE);
 			ScoreDoc[] hits = results.scoreDocs;
 			
 			resultList = new ArrayList<Integer>();
@@ -159,10 +162,12 @@ public class IndexNidKeywordsListService {
 	
 	public static void main(String args[]) {
 //		System.out.println(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
-		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
+//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nidKeywordsListMapYagoVB.txt");
+		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "test.index");
+		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "test");
 		ser.openIndexReader();
-		for(int i : ser.searchKeywordIdReNodeIds("9201454"))
+		for(int i : ser.searchKeywordIdReNodeIds("2"))
 			System.out.println(i);
 		ser.closeIndexReader();
 	}
