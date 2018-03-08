@@ -59,9 +59,9 @@ public class ZipBase64ReaderService {
 				}
 				return;
 			}
-			zais = new ZipArchiveInputStream(new FileInputStream(new File(filePath)));;
+			zais = new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(new File(filePath))));;
 			curZipEntry = zais.getNextZipEntry();
-			bufferedReader = new BufferedReader(new InputStreamReader(new BufferedInputStream(zais)));
+			bufferedReader = new BufferedReader(new InputStreamReader(zais));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -13,7 +13,26 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
+  
+  <repositories>
+  	<!-- jsi仓库 -->
+    <repository>
+      <id>jsi.sourceforge.net</id>
+      <name>sourceforge jsi repository</name>
+      <url>http://sourceforge.net/projects/jsi/files/m2_repo</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+  
   <!-- 依赖jar -->
   <dependencies>
     <dependency>
@@ -52,6 +71,20 @@
 	   <artifactId>jgrapht-core</artifactId>
 	   <version>1.1.0</version>
     </dependency>
+    
+    <!-- jsi -->
+    <dependency>
+       <groupId>net.sourceforge.jsi</groupId>
+	   <artifactId>jsi</artifactId>
+	   <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <version>1.6.4</version>
+      <scope>runtime</scope>
+    </dependency>
+    
   </dependencies>
   
   <!-- 插件 -->
