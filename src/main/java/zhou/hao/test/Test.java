@@ -40,6 +40,7 @@ import org.apache.lucene.analysis.CharArrayMap.EntrySet;
 import zhou.hao.entry.IndividualBlockingQueue;
 import zhou.hao.entry.Node;
 import zhou.hao.entry.Pair;
+import zhou.hao.helper.MComparator;
 import zhou.hao.service.GZIPReaderService;
 import zhou.hao.service.GoogleFreebaseLineProcessService;
 import zhou.hao.service.IndexNodeMapService;
@@ -53,13 +54,29 @@ public class Test {
 	
 	public static void main(String[] args) throws Exception{
 		
+		ArrayList<Integer> lit = new ArrayList<>();
+		lit.add(4);
+		lit.add(2);
+		lit.add(9);
+		lit.sort(new MComparator<Integer>());
+		for(int i=0; i<lit.size(); i++)
+			System.out.println(lit.get(i));
+		
+//		TreeSet<Integer> ts = new TreeSet<>();
+//		ts.add(32);
+//		ts.add(11);
+//		ts.add(44);
+//		ts.add(11);
+//		ArrayList<Integer> li = new ArrayList<>(ts);
+//		for(int i : li)
+//			System.out.println(i);
+		
 //		ZipBase64ReaderService reader = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "n3.zip");
 //		for(int i=0; i<100; i++)
 //			System.out.println(reader.readLine());
 //		reader.close();
 		
-		Test.displayOnDateLineOfFreebase();
-		
+//		Test.displayOnDateLineOfFreebase();
 		
 //		ArrayList<String> li = new ArrayList<>();
 //		li.add(null);

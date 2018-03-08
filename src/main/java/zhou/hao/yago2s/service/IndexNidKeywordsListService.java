@@ -2,6 +2,11 @@ package zhou.hao.yago2s.service;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -24,6 +29,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import zhou.hao.helper.MComparator;
 import zhou.hao.helper.PatternAnalyzer;
 import zhou.hao.service.ZipBase64ReaderService;
 import zhou.hao.tools.LocalFileInfo;
@@ -127,11 +133,11 @@ public class IndexNidKeywordsListService {
 	}
 	
 	// 检索关键字id，获得对应点
-	public ArrayList<Integer> searchKeywordIdReNodeIds(String searchedWordId){
+	public ArrayList<Integer> searchKeywordIdReNodeIds(Integer searchedWordId){
 		ArrayList<Integer> resultList = null;
 		try {
 //			TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
-			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("keywordIdList", Integer.parseInt(searchedWordId)), Integer.MAX_VALUE);
+			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("keywordIdList", searchedWordId), Integer.MAX_VALUE);
 			ScoreDoc[] hits = results.scoreDocs;
 			
 			resultList = new ArrayList<Integer>();
@@ -149,6 +155,48 @@ public class IndexNidKeywordsListService {
 		return null;
 	}
 	
+	// 搜索多个关键字
+	public HashMap<Integer, ArrayList<Integer>> searchKeywordIdListReNodeIdMap(ArrayList<Integer> searchedWordList){
+		MComparator<Integer> mcomp = new MComparator<Integer>();
+		searchedWordList.sort(mcomp);
+		ArrayList<LinkedList<Integer>> resultList  = new ArrayList<>();
+		ArrayList<Integer> tempList = null;
+		
+		// 添加搜索结果
+		for(Integer in : searchedWordList) {
+			tempList = this.searchKeywordIdReNodeIds(in);
+			tempList.sort(mcomp);
+			resultList.add(new LinkedList<>(tempList));
+		}
+		
+		// 构造结果Map
+		HashMap<Integer, ArrayList<Integer>> resultMap = new HashMap<>();
+		
+		int len = 0, minIn =  Integer.MAX_VALUE, i = 0;
+		len = searchedWordList.size();
+		LinkedList<Integer> tempLink = null;
+		while(true) {
+			minIn = Integer.MAX_VALUE;
+			for(i=0; i<len; i++) {
+				tempLink = resultList.get(i);
+				if(!tempLink.isEmpty() && tempLink.getFirst() < minIn)	minIn = tempLink.getFirst();
+			}
+			if(minIn == Integer.MAX_VALUE)	break;
+			
+			tempList = new ArrayList<>();
+			for(i=0; i<len; i++) {
+				tempLink = resultList.get(i);
+				if(!tempLink.isEmpty() && tempLink.getFirst() == minIn) {
+					tempList.add(searchedWordList.get(i));
+					tempLink.poll();
+				}
+			}
+			
+			resultMap.put(minIn, tempList);
+		}
+		return resultMap;
+	}
+	
 	// 关闭索引读流
 	public void closeIndexReader() {
 		if(indexReader!=null) {
@@ -162,13 +210,28 @@ public class IndexNidKeywordsListService {
 	
 	public static void main(String args[]) {
 //		System.out.println(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
-//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
+		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nidKeywordsListMapYagoVB.txt");
-		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "test.index");
-		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "test");
+//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "test.index");
+//		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "test");
 		ser.openIndexReader();
-		for(int i : ser.searchKeywordIdReNodeIds("2"))
-			System.out.println(i);
+		ArrayList<Integer> wordList = new ArrayList<>();
+		wordList.add(10659321);
+		wordList.add(10321429);
+		wordList.add(8267756);
+		wordList.add(10443569);
+		wordList.add(10737877);
+		int i = 0;
+		HashMap<Integer, ArrayList<Integer>> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
+		for(Entry<Integer, ArrayList<Integer>> en : resMap.entrySet()) {
+			System.out.print(en.getKey() + " : ");
+			for(Integer in : en.getValue())
+				System.out.print(in + " ");
+			System.out.println();
+			if((i++)==5)	break;
+		}
+//		for(int i : ser.searchKeywordIdReNodeIds(2))
+//			System.out.println(i);
 		ser.closeIndexReader();
 	}
 }
