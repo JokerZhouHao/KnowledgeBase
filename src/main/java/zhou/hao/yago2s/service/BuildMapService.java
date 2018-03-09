@@ -46,7 +46,7 @@ public class BuildMapService {
 				tempList.add(Integer.parseInt(st));
 		}
 		ser.close();
-		System.out.println("> 结束构造Yago2sMap(" + yago2sArrMap.length + "个节点), 花时" + TimeStr.getSpendTimeStr(startTime, System.currentTimeMillis()) + "  ！ ！！"+ TimeStr.getTime());
+		System.out.println("> 结束构造Yago2sMap(" + yago2sArrMap.length + "个节点), 花时" + TimeStr.getSpendTimeStr(startTime, System.currentTimeMillis()) + "  ！ ！！"+ TimeStr.getTime() + "\n");
 		return yago2sArrMap;
 	}
 	

@@ -26,13 +26,36 @@ public class IndexCoordService {
 	private String entryName = null;
 	private ArrayList<Point> pointList = new ArrayList<>();
 	
+	public class PointAndId{
+		private Point point = null;
+		private int id = 0;
+		public PointAndId(Point point, int id) {
+			super();
+			this.point = point;
+			this.id = id;
+		}
+		public Point getPoint() {
+			return point;
+		}
+		public void setPoint(Point point) {
+			this.point = point;
+		}
+		public int getId() {
+			return id;
+		}
+		public void setId(int id) {
+			this.id = id;
+		}
+		
+	}
+	
 	public IndexCoordService(String zipPath, String entryName) {
 		this.zipPath = zipPath;
 		this.entryName = entryName;
 	}
 	
 	// 建立RTree
-	private void buildRTree() {
+	public void buildRTree() {
 		long startTime = System.currentTimeMillis();
 		ZipBase64ReaderService reader = new ZipBase64ReaderService(zipPath, entryName);
 		String lineStr = reader.readLine();
@@ -62,6 +85,7 @@ public class IndexCoordService {
 			pointList.set(tempNodeId, new Point(x, y));
 		}
 		System.out.println("> 完成为zip文件" + zipPath + "里的文件" + entryName + "中的" + nodeNum + "个坐标创建RTree ！！！  " + TimeStr.getTime() + ", 花时" + TimeStr.getSpendTimeStr(startTime, System.currentTimeMillis()));
+		System.out.println();
 		reader.close();
 	}
 	
@@ -71,19 +95,24 @@ public class IndexCoordService {
 	}
 	
 	// 查找最近的N个点
-	public ArrayList<Point> nearestN(Point p, int n){
+	public ArrayList<PointAndId> nearestN(Point p, int n){
 		if(null == rTree)	this.buildRTree();
-		ArrayList<Point> resList = new ArrayList<>();
+		ArrayList<PointAndId> resList = new ArrayList<>();
 		rTree.nearestN(p, new TIntProcedure() {
 			
 			@Override
 			public boolean execute(int i) {
 //				System.out.println(("Point " + i + " " + pointList.get(i) + ", distance=" + getTwoPointDis(pointList.get(i), p)));
-				resList.add(pointList.get(i));
+				resList.add(new PointAndId(pointList.get(i), i));
 				return Boolean.TRUE;
 			}
 		}, n, Float.MAX_VALUE);
 		return resList;
+	}
+	
+	// 获得所有的点
+	public Point getPoint(int poId) {
+		return pointList.get(poId);
 	}
 	
 	// 主函数

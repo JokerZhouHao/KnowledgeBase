@@ -210,17 +210,15 @@ public class IndexNidKeywordsListService {
 	
 	public static void main(String args[]) {
 //		System.out.println(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
-		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
+//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nidKeywordsListMapYagoVB.txt");
-//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "test.index");
-//		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "test");
+		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex");
+		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "nidKeywordsListMapYagoVB.txt");
 		ser.openIndexReader();
 		ArrayList<Integer> wordList = new ArrayList<>();
-		wordList.add(10659321);
-		wordList.add(10321429);
-		wordList.add(8267756);
-		wordList.add(10443569);
-		wordList.add(10737877);
+		wordList.add(12);
+		wordList.add(15);
+		wordList.add(17);
 		int i = 0;
 		HashMap<Integer, ArrayList<Integer>> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
 		for(Entry<Integer, ArrayList<Integer>> en : resMap.entrySet()) {

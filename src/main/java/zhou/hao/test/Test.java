@@ -53,14 +53,34 @@ import zhou.hao.tools.LocalFileInfo;
 public class Test {
 	
 	public static void main(String[] args) throws Exception{
+		ZipBase64ReaderService re1 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
+		ZipBase64ReaderService re2 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
+		re1.readLine();
+		re2.readLine();
+		String s1 = null, s2 = null;
+		for(int i = 0; i<4774796; i++) {
+			s1 = re1.readLine();
+			s2 = re2.readLine();
+			if(!s1.equals(s2))	break;
+		}
+		System.out.println(s1 + "     " + s2);
+//		ArrayList<Integer> lit = new ArrayList<>();
+//		lit.add(4);
+//		System.out.println(lit);
 		
-		ArrayList<Integer> lit = new ArrayList<>();
-		lit.add(4);
-		lit.add(2);
-		lit.add(9);
-		lit.sort(new MComparator<Integer>());
-		for(int i=0; i<lit.size(); i++)
-			System.out.println(lit.get(i));
+		
+//		boolean sign[] = new boolean[100];
+//		for(int i=0; i<10; i++)
+//			System.out.println(sign[i]);
+		
+		
+//		ArrayList<Integer> lit = new ArrayList<>();
+//		lit.add(4);
+//		lit.add(2);
+//		lit.add(9);
+//		lit.sort(new MComparator<Integer>());
+//		for(int i=0; i<lit.size(); i++)
+//			System.out.println(lit.get(i));
 		
 //		TreeSet<Integer> ts = new TreeSet<>();
 //		ts.add(32);
