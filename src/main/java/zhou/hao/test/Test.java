@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +13,9 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,17 +56,74 @@ import zhou.hao.tools.LocalFileInfo;
 public class Test {
 	
 	public static void main(String[] args) throws Exception{
-		ZipBase64ReaderService re1 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
-		ZipBase64ReaderService re2 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
-		re1.readLine();
-		re2.readLine();
-		String s1 = null, s2 = null;
-		for(int i = 0; i<4774796; i++) {
-			s1 = re1.readLine();
-			s2 = re2.readLine();
-			if(!s1.equals(s2))	break;
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		Date date = sdf.parse("1-1-1");
+//		System.out.println(sdf.format(new Date(-62135798400000L)));
+//		System.out.println(date.getTime());
+		BufferedReader reader = new BufferedReader(new FileReader(new File(LocalFileInfo.getDataSetPath() + "nodeIdOnDateMapYagoVB.txt")));
+		reader.readLine();
+		String lineStr = null;
+		int k;
+		String strArr[] = null;
+		String dateArr[] = null;
+		String year, month, day;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+		while(null != (lineStr = reader.readLine())) {
+			k = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
+			lineStr = lineStr.substring(lineStr.indexOf('"') + 1, lineStr.length());
+			strArr = lineStr.split("\"");
+			System.out.print(k + " > " + lineStr + " > ");
+			for(String st : strArr) {
+				if(!st.startsWith("^")) {
+					if(st.startsWith("-")) st = "#" + st.substring(1);
+					dateArr = st.split("-");
+					year = dateArr[0];
+					if(year.contains("-"))	year = year.replace('-', '0');
+					if(year.contains("#"))	year = year.replace("#", "0");
+					month = dateArr[1];
+					if(month.startsWith("#"))	month = "01";
+					else if(month.charAt(1)=='#')	month = month.replace("#", "0");
+					day = dateArr[2];
+					if(day.startsWith("#"))	day = "01";
+					else if(day.charAt(1)=='#')	day = day.replace("#", "0");
+					System.out.print(sdf1.format(sdf.parse(year +'-' +  month + '-' + day)) + " ");
+				}
+			}
+			System.out.println();
 		}
-		System.out.println(s1 + "     " + s2);
+		reader.close();
+		
+//		String lineStr = "5610: 40.8 -81.93333333333334\"1808-##-##\"^^xsd:date~";
+//		String strArr[]  = null;
+//		lineStr = lineStr.substring(lineStr.indexOf('"') + 1, lineStr.length());
+//		strArr = lineStr.split("\"");
+//		for(String st : strArr) {
+//			if(!st.startsWith("^"))
+//				System.out.println("  " + st);
+//		}
+		
+		
+		
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		Date date = sdf.parse("2002-##-##");
+//		Date date1 = new Date(date.getTime());
+//		System.out.println(date.getTime());
+//		System.out.println(sdf.format(date1));
+		
+		
+		
+//		ZipBase64ReaderService re1 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
+//		ZipBase64ReaderService re2 = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "nodeIdMapYagoVB.txt");
+//		re1.readLine();
+//		re2.readLine();
+//		String s1 = null, s2 = null;
+//		for(int i = 0; i<4774796; i++) {
+//			s1 = re1.readLine();
+//			s2 = re2.readLine();
+//			if(!s1.equals(s2))	break;
+//		}
+//		System.out.println(s1 + "     " + s2);
 //		ArrayList<Integer> lit = new ArrayList<>();
 //		lit.add(4);
 //		System.out.println(lit);

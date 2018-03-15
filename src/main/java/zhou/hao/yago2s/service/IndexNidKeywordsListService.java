@@ -1,7 +1,9 @@
 package zhou.hao.yago2s.service;
 
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -68,9 +70,14 @@ public class IndexNidKeywordsListService {
 		this.openIndexWriter();
 		String lineStr = null;
 		while(null != (lineStr = reader.readLine())) {
-//			System.out.println(lineStr.substring(0, lineStr.indexOf(':')));
-//			System.out.println(lineStr.substring(lineStr.indexOf(' ')+1, lineStr.length()));
-			this.addDoc(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))), lineStr.substring(lineStr.indexOf(' ')+1, lineStr.length()));
+			System.out.println(lineStr);
+			System.out.println(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))));
+			System.out.println(lineStr.substring(lineStr.indexOf(' ')+1, lineStr.lastIndexOf('#')));
+			System.out.println(lineStr.substring(lineStr.lastIndexOf('#')+1));
+			System.out.println();
+			this.addDoc(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))), 
+					lineStr.substring(lineStr.indexOf(' ')+1, lineStr.lastIndexOf('#')),
+					lineStr.substring(lineStr.lastIndexOf('#')+1));
 		}
 		this.closeIndexWriter();
 		reader.close();
@@ -93,22 +100,22 @@ public class IndexNidKeywordsListService {
 	}
 	
 	// 添加document
-	public void addDoc(int nodeId, String keyListStr) {
+	public void addDoc(int nodeId, String dateStr, String keyListStr) {
 		String[] wordIdArr = keyListStr.split(",");
 		Document doc = null;
+		doc = new Document();
+		doc.add(new StoredField("nodeId", nodeId));
+		doc.add(new StoredField("date", dateStr));
 		for(String st : wordIdArr) {
-			doc = new Document();
-			doc.add(new StoredField("nodeId", nodeId));
 			doc.add(new IntPoint("keywordIdList", Integer.parseInt(st)));
-			try {
-				indexWriter.addDocument(doc);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("添加索引失败而退出！！！");
-				System.exit(0);
-			}
 		}
-		
+		try {
+			indexWriter.addDocument(doc);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("添加索引失败而退出！！！");
+			System.exit(0);
+		}
 	}
 	
 	// 关闭索引写
@@ -155,44 +162,109 @@ public class IndexNidKeywordsListService {
 		return null;
 	}
 	
+	// 记录节点id和date
+	public class NodeIdDate{
+		private int nodeId = -1;
+		private ArrayList<Date> dateList = new ArrayList<>();
+		public int getNodeId() {
+			return nodeId;
+		}
+	}
+	
+	// 检索关键字id，获得对应点和date
+	public ArrayList<NodeIdDate> searchKeywordIdReNodeIdDate(Integer searchedWordId){
+		ArrayList<NodeIdDate> resultList = null;
+		try {
+//				TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
+			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("keywordIdList", searchedWordId), Integer.MAX_VALUE);
+			ScoreDoc[] hits = results.scoreDocs;
+			
+			resultList = new ArrayList<NodeIdDate>();
+			
+			NodeIdDate tempNID = null;
+			String dateStr = null;
+			String[] strArr = null;
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			
+			for(int i=0; i<hits.length; i++) {
+				tempNID = new NodeIdDate();
+				tempNID.nodeId = Integer.parseInt(indexSearcher.doc(hits[i].doc).get("nodeId"));
+				
+				dateStr = indexSearcher.doc(hits[i].doc).get("date");
+				strArr = dateStr.split("#");
+				for(String st : strArr)
+					tempNID.dateList.add(sdf.parse(st));
+				resultList.add(tempNID);
+			}
+			System.out.println("     【" + searchedWordId + "】  > " + "命中的点数 = " + resultList.size() + " " + TimeStr.getTime());
+			return resultList;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("检索KeywordIdReNodeIds：" + searchedWordId + "失败而退出！！！");
+			System.exit(0);
+		}
+		return null;
+	}
+	
+	// 记录keywordList和date
+	public class KeywordIdDateList{
+		private ArrayList<Integer> keywordIdList = null;
+		private ArrayList<Date> dateList = null;
+		public ArrayList<Integer> getKeywordIdList() {
+			return keywordIdList;
+		}
+		public ArrayList<Date> getDateList() {
+			return dateList;
+		}
+	}
+	
 	// 搜索多个关键字
-	public HashMap<Integer, ArrayList<Integer>> searchKeywordIdListReNodeIdMap(ArrayList<Integer> searchedWordList){
-		MComparator<Integer> mcomp = new MComparator<Integer>();
-		searchedWordList.sort(mcomp);
-		ArrayList<LinkedList<Integer>> resultList  = new ArrayList<>();
-		ArrayList<Integer> tempList = null;
+	public HashMap<Integer, KeywordIdDateList> searchKeywordIdListReNodeIdMap(ArrayList<Integer> searchedWordList){
+		MComparator<NodeIdDate> mcompNId = new MComparator<NodeIdDate>();
+		MComparator<Integer> mcompInt = new MComparator<Integer>();
+		searchedWordList.sort(mcompInt);
+		ArrayList<LinkedList<NodeIdDate>> resultList  = new ArrayList<>();
+		ArrayList<NodeIdDate> tempList = null;
 		
 		// 添加搜索结果
 		for(Integer in : searchedWordList) {
-			tempList = this.searchKeywordIdReNodeIds(in);
-			tempList.sort(mcomp);
+			tempList = this.searchKeywordIdReNodeIdDate(in);
+			tempList.sort(mcompNId);
 			resultList.add(new LinkedList<>(tempList));
 		}
 		
 		// 构造结果Map
-		HashMap<Integer, ArrayList<Integer>> resultMap = new HashMap<>();
+		HashMap<Integer, KeywordIdDateList> resultMap = new HashMap<>();
 		
 		int len = 0, minIn =  Integer.MAX_VALUE, i = 0;
 		len = searchedWordList.size();
-		LinkedList<Integer> tempLink = null;
+		LinkedList<NodeIdDate> tempLink = null;
+		NodeIdDate tempNID = null;
+		KeywordIdDateList tempKIDL = null;
 		while(true) {
 			minIn = Integer.MAX_VALUE;
 			for(i=0; i<len; i++) {
 				tempLink = resultList.get(i);
-				if(!tempLink.isEmpty() && tempLink.getFirst() < minIn)	minIn = tempLink.getFirst();
+				if(!tempLink.isEmpty() && tempLink.getFirst().nodeId < minIn) {
+					tempNID = tempLink.getFirst();
+					minIn = tempNID.nodeId;
+				}
 			}
 			if(minIn == Integer.MAX_VALUE)	break;
+			
+			tempKIDL = new KeywordIdDateList();
+			tempKIDL.dateList = tempNID.dateList;
 			
 			tempList = new ArrayList<>();
 			for(i=0; i<len; i++) {
 				tempLink = resultList.get(i);
-				if(!tempLink.isEmpty() && tempLink.getFirst() == minIn) {
-					tempList.add(searchedWordList.get(i));
+				if(!tempLink.isEmpty() && tempLink.getFirst().nodeId == minIn) {
+					if(null == tempKIDL.keywordIdList)	tempKIDL.keywordIdList = new ArrayList<>();
+					tempKIDL.keywordIdList.add(searchedWordList.get(i));
 					tempLink.poll();
 				}
 			}
-			
-			resultMap.put(minIn, tempList);
+			resultMap.put(minIn, tempKIDL);
 		}
 		return resultMap;
 	}
@@ -211,22 +283,32 @@ public class IndexNidKeywordsListService {
 	public static void main(String args[]) {
 //		System.out.println(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
-//		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nidKeywordsListMapYagoVB.txt");
+//		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nodeIdKeywordListOnDateMapYagoVB.txt");
 		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex");
-		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "nidKeywordsListMapYagoVB.txt");
+		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "nodeIdKeywordListOnDateMapYagoVB.txt");
 		ser.openIndexReader();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		for(NodeIdDate nid : ser.searchKeywordIdReNodeIdDate(16)) {
+//			System.out.print(nid.nodeId + " > ");
+//			for(Date da : nid.dateList) {
+//				System.out.print(sdf.format(da) + "   ");
+//			}
+//			System.out.println();
+//		}
 		ArrayList<Integer> wordList = new ArrayList<>();
 		wordList.add(12);
-		wordList.add(15);
-		wordList.add(17);
+		wordList.add(16);
+		wordList.add(13);
 		int i = 0;
-		HashMap<Integer, ArrayList<Integer>> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
-		for(Entry<Integer, ArrayList<Integer>> en : resMap.entrySet()) {
+		HashMap<Integer, KeywordIdDateList> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
+		for(Entry<Integer, KeywordIdDateList> en : resMap.entrySet()) {
 			System.out.print(en.getKey() + " : ");
-			for(Integer in : en.getValue())
+			for(Date da : en.getValue().dateList)
+				System.out.print(sdf.format(da) + " ");
+			System.out.print(" : ");
+			for(Integer in : en.getValue().keywordIdList)
 				System.out.print(in + " ");
 			System.out.println();
-			if((i++)==5)	break;
 		}
 //		for(int i : ser.searchKeywordIdReNodeIds(2))
 //			System.out.println(i);

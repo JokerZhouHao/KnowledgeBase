@@ -2,11 +2,16 @@ package zhou.hao.yago2s.service;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import zhou.hao.service.ZipBase64ReaderService;
 import zhou.hao.tools.LocalFileInfo;
@@ -24,6 +29,9 @@ public class NodeIdOnDateService {
 	private String vbZipPath = null;
 	private String nodeIdEntryName = null;
 	private String nodeIdOnDateMapYagoVBPath = null;
+	
+	// 构造函数
+	public NodeIdOnDateService() {}
 	
 	// 构造函数
 	public NodeIdOnDateService(String sourceZipPath, String vbZipPath, String nodeIdEntryName,
@@ -197,6 +205,173 @@ public class NodeIdOnDateService {
 		return Boolean.TRUE;
 	}
 	
+	// 输出标准的只含有节点的OnDate属性的节点txt文档 ： nodeIdStandardOnDateMapYagoVB.txt
+	public void writeNodeIdStandardOnDateTxt() throws Exception{
+		System.out.println("> 开始写nodeIdStandardOnDateMapYagoVB.txt . . . ");
+		BufferedReader reader = new BufferedReader(new FileReader(new File(LocalFileInfo.getDataSetPath() + "nodeIdOnDateMapYagoVB.txt")));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(LocalFileInfo.getDataSetPath() + "nodeIdStandardOnDateMapYagoVB.txt"));
+		reader.readLine();
+		bw.write("        \n");
+		String lineStr = null;
+		int k;
+		int nodeNum = 0;
+		String strArr[] = null;
+		String dateArr[] = null;
+		String year, month, day;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		while(null != (lineStr = reader.readLine())) {
+			if(!lineStr.contains("\""))	continue;
+			k = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
+			lineStr = lineStr.substring(lineStr.indexOf('"') + 1, lineStr.length());
+			strArr = lineStr.split("\"");
+//			System.out.println(k + " > " + lineStr + " > ");
+			bw.write(String.valueOf(k));
+			bw.write(": ");
+			for(String st : strArr) {
+				if(!st.startsWith("^")) {
+					if(st.startsWith("-")) st = "#" + st.substring(1);
+					dateArr = st.split("-");
+					
+					year = dateArr[0];
+					if(year.contains("-"))	year = year.replace('-', '0');
+					if(year.contains("#"))	year = year.replace("#", "0");
+//					if(Integer.parseInt(year) >2017) {
+//						System.out.println(year + "太大   ");
+//						return;
+//					}
+					
+					month = dateArr[1];
+					if(month.startsWith("#"))	month = "01";
+					else if(month.length() ==2 && month.charAt(1)=='#')	month = month.replace("#", "0");
+					
+					day = dateArr[2];
+					if(day.startsWith("#"))	day = "01";
+					else if(day.length() ==2 && day.charAt(1)=='#')	day = day.replace("#", "0");
+					
+					bw.write(year + '-' + month + '-' + day + '#');
+//					date2 = sdf.parse(year +'-' +  month + '-' + day);
+//					if(date1.getTime() < date2.getTime())	date1 = date2;
+				}
+			}
+			bw.write("\n");
+			nodeNum++;
+//			System.out.println();
+		}
+		reader.close();
+		bw.flush();
+		bw.close();
+		
+		RandomAccessFile raf = new RandomAccessFile(new File(LocalFileInfo.getDataSetPath() + "nodeIdStandardOnDateMapYagoVB.txt"), "rw");
+		raf.seek(0);
+//		raf.writeUTF(String.valueOf(nodeNum) + "#");
+//		raf.writeChars(String.valueOf(nodeNum) + "#");
+		raf.write((String.valueOf(nodeNum) + "#").getBytes());
+		raf.close();
+		System.out.println("> over写nodeIdStandardOnDateMapYagoVB.txt . . . ");
+	}
+	
+	// 输出只含有节点的OnDate和坐标属性的节点txt文档 ： nodeIdCoordOnDateMapYagoVB.txt
+	public Boolean writeNodeIdCoordOnDateMapTxt() throws Exception{
+		System.out.println("> 开始写nodeIdCoordOnDateMapYagoVB.txt . . . ");
+		HashMap<Integer, String> nodeMap = new HashMap<>();
+		
+		// 读pidCoordYagoVB.txt
+		ZipBase64ReaderService zipReader = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "YagoVB.zip", "pidCoordYagoVB.txt");
+		int k = 0;
+		String lineStr = null;
+		zipReader.readLine();
+		while(null != (lineStr = zipReader.readLine())) {
+			nodeMap.put(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))), lineStr);
+		}
+		zipReader.close();
+		
+		// 写nodeIdCoordOnDateMapYagoVB.txt
+		BufferedWriter bw = new BufferedWriter(new FileWriter(LocalFileInfo.getDataSetPath() + "nodeIdCoordOnDateMapYagoVB.txt"));
+		bw.write("      \n");	// 留出空位来写点数
+		BufferedReader br = new BufferedReader(new FileReader(LocalFileInfo.getDataSetPath() + "nodeIdOnDateMapYagoVB.txt"));
+		String tempStr = null;
+		int nodeNum = 0;
+		br.readLine();
+		while(null != (lineStr = br.readLine())) {
+			if(-1 != lineStr.indexOf('"')) {
+				k = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
+				if(null != (tempStr = nodeMap.get(k))) {
+					nodeNum++;
+					bw.write(tempStr);
+					bw.write(lineStr.substring(lineStr.indexOf('"'), lineStr.length()));
+					bw.write('\n');
+					nodeMap.remove(k);
+				}
+					
+			}
+		}
+		br.close();
+		bw.flush();
+		bw.close();
+		
+		RandomAccessFile raf = new RandomAccessFile(new File(LocalFileInfo.getDataSetPath() + "nodeIdCoordOnDateMapYagoVB.txt"), "rw");
+		raf.seek(0);
+//		raf.writeUTF(String.valueOf(nodeNum) + "#");
+//		raf.writeChars(String.valueOf(nodeNum) + "#");
+		raf.write((String.valueOf(nodeNum) + "#").getBytes());
+		raf.close();
+		
+		System.out.println("> 结束写nodeIdCoordOnDateMapYagoVB.txt . . . ");
+		return Boolean.TRUE;
+	}
+	
+	// 输出只含有节点的OnDate和keywordList的节点txt文档 ： nodeIdKeywordListOnDateMapYagoVB.txt
+	public void writeNodeIdKeywordListOnDateMapYagoVBTxt() throws Exception{
+		System.out.println("> 开始写nodeIdKeywordListOnDateMapYagoVB.txt . . . ");
+		
+		BufferedReader br = new BufferedReader(new FileReader(LocalFileInfo.getDataSetPath() + "nodeIdStandardOnDateMapYagoVB.txt"));
+		int id;
+		String lineStr = null;
+		HashMap<Integer, String> nodeMap = new HashMap<>();
+		br.readLine();
+		while(null != (lineStr = br.readLine())) {
+			nodeMap.put(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))), lineStr.substring(lineStr.indexOf(':')+1, lineStr.length()));
+		}
+		br.close();
+		
+		int nodeNum = 0;
+		String dateStr = null;
+		ZipBase64ReaderService zipReader = new ZipBase64ReaderService(LocalFileInfo.getDataSetPath() + "YagoVB.zip", "nidKeywordsListMapYagoVB.txt");
+		BufferedWriter bw = new BufferedWriter(new FileWriter(LocalFileInfo.getDataSetPath() + "nodeIdKeywordListOnDateMapYagoVB.txt"));
+		bw.write("       \n");
+		zipReader.readLine();
+		while(null != (lineStr = zipReader.readLine())) {
+			id = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
+			if(null != (dateStr = nodeMap.get(id))) {
+				nodeMap.remove(id);
+				bw.write(String.valueOf(id) + ":");
+				bw.write(dateStr);
+				bw.write(lineStr.substring(lineStr.indexOf(':') + 2));
+				bw.write('\n');
+				nodeNum++;
+			}
+		}
+		zipReader.close();
+		bw.flush();
+		bw.close();
+		
+		int i = 0;
+		for(Entry<Integer, String> en : nodeMap.entrySet()) {
+			if(3 != i++)	System.out.println(en.getKey());
+			else break;
+		}
+		
+		RandomAccessFile raf = new RandomAccessFile(new File(LocalFileInfo.getDataSetPath() + "nodeIdKeywordListOnDateMapYagoVB.txt"), "rw");
+		raf.seek(0);
+//		raf.writeUTF(String.valueOf(nodeNum) + "#");
+//		raf.writeChars(String.valueOf(nodeNum) + "#");
+		raf.write((String.valueOf(nodeNum) + "#").getBytes());
+		raf.close();
+		
+		System.out.println("> over写nodeIdKeywordListOnDateMapYagoVB.txt . . . ");
+	}
+	
+	
 	// 统计
 	public void displayStatisticResult() {
 		try {
@@ -236,6 +411,9 @@ public class NodeIdOnDateService {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		
+		new NodeIdOnDateService().writeNodeIdKeywordListOnDateMapYagoVBTxt();
+		
 //		OnDateAddService.testNodeMap();
 //		NodeIdOnDateService.testYago2Node();
 		

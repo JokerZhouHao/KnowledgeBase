@@ -13,4 +13,5 @@ public class TimeStr {
 		Long spendTime = endTime - startTime;
 		return  spendTime/1000/3600 + "h" + spendTime/1000%3600/60 + "m" + spendTime/1000%3600000%60 + "s";
 	}
+	
 }
