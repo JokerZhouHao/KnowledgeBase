@@ -70,11 +70,11 @@ public class IndexNidKeywordsListService {
 		this.openIndexWriter();
 		String lineStr = null;
 		while(null != (lineStr = reader.readLine())) {
-			System.out.println(lineStr);
-			System.out.println(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))));
-			System.out.println(lineStr.substring(lineStr.indexOf(' ')+1, lineStr.lastIndexOf('#')));
-			System.out.println(lineStr.substring(lineStr.lastIndexOf('#')+1));
-			System.out.println();
+//			System.out.println(lineStr);
+//			System.out.println(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))));
+//			System.out.println(lineStr.substring(lineStr.indexOf(' ')+1, lineStr.lastIndexOf('#')));
+//			System.out.println(lineStr.substring(lineStr.lastIndexOf('#')+1));
+//			System.out.println();
 			this.addDoc(Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':'))), 
 					lineStr.substring(lineStr.indexOf(' ')+1, lineStr.lastIndexOf('#')),
 					lineStr.substring(lineStr.lastIndexOf('#')+1));

@@ -1081,7 +1081,6 @@ public class RTree implements ISpatialIndex
 	private ArrayList queue = new ArrayList();
 	private Node n = null;
 	private NNComparator nnc = null;
-	public HashMap<Integer, double[]> nodeIdMap = new HashMap<>();
 	
 	public void initGetNext(final IShape query) {
 		 nnc = new NNComparator();
@@ -1092,7 +1091,7 @@ public class RTree implements ISpatialIndex
 		 hasInitGetNext = Boolean.TRUE;
 	}
 	
-	public int getNext() {
+	public IEntry getNext() {
 		if (query.getDimension() != m_dimension) throw new IllegalArgumentException("nearestNeighborQuery: Shape has the wrong number of dimensions.");
 		
 		if(!hasInitGetNext)	throw new IllegalArgumentException("please init getNext parameters ! ! !");
@@ -1139,8 +1138,7 @@ public class RTree implements ISpatialIndex
 					// report all nearest neighbors with equal furthest distances.
 					// (neighbors can be more than k, if many happen to have the same
 					//  furthest distance).
-//					System.out.println(first.m_pEntry.getShape().getMBR().getCenter()[0] + " " +  first.m_pEntry.getShape().getMBR().getCenter()[1]);
-					return first.m_pEntry.getIdentifier();
+					return first.m_pEntry;
 				}
 			}
 		}
@@ -1149,7 +1147,7 @@ public class RTree implements ISpatialIndex
 			m_rwLock.read_unlock();
 		}
 		hasInitGetNext = Boolean.FALSE;
-		return -1;
+		return null;
 	}
 	
 	
@@ -1170,19 +1168,16 @@ public class RTree implements ISpatialIndex
 			for(i=0; i<2; i++)
 				coord[i] = Double.parseDouble(tempStr[i]);
 			rTree.insertData(null, new Point(coord), nodeId);
-			rTree.nodeIdMap.put(nodeId, coord);
+//			rTree.nodeIdMap.put(nodeId, coord);
 		}
 		
 		double[] pCoord = new double[2];
 		pCoord[0] = 3;
 		pCoord[1] = 2;
+		IEntry ie = null;
 		rTree.initGetNext(new Point(pCoord));
-		while(-1 != (k = rTree.getNext())) {
-			System.out.print(k + " : ");
-			for(double dou : rTree.nodeIdMap.get(k)) {
-				System.out.print(dou + " ");
-			}
-			System.out.println("\n");
+		while(null != (ie = rTree.getNext())) {
+			System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
 		}
 	}
 	

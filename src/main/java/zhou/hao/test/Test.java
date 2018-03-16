@@ -40,6 +40,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.lucene.analysis.CharArrayMap.EntrySet;
 
+import sil.spatialindex.Point;
 import zhou.hao.entry.IndividualBlockingQueue;
 import zhou.hao.entry.Node;
 import zhou.hao.entry.Pair;
@@ -52,47 +53,77 @@ import zhou.hao.service.ZipBase64ReaderService;
 import zhou.hao.service.ZipReaderService;
 import zhou.hao.service.ZipWriterService;
 import zhou.hao.tools.LocalFileInfo;
+import zhou.hao.tools.TimeStr;
 
 public class Test {
 	
 	public static void main(String[] args) throws Exception{
+//		LinkedList<Integer> list = new LinkedList<>();
+//		list.add(1);
+//		list.add(2);
+//		list.add(3);
+//		list.remove((Object)2);
+//		for(int in : list) {
+//			System.out.println(in);
+//		}
+//		
+//		System.out.println(Long.MAX_VALUE);
+//		System.out.println((double)Long.MAX_VALUE);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date1 = sdf.parse("2018-3-27");
+		Date date2 = sdf.parse(sdf.format(new Date()));
+		System.out.println(TimeStr.calGapBetweenDate(date1, new Date("yyyy-MM-dd")));
+//		
+//		
+//		System.out.println(TimeStr.calGapBetweenDate(date2, date1));
+		
+		
+//		Stack<String> st = new Stack<>();
+//		st.add(null);
+//		System.out.println(st.pop());
+		
+//		double[] co1 = {0, 0};
+//		double[] co2 = {3, 4};
+//		System.out.println((new Point(co1)).getMinimumDistance(new Point(co2)));
+		
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //		Date date = sdf.parse("1-1-1");
 //		System.out.println(sdf.format(new Date(-62135798400000L)));
 //		System.out.println(date.getTime());
-		BufferedReader reader = new BufferedReader(new FileReader(new File(LocalFileInfo.getDataSetPath() + "nodeIdOnDateMapYagoVB.txt")));
-		reader.readLine();
-		String lineStr = null;
-		int k;
-		String strArr[] = null;
-		String dateArr[] = null;
-		String year, month, day;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-		while(null != (lineStr = reader.readLine())) {
-			k = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
-			lineStr = lineStr.substring(lineStr.indexOf('"') + 1, lineStr.length());
-			strArr = lineStr.split("\"");
-			System.out.print(k + " > " + lineStr + " > ");
-			for(String st : strArr) {
-				if(!st.startsWith("^")) {
-					if(st.startsWith("-")) st = "#" + st.substring(1);
-					dateArr = st.split("-");
-					year = dateArr[0];
-					if(year.contains("-"))	year = year.replace('-', '0');
-					if(year.contains("#"))	year = year.replace("#", "0");
-					month = dateArr[1];
-					if(month.startsWith("#"))	month = "01";
-					else if(month.charAt(1)=='#')	month = month.replace("#", "0");
-					day = dateArr[2];
-					if(day.startsWith("#"))	day = "01";
-					else if(day.charAt(1)=='#')	day = day.replace("#", "0");
-					System.out.print(sdf1.format(sdf.parse(year +'-' +  month + '-' + day)) + " ");
-				}
-			}
-			System.out.println();
-		}
-		reader.close();
+//		BufferedReader reader = new BufferedReader(new FileReader(new File(LocalFileInfo.getDataSetPath() + "nodeIdOnDateMapYagoVB.txt")));
+//		reader.readLine();
+//		String lineStr = null;
+//		int k;
+//		String strArr[] = null;
+//		String dateArr[] = null;
+//		String year, month, day;
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+//		while(null != (lineStr = reader.readLine())) {
+//			k = Integer.parseInt(lineStr.substring(0, lineStr.indexOf(':')));
+//			lineStr = lineStr.substring(lineStr.indexOf('"') + 1, lineStr.length());
+//			strArr = lineStr.split("\"");
+//			System.out.print(k + " > " + lineStr + " > ");
+//			for(String st : strArr) {
+//				if(!st.startsWith("^")) {
+//					if(st.startsWith("-")) st = "#" + st.substring(1);
+//					dateArr = st.split("-");
+//					year = dateArr[0];
+//					if(year.contains("-"))	year = year.replace('-', '0');
+//					if(year.contains("#"))	year = year.replace("#", "0");
+//					month = dateArr[1];
+//					if(month.startsWith("#"))	month = "01";
+//					else if(month.charAt(1)=='#')	month = month.replace("#", "0");
+//					day = dateArr[2];
+//					if(day.startsWith("#"))	day = "01";
+//					else if(day.charAt(1)=='#')	day = day.replace("#", "0");
+//					System.out.print(sdf1.format(sdf.parse(year +'-' +  month + '-' + day)) + " ");
+//				}
+//			}
+//			System.out.println();
+//		}
+//		reader.close();
 		
 //		String lineStr = "5610: 40.8 -81.93333333333334\"1808-##-##\"^^xsd:date~";
 //		String strArr[]  = null;

@@ -36,6 +36,41 @@ public class MinHeap {
 		disPTreeList.size++;
 	}
 	
+	// 更新路径
+	public void updatePTree(double distance, PTree pTree) {
+		MLinkedNode<DisPTree> insertedNode = new MLinkedNode<MinHeap.DisPTree>(new DisPTree(distance, pTree));
+		MLinkedNode<DisPTree>	disPTreeListHead = disPTreeList.getHead();
+		MLinkedNode<DisPTree> disPTreeListNext = disPTreeListHead.next;
+		while(null != disPTreeListNext) {
+			if(distance < disPTreeListNext.nodeInfo.distance) {
+				disPTreeListHead.next = insertedNode;
+				insertedNode.next = disPTreeListNext;
+				break;
+			} else {
+				disPTreeListHead = disPTreeListNext;
+				disPTreeListNext = disPTreeListNext.next;
+			}
+		}
+		if(null != disPTreeListNext) {
+			while(null != disPTreeListNext.next) {
+				disPTreeListHead = disPTreeListNext;
+				disPTreeListNext = disPTreeListNext.getNext();
+			}
+			disPTreeListHead.next = null;
+		}
+	}
+	
+	// 获得最后一个节点
+	public MLinkedNode<DisPTree> getLast() {
+		MLinkedNode<DisPTree> dp = this.disPTreeList.head;
+		while(null != dp.next)	dp = dp.next;
+		return dp;
+	}
+	
+	public MLinkedList<DisPTree> getDisPTreeList() {
+		return disPTreeList;
+	}
+
 	// 获得size
 	public int size()	{
 		return disPTreeList.size;
@@ -52,17 +87,17 @@ public class MinHeap {
 	// 主函数
 	public static void main(String[] args) {
 		MinHeap mHeap = new MinHeap();
-		mHeap.addPTree(4, new PTree(new PNode(0)));
-		mHeap.addPTree(3, new PTree(new PNode(1)));
-		mHeap.addPTree(1, new PTree(new PNode(2)));
-		mHeap.addPTree(3, new PTree(new PNode(3)));
-		mHeap.addPTree(4, new PTree(new PNode(4)));
-		mHeap.addPTree(5, new PTree(new PNode(5)));
+		mHeap.addPTree(4, new PTree(new PNode(0, false)));
+		mHeap.addPTree(3, new PTree(new PNode(1, false)));
+		mHeap.addPTree(1, new PTree(new PNode(2, false)));
+		mHeap.addPTree(3, new PTree(new PNode(3, false)));
+		mHeap.addPTree(4, new PTree(new PNode(4, false)));
+		mHeap.addPTree(5, new PTree(new PNode(5, false)));
 		mHeap.display();
 	}
 	
 	// pTree和距离类
-	class DisPTree{
+	public class DisPTree{
 		private double distance = -1;
 		private PTree pTree = null;
 		public DisPTree(double distance, PTree pTree) {
@@ -70,21 +105,35 @@ public class MinHeap {
 			this.distance = distance;
 			this.pTree = pTree;
 		}
+		public double getDistance() {
+			return distance;
+		}
+		public PTree getpTree() {
+			return pTree;
+		}
 	}
 	
 	// 链表节点
-	class MLinkedNode <T> {
+	public class MLinkedNode <T> {
 		private T nodeInfo = null;
 		private MLinkedNode<T> next = null;
 		
 		public MLinkedNode(T nodeInfo) {
 			this.nodeInfo = nodeInfo;
 		}
+
+		public T getNodeInfo() {
+			return nodeInfo;
+		}
+
+		public MLinkedNode<T> getNext() {
+			return next;
+		}
 		
 	}
 	
 	// 带头链表
-	class MLinkedList<T>{
+	public class MLinkedList<T>{
 		private MLinkedNode<T>	head = null;
 		private int size = 0;
 		public MLinkedList() {

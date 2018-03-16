@@ -73,7 +73,7 @@
     </dependency>
     
     <!-- jsi -->
-    <dependency>
+    <!-- <dependency>
        <groupId>net.sourceforge.jsi</groupId>
 	   <artifactId>jsi</artifactId>
 	   <version>1.0.0</version>
@@ -83,7 +83,7 @@
       <artifactId>slf4j-jdk14</artifactId>
       <version>1.6.4</version>
       <scope>runtime</scope>
-    </dependency>
+    </dependency> -->
     
   </dependencies>
   
