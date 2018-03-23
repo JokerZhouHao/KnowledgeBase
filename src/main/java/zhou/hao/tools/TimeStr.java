@@ -15,8 +15,8 @@ public class TimeStr {
 	}
 	
 	// 计算两个日期之间的天数差，同一天返回1
-	public static Long calGapBetweenDate(Date d1, Date d2) {
-		return Math.abs((d1.getTime()-d2.getTime())/86400000) + 1;
+	public static int calGapBetweenDate(Date d1, Date d2) {
+		return (int)(Math.abs((d1.getTime()-d2.getTime())/86400000) + 1);
 	}
 	
 	// 获得当前年月日

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import sil.spatialindex.IEntry;
 import sil.spatialindex.Point;
+import zhou.hao.helper.MComparator;
 import zhou.hao.tools.LocalFileInfo;
 import zhou.hao.tools.RandomNumGenerator;
 import zhou.hao.tools.TimeStr;
@@ -19,6 +20,7 @@ import zhou.hao.yago2s.entity.PTree;
 import zhou.hao.yago2s.entity.MinHeap.DisPTree;
 import zhou.hao.yago2s.entity.MinHeap.MLinkedList;
 import zhou.hao.yago2s.entity.MinHeap.MLinkedNode;
+import zhou.hao.yago2s.processor.BSPProcessor.DateSpanNodeRec;
 import zhou.hao.yago2s.service.BuildMapService;
 import zhou.hao.yago2s.service.BuildNidKeywordListMapService;
 import zhou.hao.yago2s.service.IndexCoordService;
@@ -58,6 +60,27 @@ public class BSPProcessor {
 		hasInit = Boolean.TRUE;
 	}
 	
+	// 记录相同时差的点
+	public class DateSpanNodeRec{
+		public int dateSpan = Integer.MAX_VALUE;
+		public ArrayList<Integer> nodeList = new ArrayList<>();
+	}
+	
+	// 记录距离+1乘以日期差+1的最小的点
+	private class MinDisMulDateSpanRec{
+		Integer lValue = Integer.MAX_VALUE;
+		PNode node =  null;
+		
+		public MinDisMulDateSpanRec() {}
+
+		public MinDisMulDateSpanRec(Integer lValue, PNode node) {
+			super();
+			this.lValue = lValue;
+			this.node = node;
+		};
+	}
+	
+	// bsp算法实现
 	public MinHeap bsp(int k, double[] pCoords, ArrayList<Integer> wordIdList, Date curDate){
 		
 		Point point = new Point(pCoords);
@@ -65,7 +88,18 @@ public class BSPProcessor {
 		// 初始化所需数据
 		if(!hasInit)  this.init();
 		
+		// 记录结果
 		MinHeap minHeap = new MinHeap();;
+		
+		// 排序wordIdList
+		ArrayList<Integer> sortedWordList = new ArrayList<>(wordIdList);
+		sortedWordList.sort(new MComparator<Integer>());
+		////////////////////////////打印测试
+		System.out.println("sortedWordList : ");
+		for(Integer in : sortedWordList) {
+			System.out.print(in + " ");
+		}
+		System.out.println("\n");
 		
 		// 获得Mq
 		indexNidKeywordsListService.openIndexReader();
@@ -73,6 +107,9 @@ public class BSPProcessor {
 		indexNidKeywordsListService.closeIndexReader();
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		
+		/////////////////////////// 打印测试
+		System.out.println("searchedNodeListMap : ");
 		for(Entry<Integer, KeywordIdDateList> en : searchedNodeListMap.entrySet()) {
 			System.out.print(en.getKey() + " : ");
 			for(Date da : en.getValue().getDateList())
@@ -84,96 +121,196 @@ public class BSPProcessor {
 		}
 		System.out.println();
 		
-		// 阈值
-		double threshold = Double.POSITIVE_INFINITY;
+		// 计算与当前时间时差最小的点组成的map
+		HashMap<Integer, DateSpanNodeRec> wordDateSpanMap = new HashMap<>();
+		HashMap<Integer, Integer> nodeDateSpanMap = new HashMap<>();
+		for(Integer in : wordIdList)	wordDateSpanMap.put(in, new DateSpanNodeRec());
+		int tempI1 = Integer.MAX_VALUE, tempI2 = 0, tempI3, tempI4;
+		DateSpanNodeRec tempDSNR = null;
+		for(Entry<Integer, KeywordIdDateList> en : searchedNodeListMap.entrySet()) {
+			tempI1 = Integer.MAX_VALUE;
+			// 求节点的最小时间差
+			for(Date da : en.getValue().getDateList()) {
+				if((tempI2 = TimeStr.calGapBetweenDate(curDate, da)) < tempI1)	tempI1 = tempI2;
+			}
+			nodeDateSpanMap.put(en.getKey(), tempI1);
+			for(Integer in : en.getValue().getKeywordIdList()) {
+				tempDSNR = wordDateSpanMap.get(in);
+				if(tempDSNR.dateSpan > tempI1) {
+					tempDSNR.dateSpan = tempI1;
+					tempDSNR.nodeList.clear();
+					tempDSNR.nodeList.add(en.getKey());
+				} else if (tempDSNR.dateSpan == tempI1) {
+					tempDSNR.nodeList.add(en.getKey());
+				}
+			}
+		}
 		
-		// 循环计算
+		///////////////////////////////// 打印测试
+		System.out.println("wordDateSpanMap : ");
+		for(Entry<Integer, DateSpanNodeRec> en : wordDateSpanMap.entrySet()) {
+			System.out.print(en.getKey() + " - ");
+			System.out.print(en.getValue().dateSpan + " - ");
+			for(Integer in : en.getValue().nodeList) {
+				System.out.print(in + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		
 		IEntry iEntry = null;
 		indexCooorSer.initGetNext(point);
+		double curMinF = 0;
+		int minPTreeDateSum = 0;
 		double curMinDis = 0;
+		// 阈值
+		double threshold = Double.POSITIVE_INFINITY;
+		// 词数
+		int wordNum = wordIdList.size();
+		for(Entry<Integer, DateSpanNodeRec> en : wordDateSpanMap.entrySet())	minPTreeDateSum += en.getValue().dateSpan;
+		int i, j;
+		// 循环计算
 		while(null != (iEntry = indexCooorSer.getNext())) {
-			if((curMinDis = point.getMinimumDistance(iEntry.getShape())) >= threshold)	break;
+			// 判断是否会超过阈值
+			curMinDis = point.getMinimumDistance(iEntry.getShape()) + 1;
+			curMinF = minPTreeDateSum * curMinDis;
+			if(curMinF >= threshold)	break;
 			
-			// 实现 GETSEMANTICPLACE方法 starting
-			PNode curPNode = new PNode(iEntry.getIdentifier(), false);
-			PTree pTree = new PTree(curPNode);
-			pTree.addNode(null, new PNode(Integer.MIN_VALUE, Boolean.FALSE));// Integer.MIN_VALUE表示bfs树的新的一层
-			LinkedList<Integer> copyWordIdList = new LinkedList<>(wordIdList);
-			
+			// 记录当前已被添进bfs队列的点
 			HashMap<Integer, Boolean> hasAccessNodeMap = new HashMap<>();
 			
-			int curPTreeLevel = 0;
-			double pTreeLen = 1;
+			// 实现 GETSEMANTICPLACE方法 starting
+			// 初始化给待用数据
+			PNode curPNode = new PNode(iEntry.getIdentifier(), false);
+			hasAccessNodeMap.put(iEntry.getIdentifier(), Boolean.TRUE);
+			PTree pTree = new PTree(curPNode);
+			pTree.addNode(null, new PNode(Integer.MIN_VALUE, Boolean.FALSE));// Integer.MIN_VALUE表示bfs树的新的一层
+			ArrayList<Integer> copyWordIdList = new ArrayList<>(sortedWordList);
+			
+			int curPTreeLevel = 1; // 将根节点所在层看作第一层
 			KeywordIdDateList curKIDL = null;
 			
 			ArrayList<Integer> tempList = null;
-			ArrayList<Date> tempDates = null; 
 			
-			long tempLong = 0;
-			int i = 0, tempNum = 0;
+			int curCandWordNum = 0;
+			
+			// 记录当前找到的最短路径的点
+			HashMap<Integer, MinDisMulDateSpanRec>	curMinWordMap = new HashMap<>();
+			for(Integer in : wordIdList) curMinWordMap.put(in, new MinDisMulDateSpanRec());
+			MinDisMulDateSpanRec tempMinMul = null;
+			
+			boolean noFindPTree = Boolean.FALSE;	// 标识是否找到PTree
+			boolean noWordSearch = Boolean.FALSE; 	// 标识已找到包含word的最短点都已找到
 			
 			// bfs
-			while(null != curPNode) {
-				
+			while(true) {
+				// 如果将要到新的一层
 				if(Integer.MIN_VALUE == curPNode.getId()) {
+					curPTreeLevel++;
+					// 判断当前层下，计算出的f是否会超过阈值
+					if(curCandWordNum != wordNum) {
+						curMinF = 0;
+						for(Entry<Integer, MinDisMulDateSpanRec> en : curMinWordMap.entrySet()) {
+							tempMinMul = en.getValue();
+							if(Integer.MAX_VALUE == tempMinMul.lValue)	curMinF += curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan;
+							else{
+								curMinF += tempMinMul.lValue;
+								// 判断当前节点是否已是最小节点
+								if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan) {
+									tempMinMul.node.setLeaf(Boolean.TRUE);
+									copyWordIdList.remove((Object)en.getKey());
+								}
+							}
+						}
+						if(curMinF * curMinDis >= threshold) {
+							noFindPTree = true;
+							break;
+						}
+					} else {
+						// 判断当前节点是否已是最小节点
+						for(Entry<Integer, MinDisMulDateSpanRec> en : curMinWordMap.entrySet()) {
+							tempMinMul = en.getValue();
+							// 判断当前节点key是否已是最小节点
+							if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan) {
+								tempMinMul.node.setLeaf(Boolean.TRUE);
+								copyWordIdList.remove((Object)en.getKey());
+								if(0 == copyWordIdList.size()) {
+									noWordSearch = Boolean.TRUE;
+									break;
+								}
+							}
+						}
+					}
+					if(noFindPTree || noWordSearch)	break;
+					
+					// 取下一节点
 					curPNode = curPNode.getNext();
-					if(null == curPNode)	break;
-					else {
+					if(null == curPNode) {
+						// 已遍历完
+						noWordSearch = Boolean.TRUE;
+						break;
+					} else {
 						pTree.addNode(null, new PNode(Integer.MIN_VALUE, Boolean.FALSE));
-						curPTreeLevel++;
 					}
 				}
+				if(noWordSearch || noFindPTree)		break;
 				
 				// 处理当前点
-				Boolean isLeaf = Boolean.FALSE;
-				if(!hasAccessNodeMap.containsKey(curPNode.getId()) && null != (curKIDL = searchedNodeListMap.get(curPNode.getId()))){
-					tempNum = 0;
+				if(null != (curKIDL = searchedNodeListMap.get(curPNode.getId()))){
 					tempList = curKIDL.getKeywordIdList();
-					// 标记是否已提前找到所有点
-					Boolean isBreak = Boolean.FALSE;
-					// 计算相交的词数
-					for(int in1 : tempList) {
-						i = Integer.MIN_VALUE;
-						for(int in2 : copyWordIdList) {
-							if(in1 == in2) {
-								i = in2;
-								break;
-							}
+					// 计算相交的word情况
+					tempI1 = tempList.size();
+					tempI2 = copyWordIdList.size();
+					// 注：tempList和copyWordIdList均是有序的
+					j = 0;
+					for(i=0; i<tempI1; i++) {
+						for(; j<tempI2; j++) {
+							tempI4 = copyWordIdList.get(j);
+							if(tempI4 == tempList.get(i)) {
+								tempMinMul = curMinWordMap.get(tempI4);
+								tempI3 = nodeDateSpanMap.get(curPNode.getId()) * curPTreeLevel;
+								// 判断该节点是否可成为叶子节点
+								if(tempI3 < tempMinMul.lValue) {
+									// 增加了个候选者       
+									if(Integer.MAX_VALUE == tempMinMul.lValue) {
+										curCandWordNum++;
+									}
+									
+									// 判断该节点是否是包含当前word且时差最小的点
+									for(Integer in : wordDateSpanMap.get(tempI4).nodeList) {
+										if(in == curPNode.getId()) {
+											curPNode.setLeaf(Boolean.TRUE);
+											// 移除词
+											copyWordIdList.remove(j);
+											j--;
+											tempI2--;
+											if(copyWordIdList.size() == 0) {
+												noWordSearch = Boolean.TRUE;
+												break;
+											}
+										}
+									}
+									tempMinMul.lValue = tempI3;
+									tempMinMul.node = curPNode;
+									if(noWordSearch)	break;
+								}
+							} else if(tempI4 > tempList.get(i))	break;
 						}
-						if(i != Integer.MIN_VALUE) {
-							copyWordIdList.remove((Object)i);
-							tempNum++;
-							if(copyWordIdList.isEmpty()) {
-								isBreak = Boolean.TRUE;
-								break;
-							}
-						}
+						if(j==tempI2 || noWordSearch || noFindPTree)	break;
 					}
-					
-					if(0 != tempNum) {
-						tempDates = curKIDL.getDateList();
-						// 计算离当前最短的天数
-						long minGapDay = Long.MAX_VALUE;
-						for(Date da : tempDates) {
-							if(minGapDay > (tempLong = TimeStr.calGapBetweenDate(da, curDate)))
-								minGapDay = tempLong;
-						}
-						
-						pTreeLen += tempNum * curPTreeLevel * minGapDay;
-						curPNode.setLeaf(Boolean.TRUE);
-					}
-					
-					if(isBreak)	break;
 				}
+				if(noWordSearch)	break;
 				
 				// 当前点已访问，添加到访问map中
-				hasAccessNodeMap.put(curPNode.getId(), Boolean.TRUE);
+//				hasAccessNodeMap.put(curPNode.getId(), Boolean.TRUE);
 				
-				// 添加当前点连接的边
+				// 添加bfs节点
 				if(null != (tempList = yago2sArrMap[curPNode.getId()])) {
 					for(int in : tempList) {
 						if(!hasAccessNodeMap.containsKey(in)) {
 							pTree.addNode(curPNode, new PNode(in, Boolean.FALSE));
+							// 记录已被放进bfs队列的点
+							hasAccessNodeMap.put(in, Boolean.TRUE);
 						}
 					}
 				}
@@ -183,16 +320,35 @@ public class BSPProcessor {
 			}
 			//  GETSEMANTICPLACE方法 ending
 			
-			if(copyWordIdList.isEmpty()){
+			// 该节点不能成为树
+			if(noFindPTree)	continue;
+			
+			// 如果生成一颗树了
+			if(curCandWordNum == wordNum){
+				if(0 != copyWordIdList.size()) {
+					for(Entry<Integer, MinDisMulDateSpanRec> en : curMinWordMap.entrySet()) {
+						en.getValue().node.setLeaf(Boolean.TRUE);
+					}
+				}
 				pTree.deleteUnnecessaryNode();
-				if(k != minHeap.size()) minHeap.addPTree(pTreeLen * curMinDis, pTree);
-				else minHeap.updatePTree(pTreeLen * curMinDis, pTree);
-				threshold = minHeap.getLast().getNodeInfo().getDistance();
+				curMinF = 0;
+				for(Entry<Integer, MinDisMulDateSpanRec>en : curMinWordMap.entrySet()) {
+					curMinF += en.getValue().lValue;
+				}
+				curMinF *= curMinDis;
+				
+				if(minHeap.size() != k) {
+					minHeap.addPTree(curMinF, pTree);
+					if(minHeap.size() == k)	threshold = minHeap.getLast().getNodeInfo().getDistance();
+				} else {
+					minHeap.updatePTree(curMinF, pTree);
+					threshold = minHeap.getLast().getNodeInfo().getDistance();
+				}
 				
 				// 测试打印
-				System.out.println(pTreeLen * curMinDis);
+				System.out.println(curMinF);
 				pTree.displayPath();
-				System.out.println();
+				   System.out.println();
 			}
 		}
 		return minHeap;
@@ -207,10 +363,9 @@ public class BSPProcessor {
 		ArrayList<Integer>	wordIdList = new ArrayList<>();
 		pro.init();
 		
-		
 		double[] pCoords = {2, 3};
-		wordIdList.add(21);
-		wordIdList.add(23);
+		wordIdList.add(17);
+		wordIdList.add(19);
 		MinHeap minHeap = pro.bsp(2, pCoords, wordIdList, TimeStr.getNowDate());
 		System.out.println("\n> 结果 : ");
 		MLinkedNode<DisPTree> dpt = minHeap.getDisPTreeList().getHead().getNext();

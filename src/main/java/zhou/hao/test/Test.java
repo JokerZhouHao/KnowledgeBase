@@ -57,7 +57,43 @@ import zhou.hao.tools.TimeStr;
 
 public class Test {
 	
+	public static void t1() {
+		int i = 0;
+		while(true) {
+			HashMap<Integer, String> map = new HashMap<>();
+			map.put(i++, "ss");
+			System.out.println(map);
+		}
+	}
+	
+	
 	public static void main(String[] args) throws Exception{
+		Test.t1();
+		
+//		ArrayList<Integer> al = new ArrayList<>();
+//		al.add(23);
+//		al.add(10);
+//		al.add(30);
+//		int len = al.size();
+//		for(int i =0 ; i<len; i++) {
+//			if(10==al.get(i)) {
+//				al.remove((Object)10);
+//				len--;
+//				i--;
+//			} else {
+//				System.out.println(al.get(i));
+//			}
+//		}
+		
+//		MComparator<Integer> mcompInt = new MComparator<Integer>();
+//		LinkedList<Integer> ll = new LinkedList<>(al);
+//		ll.sort(mcompInt);
+//		al.set(2, 50);
+//		for(Integer in : ll) {
+//			System.out.println(in);
+//		}
+		
+		
 //		LinkedList<Integer> list = new LinkedList<>();
 //		list.add(1);
 //		list.add(2);
@@ -70,10 +106,10 @@ public class Test {
 //		System.out.println(Long.MAX_VALUE);
 //		System.out.println((double)Long.MAX_VALUE);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date1 = sdf.parse("2018-3-27");
-		Date date2 = sdf.parse(sdf.format(new Date()));
-		System.out.println(TimeStr.calGapBetweenDate(date1, new Date("yyyy-MM-dd")));
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		Date date1 = sdf.parse("2018-3-27");
+//		Date date2 = sdf.parse(sdf.format(new Date()));
+//		System.out.println(TimeStr.calGapBetweenDate(date1, new Date("yyyy-MM-dd")));
 //		
 //		
 //		System.out.println(TimeStr.calGapBetweenDate(date2, date1));

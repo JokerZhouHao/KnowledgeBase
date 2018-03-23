@@ -44,6 +44,7 @@ public class MinHeap {
 		while(null != disPTreeListNext) {
 			if(distance < disPTreeListNext.nodeInfo.distance) {
 				disPTreeListHead.next = insertedNode;
+				disPTreeListHead = insertedNode;
 				insertedNode.next = disPTreeListNext;
 				break;
 			} else {
@@ -51,6 +52,7 @@ public class MinHeap {
 				disPTreeListNext = disPTreeListNext.next;
 			}
 		}
+		// 删除最后一个点
 		if(null != disPTreeListNext) {
 			while(null != disPTreeListNext.next) {
 				disPTreeListHead = disPTreeListNext;
@@ -88,11 +90,14 @@ public class MinHeap {
 	public static void main(String[] args) {
 		MinHeap mHeap = new MinHeap();
 		mHeap.addPTree(4, new PTree(new PNode(0, false)));
-		mHeap.addPTree(3, new PTree(new PNode(1, false)));
+//		mHeap.addPTree(3, new PTree(new PNode(1, false)));
 		mHeap.addPTree(1, new PTree(new PNode(2, false)));
-		mHeap.addPTree(3, new PTree(new PNode(3, false)));
-		mHeap.addPTree(4, new PTree(new PNode(4, false)));
-		mHeap.addPTree(5, new PTree(new PNode(5, false)));
+		mHeap.updatePTree(2, new PTree(new PNode(2, false)));
+		mHeap.updatePTree(0.5, new PTree(new PNode(2, false)));
+		mHeap.updatePTree(1.1, new PTree(new PNode(2, false)));
+//		mHeap.addPTree(3, new PTree(new PNode(3, false)));
+//		mHeap.addPTree(4, new PTree(new PNode(4, false)));
+//		mHeap.addPTree(5, new PTree(new PNode(5, false)));
 		mHeap.display();
 	}
 	
