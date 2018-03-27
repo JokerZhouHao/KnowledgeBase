@@ -37,7 +37,6 @@ import zhou.hao.service.ZipBase64ReaderService;
 import zhou.hao.tools.LocalFileInfo;
 import zhou.hao.tools.TimeStr;
 import zhou.hao.yago2s.processor.BSPProcessor;
-import zhou.hao.yago2s.processor.BSPProcessor.DateSpanNodeRec;
 import zhou.hao.yago2s.service.IndexNidKeywordsListService.KeywordIdDateList;
 
 /**
@@ -271,27 +270,6 @@ public class IndexNidKeywordsListService {
 		}
 		
 		
-		HashMap<Integer, DateSpanNodeRec> dateSpanMap = new HashMap<>();
-		BSPProcessor prc = new BSPProcessor();
-		for(Integer in : searchedWordList)	dateSpanMap.put(in, prc.new DateSpanNodeRec());
-		int tempI1 = Integer.MAX_VALUE, tempI2 = 0;
-		DateSpanNodeRec tempDSNR = null;
-		for(Entry<Integer, KeywordIdDateList> en : resultMap.entrySet()) {
-			tempI1 = Integer.MAX_VALUE;
-			for(Date da : en.getValue().getDateList()) {
-				if((tempI2 = TimeStr.calGapBetweenDate(TimeStr.getNowDate(), da)) < tempI1)	tempI1 = tempI2;
-			}
-			for(Integer in : en.getValue().getKeywordIdList()) {
-				tempDSNR = dateSpanMap.get(in);
-				if(tempDSNR.dateSpan > tempI1) {
-					tempDSNR.dateSpan = tempI1;
-					tempDSNR.nodeList.clear();
-					tempDSNR.nodeList.add(en.getKey());
-				} else if (tempDSNR.dateSpan == tempI1) {
-					tempDSNR.nodeList.add(en.getKey());
-				}
-			}
-		}
 		
 		
 		return resultMap;

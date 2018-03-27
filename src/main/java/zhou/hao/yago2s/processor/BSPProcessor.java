@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Map.Entry;
 
 import sil.spatialindex.IEntry;
@@ -18,11 +16,8 @@ import zhou.hao.yago2s.entity.MinHeap;
 import zhou.hao.yago2s.entity.PNode;
 import zhou.hao.yago2s.entity.PTree;
 import zhou.hao.yago2s.entity.MinHeap.DisPTree;
-import zhou.hao.yago2s.entity.MinHeap.MLinkedList;
 import zhou.hao.yago2s.entity.MinHeap.MLinkedNode;
-import zhou.hao.yago2s.processor.BSPProcessor.DateSpanNodeRec;
 import zhou.hao.yago2s.service.BuildMapService;
-import zhou.hao.yago2s.service.BuildNidKeywordListMapService;
 import zhou.hao.yago2s.service.IndexCoordService;
 import zhou.hao.yago2s.service.IndexNidKeywordsListService;
 import zhou.hao.yago2s.service.IndexNidKeywordsListService.KeywordIdDateList;
@@ -60,12 +55,6 @@ public class BSPProcessor {
 		hasInit = Boolean.TRUE;
 	}
 	
-	// 记录相同时差的点
-	public class DateSpanNodeRec{
-		public int dateSpan = Integer.MAX_VALUE;
-		public ArrayList<Integer> nodeList = new ArrayList<>();
-	}
-	
 	// 记录距离+1乘以日期差+1的最小的点
 	private class MinDisMulDateSpanRec{
 		Integer lValue = Integer.MAX_VALUE;
@@ -73,11 +62,6 @@ public class BSPProcessor {
 		
 		public MinDisMulDateSpanRec() {}
 
-		public MinDisMulDateSpanRec(Integer lValue, PNode node) {
-			super();
-			this.lValue = lValue;
-			this.node = node;
-		};
 	}
 	
 	// bsp算法实现
@@ -122,11 +106,10 @@ public class BSPProcessor {
 		System.out.println();
 		
 		// 计算与当前时间时差最小的点组成的map
-		HashMap<Integer, DateSpanNodeRec> wordDateSpanMap = new HashMap<>();
+		HashMap<Integer, Integer> wordDateSpanMap = new HashMap<>();
 		HashMap<Integer, Integer> nodeDateSpanMap = new HashMap<>();
-		for(Integer in : wordIdList)	wordDateSpanMap.put(in, new DateSpanNodeRec());
+		for(Integer in : wordIdList)	wordDateSpanMap.put(in, Integer.MAX_VALUE);
 		int tempI1 = Integer.MAX_VALUE, tempI2 = 0, tempI3, tempI4;
-		DateSpanNodeRec tempDSNR = null;
 		for(Entry<Integer, KeywordIdDateList> en : searchedNodeListMap.entrySet()) {
 			tempI1 = Integer.MAX_VALUE;
 			// 求节点的最小时间差
@@ -135,25 +118,17 @@ public class BSPProcessor {
 			}
 			nodeDateSpanMap.put(en.getKey(), tempI1);
 			for(Integer in : en.getValue().getKeywordIdList()) {
-				tempDSNR = wordDateSpanMap.get(in);
-				if(tempDSNR.dateSpan > tempI1) {
-					tempDSNR.dateSpan = tempI1;
-					tempDSNR.nodeList.clear();
-					tempDSNR.nodeList.add(en.getKey());
-				} else if (tempDSNR.dateSpan == tempI1) {
-					tempDSNR.nodeList.add(en.getKey());
+				if(wordDateSpanMap.get(in) > tempI1) {
+					wordDateSpanMap.put(in, tempI1);
 				}
 			}
 		}
 		
 		///////////////////////////////// 打印测试
 		System.out.println("wordDateSpanMap : ");
-		for(Entry<Integer, DateSpanNodeRec> en : wordDateSpanMap.entrySet()) {
+		for(Entry<Integer, Integer> en : wordDateSpanMap.entrySet()) {
 			System.out.print(en.getKey() + " - ");
-			System.out.print(en.getValue().dateSpan + " - ");
-			for(Integer in : en.getValue().nodeList) {
-				System.out.print(in + " ");
-			}
+			System.out.print(en.getValue() + " - ");
 			System.out.println();
 		}
 		System.out.println();
@@ -167,7 +142,7 @@ public class BSPProcessor {
 		double threshold = Double.POSITIVE_INFINITY;
 		// 词数
 		int wordNum = wordIdList.size();
-		for(Entry<Integer, DateSpanNodeRec> en : wordDateSpanMap.entrySet())	minPTreeDateSum += en.getValue().dateSpan;
+		for(Entry<Integer, Integer> en : wordDateSpanMap.entrySet())	minPTreeDateSum += en.getValue();
 		int i, j;
 		// 循环计算
 		while(null != (iEntry = indexCooorSer.getNext())) {
@@ -212,11 +187,11 @@ public class BSPProcessor {
 						curMinF = 0;
 						for(Entry<Integer, MinDisMulDateSpanRec> en : curMinWordMap.entrySet()) {
 							tempMinMul = en.getValue();
-							if(Integer.MAX_VALUE == tempMinMul.lValue)	curMinF += curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan;
+							if(Integer.MAX_VALUE == tempMinMul.lValue)	curMinF += curPTreeLevel * wordDateSpanMap.get(en.getKey());
 							else{
 								curMinF += tempMinMul.lValue;
 								// 判断当前节点是否已是最小节点
-								if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan) {
+								if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey())) {
 									tempMinMul.node.setLeaf(Boolean.TRUE);
 									copyWordIdList.remove((Object)en.getKey());
 								}
@@ -231,7 +206,7 @@ public class BSPProcessor {
 						for(Entry<Integer, MinDisMulDateSpanRec> en : curMinWordMap.entrySet()) {
 							tempMinMul = en.getValue();
 							// 判断当前节点key是否已是最小节点
-							if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey()).dateSpan) {
+							if(Boolean.FALSE == tempMinMul.node.isLeaf() && tempMinMul.lValue <= curPTreeLevel * wordDateSpanMap.get(en.getKey())) {
 								tempMinMul.node.setLeaf(Boolean.TRUE);
 								copyWordIdList.remove((Object)en.getKey());
 								if(0 == copyWordIdList.size()) {
@@ -240,8 +215,8 @@ public class BSPProcessor {
 								}
 							}
 						}
+						if(noWordSearch)	break;
 					}
-					if(noFindPTree || noWordSearch)	break;
 					
 					// 取下一节点
 					curPNode = curPNode.getNext();
@@ -253,7 +228,6 @@ public class BSPProcessor {
 						pTree.addNode(null, new PNode(Integer.MIN_VALUE, Boolean.FALSE));
 					}
 				}
-				if(noWordSearch || noFindPTree)		break;
 				
 				// 处理当前点
 				if(null != (curKIDL = searchedNodeListMap.get(curPNode.getId()))){
@@ -277,17 +251,14 @@ public class BSPProcessor {
 									}
 									
 									// 判断该节点是否是包含当前word且时差最小的点
-									for(Integer in : wordDateSpanMap.get(tempI4).nodeList) {
-										if(in == curPNode.getId()) {
-											curPNode.setLeaf(Boolean.TRUE);
-											// 移除词
-											copyWordIdList.remove(j);
-											j--;
-											tempI2--;
-											if(copyWordIdList.size() == 0) {
-												noWordSearch = Boolean.TRUE;
-												break;
-											}
+									if(nodeDateSpanMap.get(curPNode.getId()) == wordDateSpanMap.get(tempI4)) {
+										curPNode.setLeaf(Boolean.TRUE);
+										// 移除词
+										copyWordIdList.remove(j);
+										j--;
+										tempI2--;
+										if(copyWordIdList.size() == 0) {
+											noWordSearch = Boolean.TRUE;
 										}
 									}
 									tempMinMul.lValue = tempI3;
@@ -296,7 +267,7 @@ public class BSPProcessor {
 								}
 							} else if(tempI4 > tempList.get(i))	break;
 						}
-						if(j==tempI2 || noWordSearch || noFindPTree)	break;
+						if(j==tempI2 || noWordSearch)	break;
 					}
 				}
 				if(noWordSearch)	break;
@@ -365,7 +336,7 @@ public class BSPProcessor {
 		
 		double[] pCoords = {2, 3};
 		wordIdList.add(17);
-		wordIdList.add(19);
+		wordIdList.add(18);
 		MinHeap minHeap = pro.bsp(2, pCoords, wordIdList, TimeStr.getNowDate());
 		System.out.println("\n> 结果 : ");
 		MLinkedNode<DisPTree> dpt = minHeap.getDisPTreeList().getHead().getNext();
