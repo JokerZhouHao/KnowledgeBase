@@ -195,7 +195,7 @@ public class LocalFileInfo {
 	public static String getDataSetPath() {
 		if(null==LocalFileInfo.fileInfoMap)	return null;
 		else {
-			return LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "DataSet" + File.separator;
+			return LocalFileInfo.getBasePath() + "data" + File.separator + "DataSet" + File.separator;
 		}
 	}
 	
@@ -203,6 +203,13 @@ public class LocalFileInfo {
 		if(null==LocalFileInfo.fileInfoMap)	return null;
 		else {
 			return LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "DataSet" + File.separator + "index" + File.separator + "yagoVB" + File.separator;
+		}
+	}
+	
+	public static String getTFLableBasePath() {
+		if(null==LocalFileInfo.fileInfoMap)	return null;
+		else {
+			return LocalFileInfo.getDataSetPath() + "TFLabel" + File.separator ;
 		}
 	}
 	

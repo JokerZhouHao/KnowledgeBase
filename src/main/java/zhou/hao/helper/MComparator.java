@@ -21,7 +21,7 @@ public class MComparator<T> implements Comparator<T> {
 			else if (i1 == i2)	return 0;
 			else return -1;
 		} else if(t1 instanceof Integer) {
-			int i1 = (int)t1, i2 = (int)t2;
+			int i1 = (Integer)t1, i2 = (Integer)t2;
 			if(i1 > i2)	return 1;
 			else if (i1 == i2)	return 0;
 			else return -1;

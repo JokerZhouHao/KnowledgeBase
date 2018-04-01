@@ -90,6 +90,23 @@
   <!-- 插件 -->
   <build>
     <plugins>
+      <!-- 设置编译器为1.8 -->
+      <plugin>  
+           <groupId>org.apache.maven.plugins</groupId>  
+           <artifactId>maven-compiler-plugin</artifactId>  
+           <version>3.5.1</version>  
+           <configuration>  
+               <source>1.8</source>  
+               <target>1.8</target>  
+           </configuration> 
+           <dependencies>
+				<dependency>
+					<groupId>org.codehaus.plexus</groupId>
+					<artifactId>plexus-compiler-eclipse</artifactId>
+					<version>2.2</version>
+				</dependency>
+			</dependencies>
+      </plugin> 
       <!-- 打包成可执行的jar -->
       <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
