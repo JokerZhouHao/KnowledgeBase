@@ -15,6 +15,8 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -22,7 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -66,9 +70,51 @@ public class Test {
 		}
 	}
 	
-	
 	public static void main(String[] args) throws Exception{
-		Test.t1();
+//		TreeMap<Integer, Integer> tM = new TreeMap<>(new MComparator<Integer>());
+//		tM.put(1, 1);
+//		tM.put(2, 2);
+//		for(Integer in : tM.keySet()) {
+//			System.out.println(in);
+//		}
+//		
+//		TreeSet<Integer> ts = new TreeSet<>();
+//		ts.add(3);
+//		ts.add(8);
+//		ts.add(5);
+//		for(Integer in : ts) {
+//			System.out.println(in);
+//		}
+		
+//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//		Date nowDate = df.parse(df.format(new Date()));
+//		Date date = df.parse("2018-1-1");
+//		System.out.println(date.getTime()/86400000);
+		
+		ArrayList<Integer> al = new ArrayList<>();
+		al.add(10);
+		al.add(23);
+		al.add(40);
+		al.add(50);
+		System.out.println(Collections.binarySearch(al, 20));
+//		System.out.println(Integer.parseInt("-12323"));
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+//		Test.t1();
 		
 //		ArrayList<Integer> al = new ArrayList<>();
 //		al.add(23);

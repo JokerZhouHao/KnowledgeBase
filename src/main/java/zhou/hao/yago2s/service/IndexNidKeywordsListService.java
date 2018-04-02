@@ -1,13 +1,19 @@
 package zhou.hao.yago2s.service;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -60,6 +66,21 @@ public class IndexNidKeywordsListService {
 		this.indexPath = indexPath;
 	}
 	
+	// 打开索引写器
+	private void openIndexWriter() {
+		try {
+			analyzer = new PatternAnalyzer(",");
+			Directory indexDir = FSDirectory.open(Paths.get(indexPath));
+			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+			iwc.setOpenMode(OpenMode.CREATE);
+			indexWriter = new IndexWriter(indexDir, iwc);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("打开IndexWriter失败而退出！！！");
+			System.exit(0);
+		}
+	}
+	
 	// 创建索引
 	public void createIndex(String sourcePath, String entryName) {
 		this.sourcePath = sourcePath;
@@ -86,21 +107,6 @@ public class IndexNidKeywordsListService {
 		System.out.println("-over建立" + sourcePath + "里的文件" + entryName + "的索引   " + TimeStr.getTime());
 	}
 	
-	// 打开索引写器
-	public void openIndexWriter() {
-		try {
-			analyzer = new PatternAnalyzer(",");
-			Directory indexDir = FSDirectory.open(Paths.get(indexPath));
-			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-			iwc.setOpenMode(OpenMode.CREATE);
-			indexWriter = new IndexWriter(indexDir, iwc);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("打开IndexWriter失败而退出！！！");
-			System.exit(0);
-		}
-	}
-	
 	// 添加document
 	public void addDoc(int nodeId, String dateStr, String keyListStr) {
 		String[] wordIdArr = keyListStr.split(",");
@@ -120,8 +126,105 @@ public class IndexNidKeywordsListService {
 		}
 	}
 	
+	// 创建nodeIdKeywordListOnIntDateMapYagoVB.txt的索引
+	public void createNIDKeyListDateIndex(String sourcePath, String entryName) throws Exception{
+		this.sourcePath = sourcePath;
+		this.entryName = entryName;
+		
+		System.out.println("-开始建立" + sourcePath + "里的文件" + entryName + "的索引   " + TimeStr.getTime());
+//		ZipBase64ReaderService reader = new ZipBase64ReaderService(sourcePath, entryName);
+		BufferedReader reader = new BufferedReader(new FileReader(sourcePath));
+		System.out.println(reader.readLine());
+		
+		this.openIndexWriter();
+		String lineStr = null;
+		int i, nodeId;
+		String[] strArr = null;
+		Document doc = null;
+		while(null != (lineStr = reader.readLine())) {
+			doc = new Document();
+			i = lineStr.indexOf(':');
+			nodeId = Integer.parseInt(lineStr.substring(0, i));
+			doc.add(new StoredField("nodeId", nodeId));
+			doc.add(new StoredField("dateWId", lineStr.substring(i+2)));
+			strArr = lineStr.substring(lineStr.lastIndexOf('#') + 1).split(",");
+			for(String s : strArr) {
+				doc.add(new IntPoint("keywordIdList", Integer.parseInt(s)));
+			}
+			indexWriter.addDocument(doc);
+		}
+		this.closeIndexWriter();
+		reader.close();
+		System.out.println("-over建立" + sourcePath + "里的文件" + entryName + "的索引   " + TimeStr.getTime());
+	}
+	
+	// 通过nodeIdKeywordListOnIntDateMapYagoVB.txt的索引检索文件
+	public HashMap<Integer, String> searchNIDKeyListDateIndex(ArrayList<Integer> seachedWIdList){
+		HashMap<Integer, String> resultMap = null;
+		Document doc = null;
+		try {
+//			TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
+			TopDocs results = indexSearcher.search(IntPoint.newSetQuery("keywordIdList", seachedWIdList), Integer.MAX_VALUE);
+			ScoreDoc[] hits = results.scoreDocs;
+			
+			resultMap = new HashMap<>();
+			for(int i=0; i<hits.length; i++) {
+				doc = indexSearcher.doc(hits[i].doc);
+				resultMap.put(Integer.parseInt(doc.get("nodeId")), doc.get("dateWId"));
+			}
+			return resultMap;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("检索seachedWIdList：" + resultMap + "失败而退出！！！");
+			System.exit(0);
+		}
+		return null;
+	}
+	
+	// 创建wordIdOnIntDateYagoVB.txt的索引
+	public void createWIDDateIndex(String sourcePath, String entryName) throws Exception{
+		this.sourcePath = sourcePath;
+		this.entryName = entryName;
+		
+		System.out.println("-开始建立" + sourcePath + "里的文件" + entryName + "的索引   " + TimeStr.getTime());
+//		ZipBase64ReaderService reader = new ZipBase64ReaderService(sourcePath, entryName);
+		BufferedReader reader = new BufferedReader(new FileReader(sourcePath));
+		System.out.println(reader.readLine());
+		
+		this.openIndexWriter();
+		String lineStr = null;
+		int i;
+		Document doc = null;
+		while(null != (lineStr = reader.readLine())) {
+			doc = new Document();
+			i = lineStr.indexOf(':');
+			doc.add(new IntPoint("wId", Integer.parseInt(lineStr.substring(0, i))));
+			doc.add(new StoredField("date", lineStr.substring(i+2)));
+			indexWriter.addDocument(doc);
+		}
+		this.closeIndexWriter();
+		reader.close();
+		System.out.println("-over建立" + sourcePath + "里的文件" + entryName + "的索引   " + TimeStr.getTime());
+	}
+		
+	// 通过nodeIdKeywordListOnIntDateMapYagoVB.txt的索引检索文件
+	public String searchWIDDateIndex(int seachedWId){
+		try {
+//			TopDocs results = indexSearcher.search(new TermQuery(new Term("keywordList", searchedWordId)), Integer.MAX_VALUE);
+			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", seachedWId), 1);
+			ScoreDoc[] hits = results.scoreDocs;
+			return indexSearcher.doc(hits[0].doc).get("date");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("检索seachedWId：" + seachedWId + "失败而退出！！！");
+			System.exit(0);
+		}
+		return null;
+	}
+	
+	
 	// 关闭索引写
-	public void closeIndexWriter() {
+	private void closeIndexWriter() {
 		try {
 			if(null!=indexWriter) indexWriter.close();
 		} catch (Exception e) {
@@ -286,14 +389,139 @@ public class IndexNidKeywordsListService {
 		}
 	}
 	
-	public static void main(String args[]) {
+	/* 
+	 * 文件nodeIdKeywordListOnDateMapYagoVB.txt ： 4: 【2018-3-22#2018-3-23#2018-1-1#27,】转化为下面两个文件
+	 * nodeIdKeywordListOnIntDateMapYagoVB.txt : 【4: 150#100#200#27】其中100对应的是天数
+	 * wordIdOnIntDateYagoVB.txt : 【27: 100#150#200#】 按由小到大排列
+	 */
+	public static void convertNodeIdKeywordListOnDateMapTxt(String souPath, String nWIntDatPath, String wIntDatePath) throws Exception{
+		BufferedReader sBr = new BufferedReader(new FileReader(new File(souPath)));
+		BufferedWriter nWDBw = new BufferedWriter(new FileWriter(new File(nWIntDatPath)));
+		BufferedWriter wDBw = new BufferedWriter(new FileWriter(new File(wIntDatePath)));
+		TreeMap<Integer, TreeSet<Integer>> wDMap = new TreeMap<>();
+		TreeSet<Integer> wDSet = null;
+		String lineStr = null;
+		// 减少算法的比较次数
+		TreeSet<Integer> tempSet = null;
+		lineStr = sBr.readLine();
+		nWDBw.write(lineStr + '\n');
+		wDBw.write(lineStr + '\n');
+		wDBw.flush();
+		wDBw.close();
+		int i = 0, j = 0, k = 0, nodeId = 0;
+		String[] sArr = null;
+		String tempStr = null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		TreeSet<Integer> dateSet = null;
+		while(null != (lineStr = sBr.readLine())) {
+			// 处理nodeId
+			i = lineStr.indexOf(':');
+			nodeId = Integer.parseInt(lineStr.substring(0, i));
+			i += 2;
+			nWDBw.write(lineStr.substring(0, i));
+			
+			// 处理dateStr
+			j = lineStr.lastIndexOf('#');
+			tempStr = lineStr.substring(i, j);
+			sArr = tempStr.split("#");
+			dateSet = new TreeSet<>();
+			for(String str : sArr) {
+				k = (int)(sdf.parse(str).getTime()/86400000);
+				dateSet.add(k);
+			}
+			for(int in : dateSet) {
+				nWDBw.write(String.valueOf(in));
+				nWDBw.write('#');
+			}
+			
+			// 处理nodeList
+			j++;
+			tempStr = lineStr.substring(j);
+//			nWDBw.write(tempStr);
+//			nWDBw.write('\n');
+			sArr = tempStr.split(",");
+			tempSet = new TreeSet<>();
+			for(String str : sArr) {
+				k = Integer.parseInt(str);
+				tempSet.add(k);
+				if(null == (wDSet = wDMap.get(k))) {
+					wDSet = new TreeSet<>();
+					wDMap.put(k, wDSet);
+				}
+				wDSet.addAll(dateSet);
+			}
+			for(int in : tempSet) {
+				nWDBw.write(String.valueOf(in));
+				nWDBw.write(',');
+			}
+			nWDBw.write('\n');
+		}
+		nWDBw.flush();
+		nWDBw.close();
+		sBr.close();
+		
+		// 写文件wordIdOnIntDateYagoVB.txt
+		wDBw = new BufferedWriter(new FileWriter(new File(wIntDatePath), true));
+		for(Entry<Integer, TreeSet<Integer>> en : wDMap.entrySet()) {
+			wDBw.write(String.valueOf(en.getKey()));
+			wDBw.write(": ");
+			for(Integer in : en.getValue()) {
+				wDBw.write(String.valueOf(in));
+				wDBw.write(',');
+			}
+			wDBw.write('\n');
+		}
+		wDBw.flush();
+		wDBw.close();
+	}
+	
+	
+	
+	
+	public static void main(String args[]) throws Exception{
+		String filePath = LocalFileInfo.getDataSetPath() + "test/";
+		String indexPath = LocalFileInfo.getDataSetPath() + "testIndex/";
+		
+		// 转化
+//		System.out.println("> start convert . . . ");
+//		IndexNidKeywordsListService.convertNodeIdKeywordListOnDateMapTxt(filePath + "nodeIdKeywordListOnDateMapYagoVB.txt", 
+//				filePath + "nodeIdKeywordListOnIntDateMapYagoVB.txt", 
+//				filePath + "wordIdOnIntDateYagoVB.txt");
+//		System.out.println("> end convert . . . ");
+		
+		// 建立nodeIdKeywordListOnIntDateMapYagoVB.txt的索引
+//		IndexNidKeywordsListService iSer = new IndexNidKeywordsListService(indexPath + "nid_dateWid_wid");
+//		iSer.createNIDKeyListDateIndex(filePath + "nodeIdKeywordListOnIntDateMapYagoVB.txt", null);
+//		iSer.openIndexReader();
+//		ArrayList<Integer> wIdList = new ArrayList<>();
+//		wIdList.add(12);
+//		wIdList.add(17);
+//		wIdList.add(19);
+//		wIdList.add(23);
+//		HashMap<Integer, String> map = iSer.searchNIDKeyListDateIndex(wIdList);
+//		for(Entry<Integer, String> en : map.entrySet()) {
+//			System.out.println(en.getKey() + ": " + en.getValue());
+//		}
+//		iSer.closeIndexReader();
+		
+//		 建立nodeIdKeywordListOnIntDateMapYagoVB.txt的索引
+		IndexNidKeywordsListService iSer = new IndexNidKeywordsListService(indexPath + "wid_date");
+		iSer.createWIDDateIndex(filePath + "wordIdOnIntDateYagoVB.txt", null);
+		iSer.openIndexReader();
+		System.out.println(iSer.searchWIDDateIndex(27));
+		iSer.closeIndexReader();
+		
+		
+		
+		
+		
 //		System.out.println(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getYagoZipIndexBasePath() + "NidKeywordsListMapDBpediaVBTxt");
 //		ser.createIndex(LocalFileInfo.getDataSetPath() + "YagoVB.zip",  "nodeIdKeywordListOnDateMapYagoVB.txt");
-		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex");
-		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "nodeIdKeywordListOnDateMapYagoVB.txt");
-		ser.openIndexReader();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex");
+//		ser.createIndex(LocalFileInfo.getDataSetPath() + "test.zip",  "nodeIdKeywordListOnDateMapYagoVB.txt");
+//		ser.openIndexReader();
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //		for(NodeIdDate nid : ser.searchKeywordIdReNodeIdDate(16)) {
 //			System.out.print(nid.nodeId + " > ");
 //			for(Date da : nid.dateList) {
@@ -301,23 +529,23 @@ public class IndexNidKeywordsListService {
 //			}
 //			System.out.println();
 //		}
-		ArrayList<Integer> wordList = new ArrayList<>();
-		wordList.add(12);
-		wordList.add(16);
-		wordList.add(19);
-		int i = 0;
-		HashMap<Integer, KeywordIdDateList> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
-		for(Entry<Integer, KeywordIdDateList> en : resMap.entrySet()) {
-			System.out.print(en.getKey() + " : ");
-			for(Date da : en.getValue().dateList)
-				System.out.print(sdf.format(da) + " ");
-			System.out.print(" : ");
-			for(Integer in : en.getValue().keywordIdList)
-				System.out.print(in + " ");
-			System.out.println();
-		}
+//		ArrayList<Integer> wordList = new ArrayList<>();
+//		wordList.add(12);
+//		wordList.add(16);
+//		wordList.add(19);
+//		int i = 0;
+//		HashMap<Integer, KeywordIdDateList> resMap = ser.searchKeywordIdListReNodeIdMap(wordList);
+//		for(Entry<Integer, KeywordIdDateList> en : resMap.entrySet()) {
+//			System.out.print(en.getKey() + " : ");
+//			for(Date da : en.getValue().dateList)
+//				System.out.print(sdf.format(da) + " ");
+//			System.out.print(" : ");
+//			for(Integer in : en.getValue().keywordIdList)
+//				System.out.print(in + " ");
+//			System.out.println();
+//		}
 //		for(int i : ser.searchKeywordIdReNodeIds(2))
 //			System.out.println(i);
-		ser.closeIndexReader();
+//		ser.closeIndexReader();
 	}
 }

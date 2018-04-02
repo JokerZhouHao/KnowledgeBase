@@ -1,5 +1,11 @@
 package zhou.hao.yago2s.service;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntryPredicate;
@@ -55,15 +61,73 @@ public class BuildMapService {
 		return this.yago2sArrMap[nodeId];
 	}
 	
-	// 主函数
-	public static void main(String[] args) {
-//		BuildMapService ser = new BuildMapService(LocalFileInfo.getDataSetPath() + "test.zip", "test");
-		BuildMapService ser = new BuildMapService(LocalFileInfo.getDataSetPath() + "YagoVB.zip", "edgeYagoVB.txt");
-		ser.buildMap();
-		for(int i : ser.findEdges(8)) {
-			System.out.print(i + " ");
+	// 将把word也当做节点的图写到文件nodeAndWordMapYagoVB.txt中
+	public static void writenodeAndWordMapYagoVBTxt() throws Exception{
+		String basePath = LocalFileInfo.getDataSetPath() + "test/";
+		StringBuffer[] nodeAndWordMap = new StringBuffer[24];
+		String[] rPath = new String[2];
+		rPath[0] = "edgeYagoVB.txt";
+		rPath[1] = "nidKeywordsListMapYagoVB.txt";
+		BufferedReader br = null;
+		int i = 0, nodeId;
+		String lineStr = null;
+		
+		// 读文件
+		for(String path : rPath) {
+			br = new BufferedReader(new FileReader(new File(basePath + path)));
+			br.readLine();
+			while(null != (lineStr = br.readLine())) {
+				i = lineStr.indexOf(':');
+				nodeId = Integer.parseInt(lineStr.substring(0, i));
+				if(null == nodeAndWordMap[nodeId]) {
+					nodeAndWordMap[nodeId] = new StringBuffer();
+				}
+				nodeAndWordMap[nodeId].append(lineStr.substring(i +2));
+			}
+			br.close();
 		}
-		System.out.println();
+		
+		// 写文件
+		int size = nodeAndWordMap.length;
+		BufferedWriter bw = new BufferedWriter(new FileWriter(basePath + "nodeAndWordMapYagoVB.txt"));
+		bw.write("                        \n");
+		long totalDegree = 0;
+		int curDegree = 0;
+		String[] tempArr = null;
+		for(i=0; i<size; i++) {
+			if(null != nodeAndWordMap[i]) {
+				bw.write(String.valueOf(i));
+				tempArr = nodeAndWordMap[i].toString().split(",");
+				curDegree = tempArr.length;
+				totalDegree += curDegree;
+				bw.write(" " + String.valueOf(curDegree));
+				for(String st : tempArr)
+					bw.write(" " + st);
+				bw.write('\n');
+			}
+		}
+		bw.close();
+		
+		RandomAccessFile raf = new RandomAccessFile(new File(basePath + "nodeAndWordMapYagoVB.txt"), "rw");
+		raf.seek(0);
+		raf.write((String.valueOf(size) + " " + String.valueOf(totalDegree)).getBytes());
+		raf.close();
+		
+	}
+	
+	
+	// 主函数
+	public static void main(String[] args) throws Exception{
+		
+		BuildMapService.writenodeAndWordMapYagoVBTxt();
+		
+//		BuildMapService ser = new BuildMapService(LocalFileInfo.getDataSetPath() + "test.zip", "test");
+//		BuildMapService ser = new BuildMapService(LocalFileInfo.getDataSetPath() + "YagoVB.zip", "edgeYagoVB.txt");
+//		ser.buildMap();
+//		for(int i : ser.findEdges(8)) {
+//			System.out.print(i + " ");
+//		}
+//		System.out.println();
 	}
 }
 
