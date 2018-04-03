@@ -15,16 +15,28 @@ public class ReachableQueryService {
 	public native boolean queryReachable(int p, int q, int sccN);
 	
 	// 总的点数
-	public static int nodeNum = 8; 
+	public static int nodeNum = 6; 
 	
 	public static void main(String[] args) {
 		System.loadLibrary("TFLabelReachable");
 		ReachableQueryService rqs = new ReachableQueryService();
-		System.out.println(LocalFileInfo.getTFLableBasePath() + "index" + File.separator + "p2p_scc");
-		rqs.initQuery(nodeNum, LocalFileInfo.getTFLableBasePath() + "index" + File.separator + "p2p_scc");
+		System.out.println((LocalFileInfo.getDataSetPath() + "test" + File.separator + "testIndex" + File.separator + "nid_nid" + File.separator + "node").length());
+//		System.out.println(LocalFileInfo.getDataSetPath() + "test" + File.separator + "testIndex" + File.separator + "nid_nid" + File.separator + "node");
+		rqs.initQuery(nodeNum, LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + "nid_nid" + File.separator + "node");
+//		rqs.initQuery(nodeNum, LocalFileInfo.getTFLableBasePath() + "index" + File.separator + "p2p_scc");
 		Scanner keyboard = new Scanner(System.in);
 		String inputStr = null;
 		int p=1, q;
+		for(int i=0; i<nodeNum; i++) {
+			System.out.print(i + ": ");
+			for(int j=0; j<nodeNum; j++) {
+				if(i != j && rqs.queryReachable(i, j, nodeNum)) {
+					System.out.print(j + " ");
+				}
+			}
+			System.out.println();
+		}
+		
 		while(true) {
 			inputStr = keyboard.nextLine();
 			if(null != inputStr && !inputStr.equals("")) {
@@ -33,6 +45,7 @@ public class ReachableQueryService {
 				System.out.println(rqs.queryReachable(p, q, nodeNum));
 			} else break;
 		}
+		
 		rqs.freeQuery(nodeNum);
 	}
 }
