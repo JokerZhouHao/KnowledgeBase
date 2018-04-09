@@ -8,8 +8,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import precomputation.graph.TFlabelDataFormatter;
 import sil.spatialindex.IEntry;
 import sil.spatialindex.Point;
+import utility.Global;
 import zhou.hao.helper.MComparator;
 import zhou.hao.service.ReachableQueryService;
 import zhou.hao.tools.LocalFileInfo;
@@ -39,7 +41,7 @@ public class BSPUseReachProcessor {
 	private IndexNidKeywordsListService nIdWordDateSer = null;
 	private IndexNidKeywordsListService wIdDateSer = null;
 	private Boolean hasInit = Boolean.FALSE;
-	private ReachableQueryService reachableQueryService = new ReachableQueryService();
+	private ReachableQueryService reachableQueryService = null;
 	
 	// 节点数
 	private int nodeNum = 24;
@@ -47,7 +49,40 @@ public class BSPUseReachProcessor {
 	public IndexCoordService getIndexCooorSer() {
 		return indexCooorSer;
 	}
-
+	
+	/**
+	 * 预处理
+	 */
+	public void preDeal() {
+		String filePath = LocalFileInfo.getDataSetPath() + "test/";
+		String indexPath = LocalFileInfo.getDataSetPath() + "testIndex/";
+		String souPath = filePath + "nodeIdKeywordListOnDateMapYagoVB.txt";
+		String nWIntDatePath = filePath + "nodeIdKeywordListOnIntDateMapYagoVB.txt";
+		String wIntDatePath = filePath + "wordIdOnIntDateYagoVB.txt";
+		String nwIndexPath = indexPath + "nid_dateWid_wid";
+		String wIIndexPath = indexPath + "wid_date";
+		
+		try {
+			// 建立普通索引
+			nIdWordDateSer = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex/nid_dateWid_wid");
+			wIdDateSer = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex/wid_date");
+			nIdWordDateSer.convertNodeIdKeywordListOnDateMapTxt(souPath, nWIntDatePath, wIntDatePath);
+			nIdWordDateSer.createNIDKeyListDateIndex(nWIntDatePath, null);
+			wIdDateSer.createWIDDateIndex(wIntDatePath, null);
+			
+			// 建立tf-label索引
+			String DAGedgeFile = LocalFileInfo.getDataSetPath() + "test/" + Global.dagFile + Global.sccFlag
+					+ Global.keywordFlag + Global.edgeFile;
+			String sccFile = LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.SCC";
+			String edgeFile = LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.txt";
+			String nidDocFile = LocalFileInfo.getDataSetPath() + "test/" + "nidKeywordsListMapYagoVB.txt";
+			TFlabelDataFormatter.buildSCC(edgeFile, sccFile);
+			TFlabelDataFormatter.tfLabelDateFormat(DAGedgeFile, sccFile, edgeFile, nidDocFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	// 初始化成员变量
 	public void init() {
 //		indexCooorSer = new IndexCoordService(LocalFileInfo.getDataSetPath() + "yagoVB.zip", "pidCoordYagoVB.txt");
@@ -61,9 +96,8 @@ public class BSPUseReachProcessor {
 		nIdWordDateSer = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex/nid_dateWid_wid");
 		wIdDateSer = new IndexNidKeywordsListService(LocalFileInfo.getDataSetPath() + "testIndex/wid_date");
 		hasInit = Boolean.TRUE;
-		System.out.println("> 初始化reachableQueryService . . . ");
-		reachableQueryService.initQuery(nodeNum, LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + "nid_nid" + File.separator + "node");
-		System.out.println("> 初始化reachableQueryService ending ! ! ！ ");
+		reachableQueryService = new ReachableQueryService(LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.SCC", 
+				LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + "nid_nid" + File.separator);
 	}
 	
 	// 记录距离+1乘以日期差+1的最小的点
@@ -177,10 +211,10 @@ public class BSPUseReachProcessor {
 			tempI0 = iEntry.getIdentifier();
 			tempSize = wordIdList.size();
 			for(tempI1 = 0; tempI1 < tempSize; tempI1++) {
-				if(!reachableQueryService.queryReachable(tempI0, wordIdList.get(tempI1), tempSize))	break;
+				if(!reachableQueryService.queryReachable(tempI0, wordIdList.get(tempI1)))	break;
 			}
 			if(tempI1 != tempSize) {
-				System.out.println("> 点" + tempI0 + "不可达 ！ ！ ！ ");
+				System.out.println("> 点" + tempI0 + "不可达 ！ ！ ！ \n");
 				continue;
 			}
 			
@@ -303,7 +337,7 @@ public class BSPUseReachProcessor {
 											noWordSearch = Boolean.TRUE;
 										}
 									}
-									tempMinMul.lValue = tempI3;
+									tempMinMul.lValue = tempI4;
 									tempMinMul.node = curPNode;
 									if(noWordSearch)	break;
 								}
@@ -367,7 +401,13 @@ public class BSPUseReachProcessor {
 	
 	// 主函数
 	public static void main(String[] args) {
-		BSPProcessor pro = new BSPProcessor();
+		BSPUseReachProcessor pro = new BSPUseReachProcessor();
+		boolean signPre = false;
+		if(signPre) {
+			pro.preDeal();
+			return;
+		}
+		
 		RandomNumGenerator randomGe = new RandomNumGenerator(Yago2sInfoService.keywordStartId, Yago2sInfoService.keywordStartId + Yago2sInfoService.keywordNum -1);
 		RandomNumGenerator pointIdGe = new RandomNumGenerator(0, Yago2sInfoService.coordNum-1);
 		ArrayList<Integer>	wordIdList = new ArrayList<>();

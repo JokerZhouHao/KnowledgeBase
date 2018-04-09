@@ -21,16 +21,8 @@ public class TFlabelUtility {
 		BufferedReader reader = Utility.getBufferedReader(edgeFile);
 		String line = reader.readLine();// first line is statistics of graph
 
-		String[] stat = line.split(Global.delimiterPound);
-		int numEdges = Integer.parseInt(stat[1]);
-		if (numEdges != Global.numEdges) {
-			throw new Exception("numEdges in configuration is " + Global.numEdges
-					+ " but stat in read-file is " + numEdges);
-		}
-
-		int cntLines = 0;
+		
 		while ((line = reader.readLine()) != null) {
-			cntLines++;
 			String[] nidOutNids = line.split(Global.delimiterLevel1);
 			if (nidOutNids.length != 2) {
 				throw new Exception("nid->nids direct edge splits wrong length, should be 2 but is "
@@ -59,7 +51,6 @@ public class TFlabelUtility {
 			}
 		}
 		reader.close();
-//		System.out.println(cntLines);
 
 		return DAGedges;
 	}
@@ -77,6 +68,7 @@ public class TFlabelUtility {
 				System.err.println("processed " + cntLines + " vertexDoc");
 			}
 			if (line.contains(Global.delimiterPound)) {
+				Global.numKeywords = Integer.parseInt(line.split(Global.delimiterPound)[1]);
 				continue;
 			}
 			String[] nidDocument = line.split(Global.delimiterLevel1);
@@ -106,7 +98,6 @@ public class TFlabelUtility {
 			}
 		}
 		reader.close();
-//		System.out.println(cntLines);
 	}
 
 	// load the the vertexid-sccid map
@@ -129,10 +120,6 @@ public class TFlabelUtility {
 				int vertex = Integer.parseInt(vertices[i]);
 				vertexSCCMap.put(vertex, sccid);
 			}
-		}
-		if (vertexSCCMap.size() != Global.numNodes) {
-			throw new Exception("there are " + vertexSCCMap.size() + " places in scc but should be "
-					+ Global.numNodes);
 		}
 		return vertexSCCMap;
 	}

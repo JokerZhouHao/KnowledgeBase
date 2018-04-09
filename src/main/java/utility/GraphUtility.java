@@ -24,6 +24,14 @@ public class GraphUtility {
 	public static DirectedGraph<Integer, DefaultEdge> buildSimpleDirectedGraph(String edgeFile)
 			throws Exception {
 		
+		BufferedReader reader = Utility.getBufferedReader(edgeFile);
+		String line = reader.readLine();//first line is statistics of graph
+		String[] stat = line.split(Global.delimiterPound);
+		int numNodes = Integer.parseInt(stat[0]);
+		Global.numNodes = numNodes;
+		int numEdges = Integer.parseInt(stat[1]);
+		Global.numEdges = numEdges;
+		
 		DirectedGraph<Integer, DefaultEdge> sdgraph = new SimpleDirectedGraph<Integer, DefaultEdge>(
 				DefaultEdge.class);
 
@@ -32,17 +40,7 @@ public class GraphUtility {
 			sdgraph.addVertex(nid);
 		}
 
-		BufferedReader reader = Utility.getBufferedReader(edgeFile);
-		String line = reader.readLine();//first line is statistics of graph
-
-		String[] stat = line.split(Global.delimiterPound);
-		// numNodesWithOutEdge <= numNodes
-		int numEdges = Integer.parseInt(stat[1]);
-		if (numEdges != Global.numEdges) {
-			throw new Exception("numEdges in configuration is " + Global.numEdges
-					+ " but stat in read-file is " + numEdges);
-		}
-
+		
 		int edgeCount = 0;
 		int cntLines = 0;
 		while ((line = reader.readLine()) != null) {
@@ -73,11 +71,6 @@ public class GraphUtility {
 			}
 		}
 		reader.close();
-
-		if (edgeCount != Global.numEdges) {
-			throw new Exception("numEdges in configuration is " + Global.numEdges
-					+ " but actual numEdges in read-file is " + edgeCount);
-		}
 
 		return sdgraph;
 	}

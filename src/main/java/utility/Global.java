@@ -51,12 +51,13 @@ public class Global {
 	public static String diskFlag = ".disk.";
 	public static String sccFlag = ".SCC";
 	public static String keywordFlag = ".keyword";
+	public static String sccIndexFlag = "p2p_scc";
 	
 	public static int numPlaces = -1;
 	public static int numNodes = 12;//include nodes that are places
-	public static int numKeywords = 15;
-	public static int numEdges = 2;
-	public static int numSCCs = 27;// # of vertx SCCs + # of keywords
+	public static int numKeywords = 18;
+	public static int numEdges = 16;
+	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
 	public static int rtreeBufferSize = -1;
 	public static int rtreePageSize = -1;
 	public static int rtreeFanout = -1;

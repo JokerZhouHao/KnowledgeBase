@@ -394,9 +394,9 @@ public class IndexNidKeywordsListService {
 	 * nodeIdKeywordListOnIntDateMapYagoVB.txt : 【4: 150#100#200#27】其中100对应的是天数
 	 * wordIdOnIntDateYagoVB.txt : 【27: 100#150#200#】 按由小到大排列
 	 */
-	public static void convertNodeIdKeywordListOnDateMapTxt(String souPath, String nWIntDatPath, String wIntDatePath) throws Exception{
+	public void convertNodeIdKeywordListOnDateMapTxt(String souPath, String nWIntDatePath, String wIntDatePath) throws Exception{
 		BufferedReader sBr = new BufferedReader(new FileReader(new File(souPath)));
-		BufferedWriter nWDBw = new BufferedWriter(new FileWriter(new File(nWIntDatPath)));
+		BufferedWriter nWDBw = new BufferedWriter(new FileWriter(new File(nWIntDatePath)));
 		BufferedWriter wDBw = new BufferedWriter(new FileWriter(new File(wIntDatePath)));
 		TreeMap<Integer, TreeSet<Integer>> wDMap = new TreeMap<>();
 		TreeSet<Integer> wDSet = null;
@@ -504,7 +504,7 @@ public class IndexNidKeywordsListService {
 //		}
 //		iSer.closeIndexReader();
 		
-//		 建立nodeIdKeywordListOnIntDateMapYagoVB.txt的索引
+//		 建立wordIdOnIntDateYagoVB.txt的索引
 		IndexNidKeywordsListService iSer = new IndexNidKeywordsListService(indexPath + "wid_date");
 		iSer.createWIDDateIndex(filePath + "wordIdOnIntDateYagoVB.txt", null);
 		iSer.openIndexReader();
