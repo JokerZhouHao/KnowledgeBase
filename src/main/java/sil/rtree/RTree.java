@@ -61,6 +61,7 @@ import sil.storagemanager.PropertySet;
 import zhou.hao.service.GZIPReaderService;
 import zhou.hao.service.ZipReaderService;
 import zhou.hao.tools.LocalFileInfo;
+import zhou.hao.tools.TimeStr;
 
 public class RTree implements ISpatialIndex
 {
@@ -103,7 +104,9 @@ public class RTree implements ISpatialIndex
 	ArrayList m_writeNodeCommands = new ArrayList();
 	ArrayList m_readNodeCommands = new ArrayList();
 	ArrayList m_deleteNodeCommands = new ArrayList();
-
+	
+	public RTree() {}
+	
 	public RTree(PropertySet ps, IStorageManager sm)
 	{
 		m_rwLock = new RWLock();
@@ -112,8 +115,10 @@ public class RTree implements ISpatialIndex
 		m_headerID = IStorageManager.NewPage;
 		m_treeVariant = SpatialIndex.RtreeVariantRstar;
 		m_fillFactor = 0.7f;
-		m_indexCapacity = 100;
-		m_leafCapacity = 100;
+//		m_indexCapacity = 100;
+//		m_leafCapacity = 100;
+		m_indexCapacity = 12;
+		m_leafCapacity = 10;
 		m_nearMinimumOverlapFactor = 32;
 		m_splitDistributionFactor = 0.4f;
 		m_reinsertFactor = 0.3f;
@@ -1078,7 +1083,7 @@ public class RTree implements ISpatialIndex
 	// 写getNext方法
 	private Boolean hasInitGetNext = Boolean.FALSE;
 	private IShape  query = null;
-	private ArrayList queue = new ArrayList();
+	private ArrayList<NNEntry> queue = new ArrayList();
 	private Node n = null;
 	private NNComparator nnc = null;
 	
@@ -1150,35 +1155,18 @@ public class RTree implements ISpatialIndex
 		return null;
 	}
 	
-	
 	// 主函数
-	public static void main(String[] args) {
-		ZipReaderService reader = new ZipReaderService(LocalFileInfo.getDataSetPath() + "test.zip", "Coord");
-		int nodeId = 0, i, k;
-		String[] tempStr = null;
-		String lineStr = null;
-		RTree rTree = new RTree(new PropertySet(), new MemoryStorageManager());
+	public static void main(String[] args) throws Exception{
 		
-		reader.readLine();
-		while(null != (lineStr = reader.readLine())) {
-			double[] coord = new double[2];
-			k = lineStr.indexOf(':');
-			nodeId = Integer.parseInt(lineStr.substring(0, k));
-			tempStr = lineStr.substring(k+2, lineStr.length()).split(" ");
-			for(i=0; i<2; i++)
-				coord[i] = Double.parseDouble(tempStr[i]);
-			rTree.insertData(null, new Point(coord), nodeId);
-//			rTree.nodeIdMap.put(nodeId, coord);
-		}
 		
 		double[] pCoord = new double[2];
 		pCoord[0] = 3;
 		pCoord[1] = 2;
-		IEntry ie = null;
-		rTree.initGetNext(new Point(pCoord));
-		while(null != (ie = rTree.getNext())) {
-			System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
-		}
+//		IEntry ie = null;
+//		rTree.initGetNext(new Point(pCoord));
+//		while(null != (ie = rTree.getNext())) {
+//			System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
+//		}
 	}
 	
 }
