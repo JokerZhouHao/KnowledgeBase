@@ -29,9 +29,8 @@
 
 package spatialindex.rtree;
 
-import java.util.ArrayList;
-
-import spatialindex.spatialindex.IStatistics;
+import java.util.*;
+import spatialindex.spatialindex.*;
 
 public class Statistics implements IStatistics, Cloneable
 {
@@ -42,7 +41,7 @@ public class Statistics implements IStatistics, Cloneable
 	protected long m_misses;
 	protected long m_nodes;
 	protected long m_adjustments;
-	protected long m_queryResults;
+	public long m_queryResults;
 	protected long m_data;
 	protected int m_treeHeight;
 	protected ArrayList m_nodesInLevel = new ArrayList();

@@ -29,6 +29,7 @@
 
 package spatialindex.rtree;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -36,7 +37,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -54,22 +54,22 @@ import spatialindex.spatialindex.Point;
 import spatialindex.spatialindex.RWLock;
 import spatialindex.spatialindex.Region;
 import spatialindex.spatialindex.SpatialIndex;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IBuffer;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.InvalidPageException;
-import spatialindex.storagemanager.MemoryStorageManager;
 import spatialindex.storagemanager.PropertySet;
-import file.reader.GZIPReader;
-import file.reader.ZipReader;
-import utility.LocalFileInfo;
-import utility.TimeUtility;
+import spatialindex.storagemanager.TreeLRUBuffer;
+import utility.Global;
+import utility.Utility;
 
 public class RTree implements ISpatialIndex
 {
-	RWLock m_rwLock;
+	protected RWLock m_rwLock;
 
 	IStorageManager m_pStorageManager;
 
-	int m_rootID;
+	protected int m_rootID;
 	int m_headerID;
 
 	int m_treeVariant;
@@ -95,18 +95,16 @@ public class RTree implements ISpatialIndex
 		// [Beckmann, Kriegel, Schneider, Seeger 'The R*-tree: An efficient and Robust Access Method
 		//  for Points and Rectangles, Section 4.3]
 
-	int m_dimension;
+	protected int m_dimension;
 
 	Region m_infiniteRegion;
 
-	Statistics m_stats;
+	public Statistics m_stats;
 
 	ArrayList m_writeNodeCommands = new ArrayList();
 	ArrayList m_readNodeCommands = new ArrayList();
 	ArrayList m_deleteNodeCommands = new ArrayList();
-	
-	public RTree() {}
-	
+
 	public RTree(PropertySet ps, IStorageManager sm)
 	{
 		m_rwLock = new RWLock();
@@ -115,10 +113,8 @@ public class RTree implements ISpatialIndex
 		m_headerID = IStorageManager.NewPage;
 		m_treeVariant = SpatialIndex.RtreeVariantRstar;
 		m_fillFactor = 0.7f;
-//		m_indexCapacity = 100;
-//		m_leafCapacity = 100;
-		m_indexCapacity = 12;
-		m_leafCapacity = 10;
+		m_indexCapacity = 100;
+		m_leafCapacity = 100;
 		m_nearMinimumOverlapFactor = 32;
 		m_splitDistributionFactor = 0.4f;
 		m_reinsertFactor = 0.3f;
@@ -299,6 +295,7 @@ public class RTree implements ISpatialIndex
 					m_stats.m_queryResults++;
 					count++;
 					knearest = first.m_minDist;
+					System.out.println(first.m_minDist);
 				}
 			}
 		}
@@ -542,7 +539,7 @@ public class RTree implements ISpatialIndex
 			if (var instanceof Integer)
 			{
 				int i = ((Integer) var).intValue();
-				if (i < 3) throw new IllegalArgumentException("Property IndexCapacity must be >= 3");
+				if (i < 3) throw new IllegalArgumentException("Property IndexCapacity must be >= 3 but is " + i);
 				m_indexCapacity = i;
 			}
 			else
@@ -792,7 +789,7 @@ public class RTree implements ISpatialIndex
 
 	protected void insertData_impl(byte[] pData, Region mbr, int id)
 	{
-//		assert mbr.getDimension() == m_dimension;
+		assert mbr.getDimension() == m_dimension;
 
 		boolean[] overflowTable;
 
@@ -811,7 +808,7 @@ public class RTree implements ISpatialIndex
 
 	protected void insertData_impl(byte[] pData, Region mbr, int id, int level, boolean[] overflowTable)
 	{
-//		assert mbr.getDimension() == m_dimension;
+		assert mbr.getDimension() == m_dimension;
 
 		Stack pathBuffer = new Stack();
 
@@ -822,7 +819,7 @@ public class RTree implements ISpatialIndex
 
 	protected boolean deleteData_impl(final Region mbr, int id)
 	{
-//		assert mbr.getDimension() == m_dimension;
+		assert mbr.getDimension() == m_dimension;
 
 		boolean bRet = false;
 
@@ -887,7 +884,7 @@ public class RTree implements ISpatialIndex
 		return page;
 	}
 
-	protected Node readNode(int id)
+	public Node readNode(int id)
 	{
 		byte[] buffer;
 		DataInputStream ds = null;
@@ -906,7 +903,7 @@ public class RTree implements ISpatialIndex
 
 			n.m_pTree = this;
 			n.m_identifier = id;
-			n.load(buffer);
+			n.load(buffer);			
 
 			m_stats.m_reads++;
 		}
@@ -1024,28 +1021,9 @@ public class RTree implements ISpatialIndex
 		return s;
 	}
 
-	class NNEntry
-	{
-		IEntry m_pEntry;
-		double m_minDist;
+	
 
-		NNEntry(IEntry e, double f) { m_pEntry = e; m_minDist = f; }
-	}
-
-	class NNEntryComparator implements Comparator
-	{
-		public int compare(Object o1, Object o2)
-		{
-			NNEntry n1 = (NNEntry) o1;
-			NNEntry n2 = (NNEntry) o2;
-
-			if (n1.m_minDist < n2.m_minDist) return -1;
-			if (n1.m_minDist > n2.m_minDist) return 1;
-			return 0;
-		}
-	}
-
-	class NNComparator implements INearestNeighborComparator
+	public class NNComparator implements INearestNeighborComparator
 	{
 		public double getMinimumDistance(IShape query, IEntry e)
 		{
@@ -1062,111 +1040,212 @@ public class RTree implements ISpatialIndex
 		ValidateEntry(Region r, Node pNode) { m_parentMBR = r; m_pNode = pNode; }
 	}
 
-	class Data implements IData
-	{
-		int m_id;
-		Region m_shape;
-		byte[] m_pData;
+	public static void build(String placefile, String treefile, int fanout, int buffersize, int pagesize)throws Exception{
+		// Create a disk based storage manager.
+		PropertySet ps = new PropertySet();
 
-		Data(byte[] pData, Region mbr, int id) { m_id = id; m_shape = mbr; m_pData = pData; }
+		Boolean b = new Boolean(true);
+		ps.setProperty("Overwrite", b);
+		//overwrite the file if it exists.
 
-		public int getIdentifier() { return m_id; }
-		public IShape getShape() { return new Region(m_shape); }
-		public byte[] getData()
-		{
-			byte[] data = new byte[m_pData.length];
-			System.arraycopy(m_pData, 0, data, 0, m_pData.length);
-			return data;
+		ps.setProperty("FileName", treefile);
+		Integer i = new Integer(pagesize);
+		ps.setProperty("PageSize", i);
+		// specify the page size. Since the index may also contain user defined data
+		// there is no way to know how big a single node may become. The storage manager
+		// will use multiple pages per node if needed. Off course this will slow down performance.
+
+
+		IStorageManager diskfile = new DiskStorageManager(ps);
+
+		IBuffer file = new TreeLRUBuffer(diskfile, buffersize, false);
+		// applies a main memory random buffer on top of the persistent storage manager
+		// (LRU buffer, etc can be created the same way).
+
+		// Create a new, empty, RTree with dimensionality 2, minimum load 70%, using "file" as
+		// the StorageManager and the RSTAR splitting policy.
+
+		Double f = new Double(0.7);
+		ps.setProperty("FillFactor", f);
+
+		i = fanout;
+		ps.setProperty("IndexCapacity", i);
+		ps.setProperty("LeafCapacity", i);
+		// Index capacity and leaf capacity may be different.
+
+		i = new Integer(2);
+		ps.setProperty("Dimension", i);
+
+		RTree rtree = new RTree(ps, file);
+		
+		
+		BufferedReader reader = Utility.getBufferedReader(placefile);
+		String line = reader.readLine();
+		
+		int cntLines = 0;
+		double[] f1 = new double[2];
+		double[] f2 = new double[2];
+
+		long start = System.currentTimeMillis();
+		while ((line = reader.readLine()) != null) {
+			cntLines++;
+			String[] pidCoord = line.split(Global.delimiterLevel1);
+			int id = Integer.parseInt(pidCoord[0]);
+			String[] coord = pidCoord[1].split(Global.delimiterSpace);
+			float x = Float.parseFloat(coord[0]);
+			float y = Float.parseFloat(coord[1]);
+			if (x < -90 || x > 90 || y < -180 || y > 180) {
+				continue;
+			}
+			f1[0] = f2[0] = x;
+			f1[1] = f2[1] = y;
+			Region r = new Region(f1, f2);
+			rtree.insertData(null, r, id);
+
+			if (cntLines % 10000 == 0)
+				System.out.println(cntLines + " places inserted");
 		}
+
+		long end = System.currentTimeMillis();
+
+		System.out.println("Revision Minutes: " + ((end - start) / 1000.0f) / 60.0f);
+
+		boolean ret = rtree.isIndexValid();
+		if (ret == false)
+			System.err.println("Structure is INVALID!");
+
+		rtree.flush();
+		
+		if (cntLines != Global.numPlaces) {
+			throw new Exception("actual num places in file is " + cntLines + " but config is "
+					+ Global.numPlaces);
+		}
+	}
+	
+	public int getM_dimensoin() {
+		return this.m_dimension;
+	}
+	
+	public void writeLock(){
+		m_rwLock.write_lock();
+	}
+	public void readLock(){
+		m_rwLock.read_lock();
+	}
+	
+	public void readUnlock(){
+		m_rwLock.read_unlock();
+	}
+	
+	public int getRoot() {
+		return this.m_rootID;
+	}
+	public int getTreeHeight(){
+		return this.m_stats.m_treeHeight;
 	}
 	
 	// 写getNext方法
-	private Boolean hasInitGetNext = Boolean.FALSE;
-	private IShape  query = null;
-	private ArrayList<NNEntry> queue = new ArrayList();
-	private Node n = null;
-	private NNComparator nnc = null;
-	
-	public void initGetNext(final IShape query) {
-		 nnc = new NNComparator();
-		 this.query = query;
-		 queue = new ArrayList();
-		 n = readNode(m_rootID);
-		 queue.add(new NNEntry(n, 0.0));
-		 hasInitGetNext = Boolean.TRUE;
-	}
-	
-	public IEntry getNext() {
-		if (query.getDimension() != m_dimension) throw new IllegalArgumentException("nearestNeighborQuery: Shape has the wrong number of dimensions.");
+		private Boolean hasInitGetNext = Boolean.FALSE;
+		private IShape  query = null;
+		private ArrayList<NNEntry> queue = new ArrayList();
+		private Node n = null;
+		private NNComparator nnc = null;
 		
-		if(!hasInitGetNext)	throw new IllegalArgumentException("please init getNext parameters ! ! !");
+		public void initGetNext(final IShape query) {
+			 nnc = new NNComparator();
+			 this.query = query;
+			 queue = new ArrayList();
+			 n = readNode(m_rootID);
+			 queue.add(new NNEntry(n, 0.0));
+			 hasInitGetNext = Boolean.TRUE;
+		}
 		
-		m_rwLock.read_lock();
+		public IEntry getNext() {
+			if (query.getDimension() != m_dimension) throw new IllegalArgumentException("nearestNeighborQuery: Shape has the wrong number of dimensions.");
+			
+			if(!hasInitGetNext)	throw new IllegalArgumentException("please init getNext parameters ! ! !");
+			
+			m_rwLock.read_lock();
 
-		try
-		{
-			// I need a priority queue here. It turns out that TreeSet sorts unique keys only and since I am
-			// sorting according to distances, it is not assured that all distances will be unique. TreeMap
-			// also sorts unique keys. Thus, I am simulating a priority queue using an ArrayList and binarySearch.
-
-			while (queue.size() != 0)
+			try
 			{
-				NNEntry first = (NNEntry) queue.remove(0);
+				// I need a priority queue here. It turns out that TreeSet sorts unique keys only and since I am
+				// sorting according to distances, it is not assured that all distances will be unique. TreeMap
+				// also sorts unique keys. Thus, I am simulating a priority queue using an ArrayList and binarySearch.
 
-				if (first.m_pEntry instanceof Node)
+				while (queue.size() != 0)
 				{
-					n = (Node) first.m_pEntry;
+					NNEntry first = (NNEntry) queue.remove(0);
 
-					for (int cChild = 0; cChild < n.m_children; cChild++)
+					if (first.m_pEntry instanceof Node)
 					{
-						IEntry e;
+						n = (Node) first.m_pEntry;
 
-						if (n.m_level == 0)
+						for (int cChild = 0; cChild < n.m_children; cChild++)
 						{
-							e = new Data(n.m_pData[cChild], n.m_pMBR[cChild], n.m_pIdentifier[cChild]);
-						}
-						else
-						{
-							e = (IEntry) readNode(n.m_pIdentifier[cChild]);
-						}
+							IEntry e;
 
-						NNEntry e2 = new NNEntry(e, nnc.getMinimumDistance(query, e));
+							if (n.m_level == 0)
+							{
+								e = new Data(n.m_pData[cChild], n.m_pMBR[cChild], n.m_pIdentifier[cChild]);
+							}
+							else
+							{
+								e = (IEntry) readNode(n.m_pIdentifier[cChild]);
+							}
 
-						// Why don't I use a TreeSet here? See comment above...
-						int loc = Collections.binarySearch(queue, e2, new NNEntryComparator());
-						if (loc >= 0) queue.add(loc, e2);
-						else queue.add((-loc - 1), e2);
+							NNEntry e2 = new NNEntry(e, nnc.getMinimumDistance(query, e));
+
+							// Why don't I use a TreeSet here? See comment above...
+							int loc = Collections.binarySearch(queue, e2, new NNEntryComparator());
+							if (loc >= 0) queue.add(loc, e2);
+							else queue.add((-loc - 1), e2);
+						}
+					}
+					else
+					{
+						// report all nearest neighbors with equal furthest distances.
+						// (neighbors can be more than k, if many happen to have the same
+						//  furthest distance).
+						return first.m_pEntry;
 					}
 				}
-				else
-				{
-					// report all nearest neighbors with equal furthest distances.
-					// (neighbors can be more than k, if many happen to have the same
-					//  furthest distance).
-					return first.m_pEntry;
-				}
 			}
+			finally
+			{
+				m_rwLock.read_unlock();
+			}
+			hasInitGetNext = Boolean.FALSE;
+			return null;
 		}
-		finally
-		{
-			m_rwLock.read_unlock();
+		
+		// 主函数
+		public static void main(String[] args) throws Exception{
+			
+			if (args.length != 1)
+			{
+				System.err.println("Usage: runnable configFile");
+				System.exit(-1);
+			}
+			
+			Utility.loadInitialConfig(args[0]);
+			
+			String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
+			String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+			int fanout = Global.rtreeFanout;
+			int buffersize = Global.rtreeBufferSize;
+			int pagesize = Global.rtreePageSize;
+			
+			build(inputfile, treefile, fanout, buffersize, pagesize);
+			
+			double[] pCoord = new double[2];
+			pCoord[0] = 3;
+			pCoord[1] = 2;
+//			IEntry ie = null;
+//			rTree.initGetNext(new Point(pCoord));
+//			while(null != (ie = rTree.getNext())) {
+//				System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
+//			}
 		}
-		hasInitGetNext = Boolean.FALSE;
-		return null;
-	}
-	
-	// 主函数
-	public static void main(String[] args) throws Exception{
-		
-		
-		double[] pCoord = new double[2];
-		pCoord[0] = 3;
-		pCoord[1] = 2;
-//		IEntry ie = null;
-//		rTree.initGetNext(new Point(pCoord));
-//		while(null != (ie = rTree.getNext())) {
-//			System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
-//		}
-	}
 	
 }

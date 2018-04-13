@@ -29,11 +29,9 @@
 
 package spatialindex.rtree;
 
-import java.util.ArrayList;
-import java.util.Stack;
+import java.util.*;
 
-import spatialindex.spatialindex.Region;
-import spatialindex.spatialindex.SpatialIndex;
+import spatialindex.spatialindex.*;
 
 public class Leaf extends Node
 {

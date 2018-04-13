@@ -29,15 +29,9 @@
 
 package spatialindex.rtree;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Stack;
+import java.util.*;
 
-import spatialindex.spatialindex.Point;
-import spatialindex.spatialindex.Region;
-import spatialindex.spatialindex.SpatialIndex;
-import spatialindex.storagemanager.PropertySet;
+import spatialindex.spatialindex.*;
 
 public class Index extends Node
 {

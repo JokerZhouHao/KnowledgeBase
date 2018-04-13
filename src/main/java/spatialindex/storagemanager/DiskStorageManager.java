@@ -258,12 +258,17 @@ public class DiskStorageManager implements IStorageManager
 			cNext++;
 		}
 		while (cNext < cTotal);
-
+		
 		return data;
 	}
 
-	public int storeByteArray(final int id, final byte[] data)
+	public int storeByteArray(final int id, final byte[] data) 
 	{
+		if (data.length > m_pageSize) {
+			System.err.println("data with length " + data.length + " exceeds a disk pagesize " + m_pageSize);
+			System.exit(-1);
+			//throw new IOException("data with length " + data.length + " exceeds a disk pagesize " + m_pageSize);
+		}
 		if (id == NewPage)
 		{
 			Entry e = new Entry();
@@ -307,6 +312,9 @@ public class DiskStorageManager implements IStorageManager
 			}
 
 			Integer i = (Integer) e.m_pages.get(0);
+			if (e.m_pages.size() > 1) {
+				System.err.println(id + "node size exceeds one pagesize!!! please reduce fanout or increase pagesize");
+			}
 			m_pageIndex.put(i, e);
 
 			return i.intValue();
@@ -371,6 +379,9 @@ public class DiskStorageManager implements IStorageManager
 			}
 
 			Integer i = (Integer) e.m_pages.get(0);
+			if (e.m_pages.size() > 1) {
+				System.err.println(id + "node size exceeds one pagesize!!! please reduce fanout or increase pagesize");
+			}
 			m_pageIndex.put(i, e);
 
 			return i.intValue();

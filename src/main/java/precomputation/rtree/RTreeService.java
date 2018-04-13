@@ -18,7 +18,6 @@ import utility.TimeUtility;
  */
 public class RTreeService extends RTree{
 	
-	public RTreeService() {}
 	public RTreeService(PropertySet ps, IStorageManager sm) {
 		super(ps, sm);
 	}
@@ -76,7 +75,7 @@ public class RTreeService extends RTree{
 	
 	
 	public static void main(String[] args) throws Exception{
-		RTreeService ser = new RTreeService();
+		RTreeService ser = new RTreeService(null, null);
 		
 		int fanout = 5;
 		String rTreeIndexPath = LocalFileInfo.getDataSetPath() + "testIndex/rtree/";

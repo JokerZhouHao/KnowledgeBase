@@ -29,34 +29,24 @@
 
 package spatialindex.rtree;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Stack;
+import java.util.*;
+import java.io.*;
 
-import spatialindex.spatialindex.INode;
-import spatialindex.spatialindex.IShape;
-import spatialindex.spatialindex.Region;
-import spatialindex.spatialindex.SpatialIndex;
+import spatialindex.spatialindex.*;
 
-abstract class Node implements INode
+public abstract class Node implements INode
 {
 	protected RTree m_pTree = null;
 		// Parent of all nodes.
 
-	protected int m_level = -1;
+	public int m_level = -1;
 		// The level of the node in the tree.
 		// Leaves are always at level 0.
 
-	protected int m_identifier = -1;
+	public int m_identifier = -1;
 		// The unique ID of this node.
 
-	protected int m_children = 0;
+	public int m_children = 0;
 		// The number of children pointed by this node.
 
 	protected int m_capacity = -1;
@@ -65,13 +55,13 @@ abstract class Node implements INode
 	protected Region m_nodeMBR = null;
 		// The minimum bounding region enclosing all data contained in the node.
 
-	protected byte[][] m_pData = null;
+	public byte[][] m_pData = null;
 		// The data stored in the node.
 
-	protected Region[] m_pMBR = null;
+	public Region[] m_pMBR = null;
 		// The corresponding data MBRs.
 
-	protected int[] m_pIdentifier = null;
+	public int[] m_pIdentifier = null;
 		// The corresponding data identifiers.
 
 	protected int[] m_pDataLength = null;

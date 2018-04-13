@@ -42,7 +42,7 @@ public class RandomEvictionsBuffer extends Buffer
 
 	void addEntry(int id, Entry e)
 	{
-//		assert m_buffer.size() <= m_capacity;
+		assert m_buffer.size() <= m_capacity;
 
 		if (m_buffer.size() == m_capacity) removeEntry();
 		m_buffer.put(new Integer(id), e);
