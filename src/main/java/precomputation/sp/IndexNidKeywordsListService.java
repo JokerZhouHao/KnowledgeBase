@@ -1,4 +1,4 @@
-package precomputation.index.sp;
+package precomputation.sp;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,7 +43,7 @@ import file.reader.ZipBase64Reader;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
 import main.sp.SPIncompletion;
-import precomputation.index.sp.IndexNidKeywordsListService.KeywordIdDateList;
+import precomputation.sp.IndexNidKeywordsListService.KeywordIdDateList;
 
 /**
  * 

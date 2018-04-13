@@ -8,14 +8,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import precomputation.index.rechable.TFlabelDataFormatter;
 import processor.sp.BuildMapService;
 import processor.sp.Yago2sInfoService;
 import spatialindex.spatialindex.IEntry;
 import spatialindex.spatialindex.Point;
 import utility.Global;
 import utility.MComparator;
-import precomputation.index.rechable.ReachableQueryService;
 import utility.LocalFileInfo;
 import utility.RandomNumGenerator;
 import utility.TimeUtility;
@@ -24,9 +22,11 @@ import entity.sp.PNode;
 import entity.sp.PTree;
 import entity.sp.MinHeap.DisPTree;
 import entity.sp.MinHeap.MLinkedNode;
-import precomputation.index.sp.IndexCoordService;
-import precomputation.index.sp.IndexNidKeywordsListService;
-import precomputation.index.sp.IndexNidKeywordsListService.KeywordIdDateList;
+import precomputation.rechable.ReachableQueryService;
+import precomputation.rechable.TFlabelDataFormatter;
+import precomputation.sp.IndexCoordService;
+import precomputation.sp.IndexNidKeywordsListService;
+import precomputation.sp.IndexNidKeywordsListService.KeywordIdDateList;
 
 /**
  * 

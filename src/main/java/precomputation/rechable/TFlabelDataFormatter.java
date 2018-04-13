@@ -1,7 +1,7 @@
 /**
  * 
  */
-package precomputation.index.rechable;
+package precomputation.rechable;
 
 import java.util.List;
 import java.util.Map;

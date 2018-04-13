@@ -29,7 +29,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
-import precomputation.index.freebase.IndexNodeMapService;
+import precomputation.freebase.IndexNodeMapService;
 
 public class LuceneTest011 {
 	

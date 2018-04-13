@@ -1,4 +1,4 @@
-package precomputation.index.sp;
+package precomputation.sp;
 
 import java.util.ArrayList;
 

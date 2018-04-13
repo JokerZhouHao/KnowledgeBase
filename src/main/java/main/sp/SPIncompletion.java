@@ -17,13 +17,13 @@ import entity.sp.PNode;
 import entity.sp.PTree;
 import entity.sp.MinHeap.DisPTree;
 import entity.sp.MinHeap.MLinkedNode;
+import precomputation.sp.IndexCoordService;
+import precomputation.sp.IndexNidKeywordsListService;
+import precomputation.sp.IndexNidKeywordsListService.KeywordIdDateList;
 import processor.sp.BuildMapService;
 import processor.sp.Yago2sInfoService;
 import spatialindex.spatialindex.IEntry;
 import spatialindex.spatialindex.Point;
-import precomputation.index.sp.IndexCoordService;
-import precomputation.index.sp.IndexNidKeywordsListService;
-import precomputation.index.sp.IndexNidKeywordsListService.KeywordIdDateList;
 
 /**
  * 

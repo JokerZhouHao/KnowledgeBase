@@ -2,7 +2,7 @@ package utility;
 
 import java.util.Comparator;
 
-import precomputation.index.sp.IndexNidKeywordsListService;
+import precomputation.sp.IndexNidKeywordsListService;
 
 /**
  * 

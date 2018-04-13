@@ -1,4 +1,4 @@
-package precomputation.index.rechable;
+package precomputation.rechable;
 
 import java.io.File;
 import java.util.Map;

@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import precomputation.index.freebase.IndexNodeMapService;
 import file.reader.ZipReader;
 import file.writer.ZipWriter;
+import precomputation.freebase.IndexNodeMapService;
 import utility.LocalFileInfo;
 import utility.MemoryInfo;
 import utility.TimeUtility;

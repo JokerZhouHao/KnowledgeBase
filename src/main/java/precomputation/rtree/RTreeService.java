@@ -1,4 +1,4 @@
-package precomputation.index.rtree;
+package precomputation.rtree;
 
 import spatialindex.rtree.RTree;
 import spatialindex.spatialindex.IEntry;

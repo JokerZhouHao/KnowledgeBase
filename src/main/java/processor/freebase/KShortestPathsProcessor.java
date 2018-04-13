@@ -25,7 +25,7 @@ import entity.freebase.AList.Path;
 import entity.freebase.AList.PolledPath;
 import entity.freebase.MMap.CanPathList;
 import entity.freebase.MMap.PathList;
-import precomputation.index.freebase.IndexNodeMapService;
+import precomputation.freebase.IndexNodeMapService;
 import utility.LocalFileInfo;
 import utility.MemoryInfo;
 import utility.TimeUtility;

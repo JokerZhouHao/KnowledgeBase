@@ -3,8 +3,8 @@ package main.freebase;
 import java.io.File;
 import java.util.Date;
 
-import precomputation.index.freebase.IndexNodeMapService;
 import file.reader.ZipReader;
+import precomputation.freebase.IndexNodeMapService;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
 

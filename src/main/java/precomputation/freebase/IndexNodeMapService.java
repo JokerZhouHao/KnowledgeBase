@@ -1,4 +1,4 @@
-package precomputation.index.freebase;
+package precomputation.freebase;
 
 import java.io.File;
 import java.io.IOException;
