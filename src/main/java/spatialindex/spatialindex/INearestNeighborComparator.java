@@ -1,3 +1,6 @@
+// Spatial Index Library
+//
+// Copyright (C) 2002  Navel Ltd.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -24,10 +27,9 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
-public interface IVisitor
+public interface INearestNeighborComparator
 {
-	public void visitNode(final INode n);
-	public void visitData(final IData d);
-} // IVisitor
+	public double getMinimumDistance(IShape query, IEntry e);
+} // INearestNeighborComparator

@@ -27,7 +27,7 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.storagemanager;
+package spatialindex.storagemanager;
 
 import java.util.*;
 import java.io.*;

@@ -27,21 +27,9 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.storagemanager;
+package spatialindex.spatialindex;
 
-import java.util.*;
-
-public class PropertySet
+public interface INodeCommand
 {
-	private HashMap m_propertySet = new HashMap();
-
-	public Object getProperty(String property)
-	{
-		return m_propertySet.get(property);
-	}
-
-	public void setProperty(String property, Object o)
-	{
-		m_propertySet.put(property, o);
-	}
-} // PropertySet
+	public void execute(INode n);
+} // INodeCommand

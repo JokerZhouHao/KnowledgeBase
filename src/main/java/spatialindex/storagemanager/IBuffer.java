@@ -27,45 +27,12 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.storagemanager;
+package spatialindex.storagemanager;
 
-import java.util.*;
-
-public class RandomEvictionsBuffer extends Buffer
+public interface IBuffer extends IStorageManager
 {
-	Random m_random = new Random();
+	public long getHits();
+	public void clear();
+	public void flush();
+} // IBuffer
 
-	public RandomEvictionsBuffer(IStorageManager sm, int capacity, boolean bWriteThrough)
-	{
-		super(sm, capacity, bWriteThrough);
-	}
-
-	void addEntry(int id, Entry e)
-	{
-//		assert m_buffer.size() <= m_capacity;
-
-		if (m_buffer.size() == m_capacity) removeEntry();
-		m_buffer.put(new Integer(id), e);
-	}
-
-	void removeEntry()
-	{
-		if (m_buffer.size() == 0) return;
-
-		int entry = m_random.nextInt(m_buffer.size());
-
-		Iterator it = m_buffer.entrySet().iterator();
-		for (int cIndex = 0; cIndex < entry - 1; cIndex++) it.next();
-
-		Map.Entry me = (Map.Entry) it.next();
-		Entry e = (Entry) me.getValue();
-		int id = ((Integer) me.getKey()).intValue();
-
-		if (e.m_bDirty)
-		{
-			m_storageManager.storeByteArray(id, e.m_data);
-		}
-
-		m_buffer.remove(new Integer(id));
-	}
-} // RandomEvictionsBuffer

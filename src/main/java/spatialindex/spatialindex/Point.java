@@ -27,7 +27,7 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
 public class Point implements IShape, Cloneable
 {

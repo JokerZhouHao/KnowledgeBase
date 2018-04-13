@@ -27,11 +27,11 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.rtree;
+package spatialindex.rtree;
 
 import java.util.ArrayList;
 
-import sil.spatialindex.IStatistics;
+import spatialindex.spatialindex.IStatistics;
 
 public class Statistics implements IStatistics, Cloneable
 {

@@ -1,6 +1,3 @@
-// Spatial Index Library
-//
-// Copyright (C) 2002  Navel Ltd.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -27,14 +24,12 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
-public interface INode extends IEntry
+public interface IStatistics
 {
-	public int getChildrenCount();
-	public int getChildIdentifier(int index) throws IndexOutOfBoundsException;
-	public IShape getChildShape(int index) throws IndexOutOfBoundsException;
-	public int getLevel();
-	public boolean isIndex();
-	public boolean isLeaf();
-} // INode
+	public long getReads();
+	public long getWrites();
+	public long getNumberOfNodes();
+	public long getNumberOfData();
+} // IStatistics

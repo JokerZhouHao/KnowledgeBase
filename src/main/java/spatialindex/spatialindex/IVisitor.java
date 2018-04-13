@@ -1,6 +1,3 @@
-// Spatial Index Library
-//
-// Copyright (C) 2002  Navel Ltd.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -27,9 +24,10 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
-public interface IData extends IEntry
+public interface IVisitor
 {
-	public byte[] getData();
-} // IData
+	public void visitNode(final INode n);
+	public void visitData(final IData d);
+} // IVisitor

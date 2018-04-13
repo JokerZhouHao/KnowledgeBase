@@ -1,11 +1,11 @@
 package precomputation.index.rtree;
 
-import sil.rtree.RTree;
-import sil.spatialindex.IEntry;
-import sil.spatialindex.Point;
-import sil.storagemanager.DiskStorageManager;
-import sil.storagemanager.IStorageManager;
-import sil.storagemanager.PropertySet;
+import spatialindex.rtree.RTree;
+import spatialindex.spatialindex.IEntry;
+import spatialindex.spatialindex.Point;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.PropertySet;
 import utility.Global;
 import file.reader.ZipReader;
 import utility.LocalFileInfo;
@@ -49,7 +49,7 @@ public class RTreeService extends RTree{
 		ps.setProperty("FileName", rTreeIndexPath);
 		ps.setProperty("PageSize", pagesize);
 		// 设置放文件的地方
-		IStorageManager diskfile = new sil.storagemanager.DiskStorageManager(ps);
+		IStorageManager diskfile = new spatialindex.storagemanager.DiskStorageManager(ps);
 		RTree rTree = new RTree(ps, diskfile);
 		
 		reader.readLine();

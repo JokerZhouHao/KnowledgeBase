@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import sil.spatialindex.IEntry;
-import sil.spatialindex.Point;
 import utility.MComparator;
 import utility.LocalFileInfo;
 import utility.RandomNumGenerator;
@@ -21,6 +19,8 @@ import entity.sp.MinHeap.DisPTree;
 import entity.sp.MinHeap.MLinkedNode;
 import processor.sp.BuildMapService;
 import processor.sp.Yago2sInfoService;
+import spatialindex.spatialindex.IEntry;
+import spatialindex.spatialindex.Point;
 import precomputation.index.sp.IndexCoordService;
 import precomputation.index.sp.IndexNidKeywordsListService;
 import precomputation.index.sp.IndexNidKeywordsListService.KeywordIdDateList;

@@ -27,16 +27,10 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
-public interface IShape
+public interface IEntry
 {
-	public boolean intersects(final IShape s);
-	public boolean contains(final IShape s);
-	public boolean touches(final IShape s);
-	public double[] getCenter();
-	public long getDimension();
-	public Region getMBR();
-	public double getArea();
-	public double getMinimumDistance(final IShape s);
-} // IShape
+	public int getIdentifier();
+	public IShape getShape();
+} // IEntry

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import org.apache.lucene.queryparser.flexible.standard.config.PointsConfigListener;
 
-import sil.rtree.RTree;
-import sil.spatialindex.IEntry;
-import sil.spatialindex.IShape;
-import sil.spatialindex.Point;
-import sil.storagemanager.MemoryStorageManager;
-import sil.storagemanager.PropertySet;
+import spatialindex.rtree.RTree;
+import spatialindex.spatialindex.IEntry;
+import spatialindex.spatialindex.IShape;
+import spatialindex.spatialindex.Point;
+import spatialindex.storagemanager.MemoryStorageManager;
+import spatialindex.storagemanager.PropertySet;
 import file.reader.ZipBase64Reader;
 import utility.LocalFileInfo;
 import utility.TimeUtility;

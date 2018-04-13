@@ -27,10 +27,21 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.storagemanager;
 
-public interface IEntry
+import java.util.*;
+
+public class PropertySet
 {
-	public int getIdentifier();
-	public IShape getShape();
-} // IEntry
+	private HashMap m_propertySet = new HashMap();
+
+	public Object getProperty(String property)
+	{
+		return m_propertySet.get(property);
+	}
+
+	public void setProperty(String property, Object o)
+	{
+		m_propertySet.put(property, o);
+	}
+} // PropertySet

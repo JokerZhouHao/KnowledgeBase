@@ -27,15 +27,15 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import sil.storagemanager.DiskStorageManager;
-import sil.storagemanager.IStorageManager;
-import sil.storagemanager.MemoryStorageManager;
-import sil.storagemanager.PropertySet;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.MemoryStorageManager;
+import spatialindex.storagemanager.PropertySet;
 
 public class SpatialIndex
 {

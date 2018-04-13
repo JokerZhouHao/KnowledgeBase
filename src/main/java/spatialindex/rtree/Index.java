@@ -27,17 +27,17 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.rtree;
+package spatialindex.rtree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Stack;
 
-import sil.spatialindex.SpatialIndex;
-import sil.storagemanager.PropertySet;
-import sil.spatialindex.Point;
-import sil.spatialindex.Region;
+import spatialindex.spatialindex.Point;
+import spatialindex.spatialindex.Region;
+import spatialindex.spatialindex.SpatialIndex;
+import spatialindex.storagemanager.PropertySet;
 
 public class Index extends Node
 {

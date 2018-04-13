@@ -1,6 +1,3 @@
-// Spatial Index Library
-//
-// Copyright (C) 2002  Navel Ltd.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -27,14 +24,9 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.storagemanager;
+package spatialindex.spatialindex;
 
-public interface IStorageManager
+public interface IQueryStrategy
 {
-	public static final int NewPage = -1;
-
-	public void flush();
-	public byte[] loadByteArray(final int id);
-	public int storeByteArray(final int id, final byte[] data);
-	public void deleteByteArray(final int id);
-} // IStorageManager
+	public void getNextEntry(IEntry e, int[] nextEntry, boolean[] hasNext);
+} // IQueryStrategy

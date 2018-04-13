@@ -29,7 +29,7 @@
 
 // Readers/Writers lock by Allen Holub
 
-package sil.spatialindex;
+package spatialindex.spatialindex;
 
 import java.util.*;
 

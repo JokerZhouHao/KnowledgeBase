@@ -27,9 +27,12 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.spatialindex;
+package spatialindex.storagemanager;
 
-public interface INodeCommand
+public class InvalidPageException extends RuntimeException
 {
-	public void execute(INode n);
-} // INodeCommand
+	public InvalidPageException(int id)
+	{
+		super("" + id);
+	}
+}

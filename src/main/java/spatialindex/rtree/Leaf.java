@@ -27,13 +27,13 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.rtree;
+package spatialindex.rtree;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
-import sil.spatialindex.Region;
-import sil.spatialindex.SpatialIndex;
+import spatialindex.spatialindex.Region;
+import spatialindex.spatialindex.SpatialIndex;
 
 public class Leaf extends Node
 {

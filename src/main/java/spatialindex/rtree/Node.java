@@ -27,7 +27,7 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.rtree;
+package spatialindex.rtree;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,10 +39,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Stack;
 
-import sil.spatialindex.INode;
-import sil.spatialindex.IShape;
-import sil.spatialindex.SpatialIndex;
-import sil.spatialindex.Region;
+import spatialindex.spatialindex.INode;
+import spatialindex.spatialindex.IShape;
+import spatialindex.spatialindex.Region;
+import spatialindex.spatialindex.SpatialIndex;
 
 abstract class Node implements INode
 {

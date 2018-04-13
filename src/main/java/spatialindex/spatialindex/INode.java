@@ -27,12 +27,14 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.storagemanager;
+package spatialindex.spatialindex;
 
-public class InvalidPageException extends RuntimeException
+public interface INode extends IEntry
 {
-	public InvalidPageException(int id)
-	{
-		super("" + id);
-	}
-}
+	public int getChildrenCount();
+	public int getChildIdentifier(int index) throws IndexOutOfBoundsException;
+	public IShape getChildShape(int index) throws IndexOutOfBoundsException;
+	public int getLevel();
+	public boolean isIndex();
+	public boolean isLeaf();
+} // INode

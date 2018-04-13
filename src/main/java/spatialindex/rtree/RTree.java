@@ -27,7 +27,7 @@
 //  Email:
 //    marioh@cs.ucr.edu
 
-package sil.rtree;
+package spatialindex.rtree;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,24 +40,24 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
 
-import sil.spatialindex.IData;
-import sil.spatialindex.IEntry;
-import sil.spatialindex.INearestNeighborComparator;
-import sil.spatialindex.INode;
-import sil.spatialindex.INodeCommand;
-import sil.spatialindex.IQueryStrategy;
-import sil.spatialindex.IShape;
-import sil.spatialindex.ISpatialIndex;
-import sil.spatialindex.IStatistics;
-import sil.spatialindex.IVisitor;
-import sil.spatialindex.Point;
-import sil.spatialindex.RWLock;
-import sil.spatialindex.Region;
-import sil.spatialindex.SpatialIndex;
-import sil.storagemanager.IStorageManager;
-import sil.storagemanager.InvalidPageException;
-import sil.storagemanager.MemoryStorageManager;
-import sil.storagemanager.PropertySet;
+import spatialindex.spatialindex.IData;
+import spatialindex.spatialindex.IEntry;
+import spatialindex.spatialindex.INearestNeighborComparator;
+import spatialindex.spatialindex.INode;
+import spatialindex.spatialindex.INodeCommand;
+import spatialindex.spatialindex.IQueryStrategy;
+import spatialindex.spatialindex.IShape;
+import spatialindex.spatialindex.ISpatialIndex;
+import spatialindex.spatialindex.IStatistics;
+import spatialindex.spatialindex.IVisitor;
+import spatialindex.spatialindex.Point;
+import spatialindex.spatialindex.RWLock;
+import spatialindex.spatialindex.Region;
+import spatialindex.spatialindex.SpatialIndex;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.InvalidPageException;
+import spatialindex.storagemanager.MemoryStorageManager;
+import spatialindex.storagemanager.PropertySet;
 import file.reader.GZIPReader;
 import file.reader.ZipReader;
 import utility.LocalFileInfo;
