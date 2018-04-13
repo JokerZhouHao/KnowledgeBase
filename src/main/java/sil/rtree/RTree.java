@@ -58,10 +58,10 @@ import sil.storagemanager.IStorageManager;
 import sil.storagemanager.InvalidPageException;
 import sil.storagemanager.MemoryStorageManager;
 import sil.storagemanager.PropertySet;
-import zhou.hao.service.GZIPReaderService;
-import zhou.hao.service.ZipReaderService;
-import zhou.hao.tools.LocalFileInfo;
-import zhou.hao.tools.TimeStr;
+import file.reader.GZIPReader;
+import file.reader.ZipReader;
+import utility.LocalFileInfo;
+import utility.TimeUtility;
 
 public class RTree implements ISpatialIndex
 {
