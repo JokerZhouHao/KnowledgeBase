@@ -8,9 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import invertedindex.InvertedIndexHash;
-import invertedindexmemory.InvertedIndex;
-import entity.sp.GraphByArray;;
+import entity.sp.GraphByArray;
+import entity.sp.SortedList.SortedListNode;
 import spatialindex.rtree.Node;
 import spatialindex.rtree.RTree;
 import spatialindex.storagemanager.IStorageManager;
@@ -34,8 +33,6 @@ public class RTreeWithGI extends RTree {
 	// this RTree: disk
 	// graph: in memory
 	protected GraphByArray graph;
-	// inverted index: disk based
-	InvertedIndexHash iindex;
 
 	public RTreeWithGI(PropertySet psRTree, IStorageManager sm) throws Exception {
 		super(psRTree, sm);
@@ -56,7 +53,7 @@ public class RTreeWithGI extends RTree {
 		return this.graph;
 	}
 
-	public void precomputeAlphaWN(InvertedIndex vidDocMap, double radius) throws Exception {
+	public void precomputeAlphaWN(NidToDateWidIndex nidToDateWidIndex, int radius) throws Exception {
 		/*
 		 * add all the leaf nodes of Rtree into graph for each keyword, read its
 		 * postinglist add the keyword into graph run Bellman-Ford algorithm to
@@ -73,7 +70,7 @@ public class RTreeWithGI extends RTree {
 		int[] count = new int[3];// numNodes and sumDocLength
 
 		long starttime = System.currentTimeMillis();
-		precomputeAlphaWN(this.m_rootID, vidDocMap, radius, writer, count);
+		precomputeAlphaWN(this.m_rootID, nidToDateWidIndex, radius, writer, count);
 		long endtime = System.currentTimeMillis();
 
 		writer.close();
@@ -90,56 +87,40 @@ public class RTreeWithGI extends RTree {
 	 * @param numNodes
 	 * @throws Exception
 	 */
-	private Map<Integer, Double> precomputeAlphaWN(int nodeid, InvertedIndex vidDocMap,
-			double radius, PrintWriter writer, int[] count) throws Exception {
+	private RadiusNeighborhood precomputeAlphaWN(int nodeid, NidToDateWidIndex nidToDateWidIndex,
+			int radius, PrintWriter writer, int[] count) throws Exception {
 		Node n = readNode(nodeid);
 		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
 		if (n.isLeaf()) {
 
-			Map<Integer, Double> leafAlphaWN = new HashMap<Integer, Double>();
+			RadiusNeighborhood leafRadiusWN = new RadiusNeighborhood(radius);
 			for (int child = 0; child < n.m_children; child++) {
 				// get and output the alpha document of places in the leaf node
 				int pid = n.m_pIdentifier[child];
 				count[2]++;
-				Map<Integer, Double> pidAlphaWN = graph.alphaRadiusOfVertex(pid, radius, vidDocMap);
-				this.outputAlphaWN(writer, pid, pidAlphaWN, count);
+				RadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
+				this.outputAlphaWN(writer, radius, pid, radiusWN, count);
 
 				// merge the alpha document of places to get the alpha document of the leaf node
-				mergeAlphaWN(leafAlphaWN, pidAlphaWN);
+				leafRadiusWN.merge(radiusWN);
 			}
-			this.outputAlphaWN(writer, (-n.getIdentifier() - 1), leafAlphaWN, count);
+			this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), leafRadiusWN, count);
 			count[0]++;
-			return leafAlphaWN;
+			return leafRadiusWN;
 
 		} else {
-			Map<Integer, Double> nodeAlphaWN = new HashMap<Integer, Double>();
+			RadiusNeighborhood nodeAlphaWN = new RadiusNeighborhood(radius);
 			int child;
 			for (child = 0; child < n.m_children; child++) {
-				Map<Integer, Double> childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
-						vidDocMap, radius, writer, count);
-				mergeAlphaWN(nodeAlphaWN, childAlphaWN);
+				RadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
+						nidToDateWidIndex, radius, writer, count);
+				if(this.m_rootID != n.getIdentifier())	nodeAlphaWN.merge(childAlphaWN);
 			}
-			this.outputAlphaWN(writer, (-n.getIdentifier() - 1), nodeAlphaWN, count);
+			if(this.m_rootID != n.getIdentifier()) {
+				this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), nodeAlphaWN, count);
+			}
 			count[0]++;
 			return nodeAlphaWN;
-		}
-	}
-
-	/**
-	 * @param resultAlphaWN
-	 * @param aAlphaWN
-	 */
-	public void mergeAlphaWN(Map<Integer, Double> resultAlphaWN, Map<Integer, Double> aAlphaWN) {
-		for (Entry<Integer, Double> entry : aAlphaWN.entrySet()) {
-			int kword = entry.getKey();
-			double gdist = entry.getValue();
-			if (resultAlphaWN.containsKey(kword)) {
-				if (resultAlphaWN.get(kword) > gdist) {
-					resultAlphaWN.put(kword, gdist);
-				}
-			} else {
-				resultAlphaWN.put(kword, gdist);
-			}
 		}
 	}
 
@@ -148,15 +129,23 @@ public class RTreeWithGI extends RTree {
 	 * @param n
 	 * @param alphaDocOfN
 	 */
-	private void outputAlphaWN(PrintWriter writer, int vid, Map<Integer, Double> alphaWN, int[] count) {
-		writer.print(vid + Global.delimiterSpace);
-		if (alphaWN != null && alphaWN.size() > 0) {
-			for (Entry<Integer, Double> entry : alphaWN.entrySet()) {
-				int kword = entry.getKey();
-				double gdist = entry.getValue();
-				writer.print(kword + Global.delimiterSpace + gdist + Global.delimiterSpace);
-				count[1]++;
+	private void outputAlphaWN(PrintWriter writer, int radius, int vid, RadiusNeighborhood radiusWN, int[] count) {
+		writer.print(vid + Global.delimiterLevel1);
+		SortedListNode p = null;
+		for(HashMap<Integer, SortedList> widToDateMap : radiusWN.getEachLayerWN()) {
+			if(null == widToDateMap || widToDateMap.isEmpty()) {
+				writer.print(Global.signEmptyLayer + Global.delimiterLayer);
 			}
+			for(Entry<Integer, SortedList> en : widToDateMap.entrySet()) {
+				writer.print(en.getKey() + Global.delimiterLevel2);
+				p = en.getValue().getHead();
+				while(null != p) {
+					writer.print(p.getValue() + Global.delimiterDate);
+					p = p.getNext();
+				}
+				writer.print(' ');
+			}
+			writer.print(Global.delimiterLayer);
 		}
 		writer.println();
 		writer.flush();

@@ -3,7 +3,7 @@
  */
 package precomputation.alpha;
 
-import entity.sp.InvertedIndex;
+import entity.sp.NidToDateWidIndex;
 import entity.sp.RTreeWithGI;
 import spatialindex.storagemanager.DiskStorageManager;
 import spatialindex.storagemanager.IBuffer;
@@ -26,10 +26,10 @@ public class AlphaWNPrecomputation {
 		}
 		
 		Utility.loadInitialConfig(args[0]);
-		double alpha_radius = Double.parseDouble(args[1]);
+//		double alpha_radius = Double.parseDouble(args[1]);
 		
 		PropertySet psRTree = new PropertySet();
-		String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 		psRTree.setProperty("FileName", treefile);
 		psRTree.setProperty("PageSize", Global.rtreePageSize);
 		psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
@@ -45,11 +45,10 @@ public class AlphaWNPrecomputation {
 		rgi.buildSimpleGraphInMemory();
 		
 		String vidDocFile = args[2];
-		InvertedIndex nidKeywordsMap = new InvertedIndex(vidDocFile);
+		NidToDateWidIndex nidToDateWidIndex = new NidToDateWidIndex(vidDocFile);
 		long start = System.currentTimeMillis();
-		rgi.precomputeAlphaWN(nidKeywordsMap, alpha_radius);
+		rgi.precomputeAlphaWN(nidToDateWidIndex, Global.radius);
 		long end = System.currentTimeMillis();
 		System.out.println("Revision Minutes: " + ((end - start) / 1000.0f) / 60.0f);
-		
 	}
 }

@@ -1055,7 +1055,6 @@ public class RTree implements ISpatialIndex
 		// there is no way to know how big a single node may become. The storage manager
 		// will use multiple pages per node if needed. Off course this will slow down performance.
 
-
 		IStorageManager diskfile = new DiskStorageManager(ps);
 
 		IBuffer file = new TreeLRUBuffer(diskfile, buffersize, false);
@@ -1145,107 +1144,107 @@ public class RTree implements ISpatialIndex
 	}
 	
 	// 写getNext方法
-		private Boolean hasInitGetNext = Boolean.FALSE;
-		private IShape  query = null;
-		private ArrayList<NNEntry> queue = new ArrayList();
-		private Node n = null;
-		private NNComparator nnc = null;
+	private Boolean hasInitGetNext = Boolean.FALSE;
+	private IShape  query = null;
+	private ArrayList<NNEntry> queue = new ArrayList();
+	private Node n = null;
+	private NNComparator nnc = null;
+	
+	public void initGetNext(final IShape query) {
+		 nnc = new NNComparator();
+		 this.query = query;
+		 queue = new ArrayList();
+		 n = readNode(m_rootID);
+		 queue.add(new NNEntry(n, 0.0));
+		 hasInitGetNext = Boolean.TRUE;
+	}
+	
+	public IEntry getNext() {
+		if (query.getDimension() != m_dimension) throw new IllegalArgumentException("nearestNeighborQuery: Shape has the wrong number of dimensions.");
 		
-		public void initGetNext(final IShape query) {
-			 nnc = new NNComparator();
-			 this.query = query;
-			 queue = new ArrayList();
-			 n = readNode(m_rootID);
-			 queue.add(new NNEntry(n, 0.0));
-			 hasInitGetNext = Boolean.TRUE;
-		}
+		if(!hasInitGetNext)	throw new IllegalArgumentException("please init getNext parameters ! ! !");
 		
-		public IEntry getNext() {
-			if (query.getDimension() != m_dimension) throw new IllegalArgumentException("nearestNeighborQuery: Shape has the wrong number of dimensions.");
-			
-			if(!hasInitGetNext)	throw new IllegalArgumentException("please init getNext parameters ! ! !");
-			
-			m_rwLock.read_lock();
+		m_rwLock.read_lock();
 
-			try
+		try
+		{
+			// I need a priority queue here. It turns out that TreeSet sorts unique keys only and since I am
+			// sorting according to distances, it is not assured that all distances will be unique. TreeMap
+			// also sorts unique keys. Thus, I am simulating a priority queue using an ArrayList and binarySearch.
+
+			while (queue.size() != 0)
 			{
-				// I need a priority queue here. It turns out that TreeSet sorts unique keys only and since I am
-				// sorting according to distances, it is not assured that all distances will be unique. TreeMap
-				// also sorts unique keys. Thus, I am simulating a priority queue using an ArrayList and binarySearch.
+				NNEntry first = (NNEntry) queue.remove(0);
 
-				while (queue.size() != 0)
+				if (first.m_pEntry instanceof Node)
 				{
-					NNEntry first = (NNEntry) queue.remove(0);
+					n = (Node) first.m_pEntry;
 
-					if (first.m_pEntry instanceof Node)
+					for (int cChild = 0; cChild < n.m_children; cChild++)
 					{
-						n = (Node) first.m_pEntry;
+						IEntry e;
 
-						for (int cChild = 0; cChild < n.m_children; cChild++)
+						if (n.m_level == 0)
 						{
-							IEntry e;
-
-							if (n.m_level == 0)
-							{
-								e = new Data(n.m_pData[cChild], n.m_pMBR[cChild], n.m_pIdentifier[cChild]);
-							}
-							else
-							{
-								e = (IEntry) readNode(n.m_pIdentifier[cChild]);
-							}
-
-							NNEntry e2 = new NNEntry(e, nnc.getMinimumDistance(query, e));
-
-							// Why don't I use a TreeSet here? See comment above...
-							int loc = Collections.binarySearch(queue, e2, new NNEntryComparator());
-							if (loc >= 0) queue.add(loc, e2);
-							else queue.add((-loc - 1), e2);
+							e = new Data(n.m_pData[cChild], n.m_pMBR[cChild], n.m_pIdentifier[cChild]);
 						}
-					}
-					else
-					{
-						// report all nearest neighbors with equal furthest distances.
-						// (neighbors can be more than k, if many happen to have the same
-						//  furthest distance).
-						return first.m_pEntry;
+						else
+						{
+							e = (IEntry) readNode(n.m_pIdentifier[cChild]);
+						}
+
+						NNEntry e2 = new NNEntry(e, nnc.getMinimumDistance(query, e));
+
+						// Why don't I use a TreeSet here? See comment above...
+						int loc = Collections.binarySearch(queue, e2, new NNEntryComparator());
+						if (loc >= 0) queue.add(loc, e2);
+						else queue.add((-loc - 1), e2);
 					}
 				}
+				else
+				{
+					// report all nearest neighbors with equal furthest distances.
+					// (neighbors can be more than k, if many happen to have the same
+					//  furthest distance).
+					return first.m_pEntry;
+				}
 			}
-			finally
-			{
-				m_rwLock.read_unlock();
-			}
-			hasInitGetNext = Boolean.FALSE;
-			return null;
+		}
+		finally
+		{
+			m_rwLock.read_unlock();
+		}
+		hasInitGetNext = Boolean.FALSE;
+		return null;
+	}
+		
+	// 主函数
+	public static void main(String[] args) throws Exception{
+		
+		if (args.length != 1)
+		{
+			System.err.println("Usage: runnable configFile");
+			System.exit(-1);
 		}
 		
-		// 主函数
-		public static void main(String[] args) throws Exception{
-			
-			if (args.length != 1)
-			{
-				System.err.println("Usage: runnable configFile");
-				System.exit(-1);
-			}
-			
-			Utility.loadInitialConfig(args[0]);
-			
-			String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
-			String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
-			int fanout = Global.rtreeFanout;
-			int buffersize = Global.rtreeBufferSize;
-			int pagesize = Global.rtreePageSize;
-			
-			build(inputfile, treefile, fanout, buffersize, pagesize);
-			
-			double[] pCoord = new double[2];
-			pCoord[0] = 3;
-			pCoord[1] = 2;
+		Utility.loadInitialConfig(args[0]);
+		
+		String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
+		String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		int fanout = Global.rtreeFanout;
+		int buffersize = Global.rtreeBufferSize;
+		int pagesize = Global.rtreePageSize;
+		
+		build(inputfile, treefile, fanout, buffersize, pagesize);
+		
+		double[] pCoord = new double[2];
+		pCoord[0] = 3;
+		pCoord[1] = 2;
 //			IEntry ie = null;
 //			rTree.initGetNext(new Point(pCoord));
 //			while(null != (ie = rTree.getNext())) {
 //				System.out.print(ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
 //			}
-		}
+	}
 	
 }

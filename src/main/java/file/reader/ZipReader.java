@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
@@ -27,7 +28,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
 import utility.LocalFileInfo;
 
-public class ZipReader {
+public class ZipReader{
 	private String filePath = null;
 	private String entityName = null;
 	private ZipFile zipFile = null;

@@ -4,9 +4,15 @@ import spatialindex.rtree.RTree;
 import spatialindex.spatialindex.IEntry;
 import spatialindex.spatialindex.Point;
 import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IBuffer;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.PropertySet;
+import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 import file.reader.ZipReader;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
@@ -16,82 +22,37 @@ import utility.TimeUtility;
  * @author Monica
  *
  */
-public class RTreeService extends RTree{
+public class RTreeService{
 	
-	public RTreeService(PropertySet ps, IStorageManager sm) {
-		super(ps, sm);
+	/**
+	 * 创建rTree索引
+	 * @throws Exception
+	 */
+	public static void build() throws Exception{
+		String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
+		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		int fanout = Global.rtreeFanout;
+		int buffersize = Global.rtreeBufferSize;
+		int pagesize = Global.rtreePageSize;
+		RTree.build(inputfile, treefile, fanout, buffersize, pagesize);
 	}
 	
 	/**
-	 * 创建索引
-	 * @param zipPath
-	 * @param entryName
-	 * @param fanout
-	 * @param rTreeIndexPath
-	 * @param pagesize
+	 * 测试getNext方法
 	 * @throws Exception
 	 */
-	public void build(String zipPath, String entryName, int fanout, String rTreeIndexPath, int pagesize) throws Exception{
-		long startTime = System.currentTimeMillis();
-		System.out.println("> 开始创建" + zipPath + "的rTree索引 . . . ");
+	public static void testGetNext() throws Exception{
+		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 		
-		ZipReader reader = new ZipReader(zipPath, entryName);
-		int nodeId = 0, i, k;
-		String[] tempStr = null;
-		String lineStr = null;
-		
-		// 设置ps
-		PropertySet ps = new PropertySet();
-		ps.setProperty("Overwrite", true);
-		ps.setProperty("IndexCapacity", fanout);
-		ps.setProperty("LeafCapacity", fanout);
-		ps.setProperty("FileName", rTreeIndexPath);
-		ps.setProperty("PageSize", pagesize);
-		// 设置放文件的地方
-		IStorageManager diskfile = new spatialindex.storagemanager.DiskStorageManager(ps);
-		RTree rTree = new RTree(ps, diskfile);
-		
-		reader.readLine();
-		while(null != (lineStr = reader.readLine())) {
-			double[] coord = new double[2];
-			k = lineStr.indexOf(':');
-			nodeId = Integer.parseInt(lineStr.substring(0, k));
-			tempStr = lineStr.substring(k+2, lineStr.length()).split(" ");
-			for(i=0; i<2; i++)
-				coord[i] = Double.parseDouble(tempStr[i]);
-			rTree.insertData(null, new Point(coord), nodeId);
-//			rTree.nodeIdMap.put(nodeId, coord);
-		}
-		
-		boolean ret = rTree.isIndexValid();
-		if (ret == false)
-			System.err.println("Structure is INVALID!");
-
-		rTree.flush();
-		
-		System.out.println("> ending创建" + zipPath + "的rTree索引. 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
-	}
-	
-	
-	
-	public static void main(String[] args) throws Exception{
-		RTreeService ser = new RTreeService(null, null);
-		
-		int fanout = 5;
-		String rTreeIndexPath = LocalFileInfo.getDataSetPath() + "testIndex/rtree/";
-		int pageSize = 4096;
-		// 创建索引
-		ser.build(LocalFileInfo.getDataSetPath() + "test.zip", "Coord", fanout, 
-				rTreeIndexPath, pageSize);
-		
-		// 读取索引
 		PropertySet psRTree = new PropertySet();
-		psRTree.setProperty("FileName", rTreeIndexPath);
-		psRTree.setProperty("PageSize", pageSize);
-		psRTree.setProperty("fanout", fanout);
+		psRTree.setProperty("FileName", treefile);
+		psRTree.setProperty("PageSize", Global.rtreePageSize);
+		psRTree.setProperty("fanout", Global.rtreeFanout);
 		psRTree.setProperty("IndexIdentifier", 1);
+		
 		IStorageManager diskfile = new DiskStorageManager(psRTree);
-		RTree rTree = new RTree(psRTree, diskfile);
+		IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+		RTree rTree = new RTree(psRTree, file);
 		
 		double[] pCoord = new double[2];
 		pCoord[0] = 3;
@@ -102,5 +63,10 @@ public class RTreeService extends RTree{
 		while(null != (ie = rTree.getNext())) {
 			System.out.print((++num) + ": " + ie.getIdentifier() + " : ( " + ie.getShape().getCenter()[0] + ", " + ie.getShape().getCenter()[1] + " )\n");
 		}
+	}
+	
+	public static void main(String[] args) throws Exception{
+//		RTreeService.build();
+		RTreeService.testGetNext();
 	}
 }

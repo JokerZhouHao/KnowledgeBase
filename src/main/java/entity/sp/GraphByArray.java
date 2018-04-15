@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import invertedindexmemory.InvertedIndex;
+import entity.sp.NidToDateWidIndex;
+import entity.sp.NidToDateWidIndex.DateWid;
 import queryindex.VertexQwordsMap;
 import utility.Global;
 import utility.Utility;
@@ -48,9 +49,9 @@ public class GraphByArray {
 	/**
 	 * compute the alpha doc of vertex in BFS mode.
 	 * */
-	public Map<Integer, Double> alphaRadiusOfVertex(int vid, double radius, InvertedIndex idKeywordsMap)
+	public RadiusNeighborhood alphaRadiusOfVertex(int vid, Integer radius, NidToDateWidIndex nidToDateWidIndex)
 			throws IOException {
-		Map<Integer, Double> vid2KwordsSPD = new HashMap<Integer, Double>();
+		RadiusNeighborhood radiusWN = new RadiusNeighborhood(radius);
 		Queue<Integer> queue = new LinkedList<Integer>();
 		int source = vid;
 		preceder[vid] = -1;
@@ -61,23 +62,13 @@ public class GraphByArray {
 		while (!queue.isEmpty()) {
 			int vertex = queue.poll();
 
-			if ((double) distance2Source[vertex] > radius) {
-				break;
-			}
+			DateWid containedDateWid = nidToDateWidIndex.getDateWid(vertex);
 
-			List<Integer> containedKwords = idKeywordsMap.readPostinglist(vertex);
-
-			if (containedKwords == null) {
+			if (containedDateWid == null) {
 				continue;
 			}
-
-			for (int i = 0; i < containedKwords.size(); i++) {
-				int kword = containedKwords.get(i);
-				// int kword = ((IntKey) keydatai.key).key;
-				if (!vid2KwordsSPD.containsKey(kword)) {
-					vid2KwordsSPD.put(kword, (double) distance2Source[vertex]);
-				}
-			}
+			
+			radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
 
 			// add the unvisited adj vertices of vertex into queue only
 			// if the unvisited adj vertices with distance <= radius
@@ -101,7 +92,7 @@ public class GraphByArray {
 			}
 		}
 		// this.reset();
-		return vid2KwordsSPD;
+		return radiusWN;
 	}
 
 	/**

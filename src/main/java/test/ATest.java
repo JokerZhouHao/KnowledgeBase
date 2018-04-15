@@ -71,6 +71,38 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		
+		HashMap<Integer, Integer> ma = new HashMap<>();
+		ma.put(2, 2);
+		ma.put(1, 1);
+		ma.put(3, 3);
+		for(Entry<Integer, Integer> en : ma.entrySet()) {
+			if(en.getValue() == 2)	ma.remove(2);
+			System.out.println(en.getKey() + " " + en.getValue());
+		}
+		
+		
+		
+		System.out.println(23 + "sss");
+		
+		String st1 = "1 2 ";
+		System.out.println(st1.split(" ").length);
+		
+		String st = "1,12@12@ 2,23@24@";
+		String arr1[] = null;
+		String arr2[] = null;
+		String arr3[] = null;
+		arr1 = st.split(" ");
+		for(String s1 : arr1) {
+			arr2 = s1.split(",");
+			System.out.print(arr2[0] + " ");
+			arr3 = arr2[1].split("@");
+			for(String s3 : arr3) {
+				System.out.print(s3 + ",");
+			}
+			System.out.println();
+		}
+		
 //		TreeMap<Integer, Integer> tM = new TreeMap<>(new MComparator<Integer>());
 //		tM.put(1, 1);
 //		tM.put(2, 2);

@@ -95,7 +95,7 @@ public class Utility<T1, T2> {
 			else if (splits[0].compareTo("inputDirectoryPath") == 0) {
 				Global.inputDirectoryPath = splits[1];
 			} else if (splits[0].compareTo("nidKeywordsListMapFile") == 0) {
-				Global.nidKeywordsListMapFile = splits[1];
+				Global.nodeIdKeywordListOnIntDateFile = splits[1];
 			} else if (splits[0].compareTo("invertedIndexFile") == 0) {
 				Global.invertedIndexFile = splits[1];
 			} else if (splits[0].compareTo("pidCoordFile") == 0) {
