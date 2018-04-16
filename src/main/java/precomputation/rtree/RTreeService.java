@@ -66,7 +66,7 @@ public class RTreeService{
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		RTreeService.build();
-		RTreeService.testGetNext();
+		RTreeService.build();
+//		RTreeService.testGetNext();
 	}
 }

@@ -51,7 +51,7 @@ public class GraphByArray {
 	 * */
 	public RadiusNeighborhood alphaRadiusOfVertex(int vid, Integer radius, NidToDateWidIndex nidToDateWidIndex)
 			throws IOException {
-		RadiusNeighborhood radiusWN = new RadiusNeighborhood(radius);
+		RadiusNeighborhood radiusWN = new RadiusNeighborhood(Boolean.TRUE, radius);
 		Queue<Integer> queue = new LinkedList<Integer>();
 		int source = vid;
 		preceder[vid] = -1;
@@ -61,14 +61,6 @@ public class GraphByArray {
 
 		while (!queue.isEmpty()) {
 			int vertex = queue.poll();
-
-			DateWid containedDateWid = nidToDateWidIndex.getDateWid(vertex);
-
-			if (containedDateWid == null) {
-				continue;
-			}
-			
-			radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
 
 			// add the unvisited adj vertices of vertex into queue only
 			// if the unvisited adj vertices with distance <= radius
@@ -90,6 +82,14 @@ public class GraphByArray {
 					}
 				}
 			}
+			
+			DateWid containedDateWid = nidToDateWidIndex.getDateWid(vertex);
+
+			if (containedDateWid == null) {
+				continue;
+			}
+			
+			radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
 		}
 		// this.reset();
 		return radiusWN;

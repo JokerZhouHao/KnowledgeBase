@@ -51,11 +51,15 @@ public class Global {
 	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
 	public static String rTreePath = outputDirectoryPath + "rtree" + File.separator;
 	public static String nidToDateWidFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
-	public static String alphaWN = "alphaWN";
+	public static String placeWN = "placeWN";
+	public static String alphaPN = "alphaPN";
 	public static String alphaIindexFile = null;
 	public static int alphaIindexRTNodeBufferSize = -1;
 	public static String dagFile = "DAG";
 	public static String tfindexDirectoryPath = null;
+	
+	/*	index path	*/
+	public static String indexWidToPlaceNeighborhood = "wid_pn" + File.separator;
 	
 	/*   flag      */
 	public static String rtreeFlag = ".rtree.";
@@ -74,7 +78,7 @@ public class Global {
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
 	public static int rtreePageSize = 16384;
-	public static int rtreeFanout = 12;
+	public static int rtreeFanout = 5;
 	public static int iindexBufferSize = -1;
 	public static int iindexPageSize = -1;
 	public static boolean iindexIsCreate = false;

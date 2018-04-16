@@ -5,6 +5,7 @@ package entity.sp;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,8 +13,11 @@ import entity.sp.GraphByArray;
 import entity.sp.SortedList.SortedListNode;
 import spatialindex.rtree.Node;
 import spatialindex.rtree.RTree;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IBuffer;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.PropertySet;
+import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
 
 /**
@@ -61,7 +65,7 @@ public class RTreeWithGI extends RTree {
 		 * result remove the keyword from graph remove all the leaf nodes of
 		 * Rtree from graph
 		 */
-		PrintWriter writer = new PrintWriter(Global.outputDirectoryPath + Global.alphaWN + Global.rtreeFlag
+		PrintWriter writer = new PrintWriter(Global.outputDirectoryPath + Global.placeWN + Global.rtreeFlag
 				+ Global.rtreeFanout + "." + radius + Global.dataVersion);
 		PrintWriter writerrt = new PrintWriter(Global.outputDirectoryPath + "alphaDocCompTime"
 				+ Global.rtreeFlag + Global.rtreeFanout + "." + radius + Global.rtreeFanout
@@ -93,7 +97,7 @@ public class RTreeWithGI extends RTree {
 		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
 		if (n.isLeaf()) {
 
-			RadiusNeighborhood leafRadiusWN = new RadiusNeighborhood(radius);
+			RadiusNeighborhood leafRadiusWN = new RadiusNeighborhood(Boolean.TRUE, radius);
 			for (int child = 0; child < n.m_children; child++) {
 				// get and output the alpha document of places in the leaf node
 				int pid = n.m_pIdentifier[child];
@@ -109,16 +113,18 @@ public class RTreeWithGI extends RTree {
 			return leafRadiusWN;
 
 		} else {
-			RadiusNeighborhood nodeAlphaWN = new RadiusNeighborhood(radius);
+			RadiusNeighborhood nodeAlphaWN = new RadiusNeighborhood(Boolean.TRUE, radius);
 			int child;
 			for (child = 0; child < n.m_children; child++) {
 				RadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
 						nidToDateWidIndex, radius, writer, count);
 				if(this.m_rootID != n.getIdentifier())	nodeAlphaWN.merge(childAlphaWN);
+//				nodeAlphaWN.merge(childAlphaWN);
 			}
 			if(this.m_rootID != n.getIdentifier()) {
 				this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), nodeAlphaWN, count);
 			}
+//			this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), nodeAlphaWN, count);
 			count[0]++;
 			return nodeAlphaWN;
 		}
@@ -135,6 +141,7 @@ public class RTreeWithGI extends RTree {
 		for(HashMap<Integer, SortedList> widToDateMap : radiusWN.getEachLayerWN()) {
 			if(null == widToDateMap || widToDateMap.isEmpty()) {
 				writer.print(Global.signEmptyLayer + Global.delimiterLayer);
+				continue;
 			}
 			for(Entry<Integer, SortedList> en : widToDateMap.entrySet()) {
 				writer.print(en.getKey() + Global.delimiterLevel2);
@@ -149,5 +156,66 @@ public class RTreeWithGI extends RTree {
 		}
 		writer.println();
 		writer.flush();
+	}
+	
+	public void showRTreeStruct() {
+		System.out.println(m_rootID);
+		Node n = readNode(m_rootID);
+		LinkedList<Node> queue = new LinkedList<>();
+		LinkedList<Integer> nList = new LinkedList<>();
+		queue.add(n);
+		queue.add(null);
+		int child = 0;
+		while(!queue.isEmpty()) {
+			n = queue.poll();
+			if(null == n) {
+				System.out.println();
+				if(queue.isEmpty())	break;
+				else {
+					queue.add(null);
+					continue;
+				}
+			}
+			else System.out.print(n.m_identifier + " ");
+			if(!n.isLeaf()) {
+				for (child = 0; child < n.m_children; child++) {
+					queue.add(readNode(n.m_pIdentifier[child]));
+				}
+			} else {
+				for (child = 0; child < n.m_children; child++) {
+					nList.add(n.m_pIdentifier[child]);
+				}
+			}
+		}
+		for(int in : nList) {
+			System.out.print(in + " ");
+		}
+		System.out.println();
+	}
+	
+	
+	public static void main(String[] args) throws Exception{
+		NidToDateWidIndex idx = new NidToDateWidIndex(Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile);
+		PropertySet psRTree = new PropertySet();
+		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		psRTree.setProperty("FileName", treefile);
+		psRTree.setProperty("PageSize", Global.rtreePageSize);
+		psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
+		psRTree.setProperty("fanout", Global.rtreeFanout);
+		
+		IStorageManager diskfile = new DiskStorageManager(psRTree);
+		IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+		
+		Integer i = new Integer(1); 
+		psRTree.setProperty("IndexIdentifier", i);
+		
+		RTreeWithGI rgi = new RTreeWithGI(psRTree, file);
+		rgi.buildSimpleGraphInMemory();
+		PrintWriter writer = new PrintWriter(Global.outputDirectoryPath + Global.placeWN + Global.rtreeFlag
+				+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion);
+//		RadiusNeighborhood radiusWN = rgi.graph.alphaRadiusOfVertex(2, Global.radius, idx);
+//		rgi.outputAlphaWN(writer, Global.radius, 3, radiusWN, new int[3]);
+		rgi.showRTreeStruct();
+//		writer.close();
 	}
 }

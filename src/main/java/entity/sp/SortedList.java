@@ -116,6 +116,9 @@ public class SortedList {
 				p2 = p2.next;
 			}
 		}
+		if(null != sp1) {
+			p1.next = sp1;
+		}
 		return Boolean.TRUE;
 	}
 	
@@ -142,21 +145,22 @@ public class SortedList {
 	public static void main(String[] args) {
 		SortedList sdl1 = new SortedList();
 		SortedList sdl2 = new SortedList();
-		SortedListNode dn = sdl1.add(3);
-		dn = sdl1.add(dn, 4);
-		dn = sdl1.add(dn, 9);
-		dn = sdl1.add(dn, 13);
+		SortedListNode dn = sdl1.add(23);
+		dn = sdl1.add(dn, 67);
+//		dn = sdl1.add(dn, 9);
+//		dn = sdl1.add(dn, 13);
 //		System.out.println(sdl1);
 		
-		dn = sdl2.add(10);
-		dn = sdl2.add(dn, 12);
+		dn = sdl2.add(17611);
+		dn = sdl2.add(dn, 17614);
+		dn = sdl2.add(dn, 17617);
 //		dn = sdl2.add(dn, 4);
 //		dn = sdl2.add(dn, 5);
 //		dn = sdl2.add(dn, 9);
 //		dn = sdl2.add(dn, 10);
 //		dn = sdl2.add(dn, 13);
 //		sdl1.removeIntersection(sdl2);
-		sdl1.removeIntersection(sdl2);
+		sdl1.merge(sdl2);
 		System.out.println(sdl1);
 	}
 	

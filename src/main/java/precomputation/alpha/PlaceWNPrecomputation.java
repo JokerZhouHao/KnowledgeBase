@@ -17,15 +17,15 @@ import utility.Utility;
  * Compute the alpha Word Neighborhoods of all the places and all the Rtree nodes together
  * @author jmshi
  */
-public class AlphaWNPrecomputation {
+public class PlaceWNPrecomputation {
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 3) {
-			System.out.println("usage: runnable configFile alpha_radius nidKeywordsListFile");
-			System.exit(-1);
-		}
+//		if (args.length != 3) {
+//			System.out.println("usage: runnable configFile alpha_radius nidKeywordsListFile");
+//			System.exit(-1);
+//		}
 		
-		Utility.loadInitialConfig(args[0]);
+//		Utility.loadInitialConfig(args[0]);
 //		double alpha_radius = Double.parseDouble(args[1]);
 		
 		PropertySet psRTree = new PropertySet();
@@ -44,8 +44,8 @@ public class AlphaWNPrecomputation {
 		RTreeWithGI rgi = new RTreeWithGI(psRTree, file);
 		rgi.buildSimpleGraphInMemory();
 		
-		String vidDocFile = args[2];
-		NidToDateWidIndex nidToDateWidIndex = new NidToDateWidIndex(vidDocFile);
+		String nidToDateWidFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		NidToDateWidIndex nidToDateWidIndex = new NidToDateWidIndex(nidToDateWidFile);
 		long start = System.currentTimeMillis();
 		rgi.precomputeAlphaWN(nidToDateWidIndex, Global.radius);
 		long end = System.currentTimeMillis();

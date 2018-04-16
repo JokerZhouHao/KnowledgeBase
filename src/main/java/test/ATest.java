@@ -72,6 +72,9 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		
+		String st1 = " 1 2 ";
+		System.out.println(st1.split(" ").length);
+		
 		HashMap<Integer, Integer> ma = new HashMap<>();
 		ma.put(2, 2);
 		ma.put(1, 1);
@@ -85,8 +88,7 @@ public class ATest {
 		
 		System.out.println(23 + "sss");
 		
-		String st1 = "1 2 ";
-		System.out.println(st1.split(" ").length);
+		
 		
 		String st = "1,12@12@ 2,23@24@";
 		String arr1[] = null;

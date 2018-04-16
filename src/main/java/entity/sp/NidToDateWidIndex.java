@@ -44,6 +44,7 @@ public class NidToDateWidIndex {
 		}
 		
 		private void format() {
+			if(null == dateWidStr)	return;
 			dateList = new SortedList();
 			widList = new ArrayList<Integer>();
 			
@@ -66,18 +67,26 @@ public class NidToDateWidIndex {
 		}
 		
 		public SortedList getDateList() {
-			return dateList;
+			if(null == dateList)	format();
+			SortedList sl = new SortedList();
+			SortedListNode slNd = null;
+			SortedListNode nd = dateList.getHead();
+			slNd = sl.add(nd.getValue());
+			nd = nd.getNext();
+			while(null != nd) {
+				sl.add(slNd, nd.getValue());
+				nd = nd.getNext();
+			}
+			return sl;
 		}
 
 		public ArrayList<Integer> getWidList(){
-			if(null == widList) {
-				format();
-			}
+			if(null == widList)	format();
 			return widList;
 		}
 		
 		public void display() {
-			if(null == dateList)	format();
+			if(null != dateWidStr)	format();
 			System.out.print("dates: " + dateList);
 			
 			System.out.print("wids:");

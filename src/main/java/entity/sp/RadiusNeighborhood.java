@@ -13,12 +13,13 @@ import utility.Global;
  *
  */
 public class RadiusNeighborhood {
-	private HashMap<Integer, Integer> firstAppearWordMap = new HashMap<>();
+	private HashMap<Integer, Integer> firstAppearWordMap = null;
 	
 	private HashMap<Integer, SortedList>[] eachLayerWN = null;
 	
-	public RadiusNeighborhood(int radius) {
-		eachLayerWN = new HashMap[radius];
+	public RadiusNeighborhood(boolean needRecordMap, int radius) {
+		if(needRecordMap)	firstAppearWordMap = new HashMap<>();
+		eachLayerWN = new HashMap[radius + 1];
 	}
 	
 	/**
@@ -29,32 +30,33 @@ public class RadiusNeighborhood {
 	public void addDateWid(int layer, DateWid dateWid) {
 		Integer i = null;
 		SortedList tempList = null;
+		SortedList dateList = dateWid.getDateList();
 		HashMap<Integer, SortedList> tempMap = null;
 		for(int wid : dateWid.getWidList()) {
 			if(null == (i = firstAppearWordMap.get(wid))) {
 				if(null == (tempMap = eachLayerWN[layer]))
 					tempMap = eachLayerWN[layer] = new HashMap<>();
-				tempMap.put(wid, dateWid.getDateList());
+				tempMap.put(wid, dateList);
 				firstAppearWordMap.put(wid, layer);
 			} else {
 				// 处理在i--layer层出现的wid
 				for(; i < layer; i++) {
 					if(null != (tempMap = eachLayerWN[i]) && null != (tempList = tempMap.get(wid))) {
-						if(null == dateWid.getDateList().removeIntersection(tempList)) {
+						if(null == dateList.removeIntersection(tempList)) {
 							// 当前添加的wid的dates在第layer层上面几层全部出现过
 							break;
 						}
 					}
 				}
-				if(0 != dateWid.getDateList().getSize()) {
+				if(0 != dateList.getSize()) {
 					// 处理剩下的wid中没在第layer层上面几层出现过的dates
 					if(null == (tempMap = eachLayerWN[layer])) {
 						tempMap = eachLayerWN[layer] = new HashMap<>();
 					}
 					if(null == (tempList = tempMap.get(wid))) {
-						tempMap.put(wid, dateWid.getDateList());
+						tempMap.put(wid, dateList);
 					} else {
-						tempList.merge(dateWid.getDateList());
+						tempList.merge(dateList);
 					}
 				}
 			}
@@ -119,6 +121,11 @@ public class RadiusNeighborhood {
 		}
 	}
 	
+	public void clear() {
+		for(HashMap<Integer, SortedList> hm : eachLayerWN) {
+			if(null != hm)	hm.clear();
+		}
+	}
 	
 	public HashMap<Integer, SortedList>[] getEachLayerWN() {
 		return eachLayerWN;
