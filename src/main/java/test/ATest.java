@@ -72,38 +72,52 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		
-		String st1 = " 1 2 ";
-		System.out.println(st1.split(" ").length);
-		
-		HashMap<Integer, Integer> ma = new HashMap<>();
-		ma.put(2, 2);
-		ma.put(1, 1);
-		ma.put(3, 3);
-		for(Entry<Integer, Integer> en : ma.entrySet()) {
-			if(en.getValue() == 2)	ma.remove(2);
-			System.out.println(en.getKey() + " " + en.getValue());
+		ArrayList<Integer> li = new ArrayList<>();
+		li.add(2);
+		li.add(9);
+		li.add(5);
+		Set<Integer> set = new TreeSet<Integer>(li);;
+		set.remove(2);
+		for(Integer in : set) {
+			System.out.println(in);
 		}
 		
+//		Integer in = new Integer(5);
+//		Integer in1 = 5;
+//		System.out.println();
 		
-		
-		System.out.println(23 + "sss");
-		
-		
-		
-		String st = "1,12@12@ 2,23@24@";
-		String arr1[] = null;
-		String arr2[] = null;
-		String arr3[] = null;
-		arr1 = st.split(" ");
-		for(String s1 : arr1) {
-			arr2 = s1.split(",");
-			System.out.print(arr2[0] + " ");
-			arr3 = arr2[1].split("@");
-			for(String s3 : arr3) {
-				System.out.print(s3 + ",");
-			}
-			System.out.println();
-		}
+//		String st1 = " 1 2 ";
+//		System.out.println(st1.split(" ").length);
+//		
+//		HashMap<Integer, Integer> ma = new HashMap<>();
+//		ma.put(2, 2);
+//		ma.put(1, 1);
+//		ma.put(3, 3);
+//		for(Entry<Integer, Integer> en : ma.entrySet()) {
+//			if(en.getValue() == 2)	ma.remove(2);
+//			System.out.println(en.getKey() + " " + en.getValue());
+//		}
+//		
+//		
+//		
+//		System.out.println(23 + "sss");
+//		
+//		
+//		
+//		String st = "1,12@12@ 2,23@24@";
+//		String arr1[] = null;
+//		String arr2[] = null;
+//		String arr3[] = null;
+//		arr1 = st.split(" ");
+//		for(String s1 : arr1) {
+//			arr2 = s1.split(",");
+//			System.out.print(arr2[0] + " ");
+//			arr3 = arr2[1].split("@");
+//			for(String s3 : arr3) {
+//				System.out.print(s3 + ",");
+//			}
+//			System.out.println();
+//		}
 		
 //		TreeMap<Integer, Integer> tM = new TreeMap<>(new MComparator<Integer>());
 //		tM.put(1, 1);
@@ -125,12 +139,12 @@ public class ATest {
 //		Date date = df.parse("2018-1-1");
 //		System.out.println(date.getTime()/86400000);
 		
-		ArrayList<Integer> al = new ArrayList<>();
-		al.add(10);
-		al.add(23);
-		al.add(40);
-		al.add(50);
-		System.out.println(Collections.binarySearch(al, 20));
+//		ArrayList<Integer> al = new ArrayList<>();
+//		al.add(10);
+//		al.add(23);
+//		al.add(40);
+//		al.add(50);
+//		System.out.println(Collections.binarySearch(al, 20));
 //		System.out.println(Integer.parseInt("-12323"));
 		
 		

@@ -59,7 +59,11 @@ public class Global {
 	public static String tfindexDirectoryPath = null;
 	
 	/*	index path	*/
+	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
+	public static String indexWIdDate = "wid_date" + File.separator;
+	public static String indexTFLabel = "tf-label" + File.separator;
 	public static String indexWidToPlaceNeighborhood = "wid_pn" + File.separator;
+	public static String indexWidPN = "wid_pn" + File.separator;
 	
 	/*   flag      */
 	public static String rtreeFlag = ".rtree.";

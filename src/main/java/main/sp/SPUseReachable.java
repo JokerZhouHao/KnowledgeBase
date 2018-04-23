@@ -109,27 +109,6 @@ public class SPUseReachable {
 
 	}
 	
-	// 计算与所给时间最小的日期差
-	private int getMinDateSpan(int curDate, ArrayList<Integer> dateList) {
-		int reIndex = Collections.binarySearch(dateList, curDate);
-		if(0 <= reIndex) // 存在相等的日期
-			return 1;
-		else {
-			reIndex = -reIndex;
-			if(0 < reIndex-1 && reIndex-1 < dateList.size()) {	// 当前日期在所有日期中间
-				if(curDate - dateList.get(reIndex -1) < dateList.get(reIndex) - curDate)
-					return curDate - dateList.get(reIndex -1) + 1;
-				else
-					return dateList.get(reIndex)-curDate + 1;
-			} else if(reIndex == dateList.size() + 1) {	// 当前日期晚于于当前所有日期
-				return curDate - dateList.get(dateList.size() -1) + 1;
-			} else {	// 当前时间早于所有时间
-				return dateList.get(0) - curDate + 1;
-			}
-		}
-	}
-		
-	
 	// bsp算法实现
 	public MinHeap bsp(int k, double[] pCoords, ArrayList<Integer> wordIdList, Date curDate){
 		
@@ -139,7 +118,7 @@ public class SPUseReachable {
 		if(!hasInit)  this.init();
 		
 		// 记录结果
-		MinHeap minHeap = new MinHeap();;
+		MinHeap minHeap = new MinHeap();
 		
 		// 排序wordIdList
 		ArrayList<Integer> sortedWordList = new ArrayList<>(wordIdList);
@@ -175,7 +154,7 @@ public class SPUseReachable {
 			for(String st : dateArr) {
 				dateList.add(Integer.parseInt(st));
 			}
-			wordDateSpanMap.put(in, this.getMinDateSpan(curIntDate, dateList));
+			wordDateSpanMap.put(in, TimeUtility.getMinDateSpan(curIntDate, dateList));
 		}
 		wIdDateSer.closeIndexReader();
 		
@@ -315,7 +294,7 @@ public class SPUseReachable {
 									for(String st1 : dateArr) {
 										dateList.add(Integer.parseInt(st1));
 									}
-									tempMinDateSpan = this.getMinDateSpan(curIntDate, dateList);
+									tempMinDateSpan = TimeUtility.getMinDateSpan(curIntDate, dateList);
 								}
 								tempI4 = tempMinDateSpan * curPTreeLevel;
 								

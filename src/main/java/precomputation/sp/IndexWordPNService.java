@@ -20,14 +20,14 @@ import org.apache.lucene.store.FSDirectory;
 import utility.Global;
 import utility.PatternAnalyzer;
 
-public class IndexAlphaPNService {
+public class IndexWordPNService {
 	
 	private String indexPath = null;
 	private IndexWriter indexWriter = null;
 	private IndexReader indexReader = null;
 	private IndexSearcher indexSearcher = null;
 	
-	public IndexAlphaPNService(String indexPath) {
+	public IndexWordPNService(String indexPath) {
 		this.indexPath = indexPath;
 	}
 	
@@ -105,7 +105,7 @@ public class IndexAlphaPNService {
 	
 	public static void main(String[] args) {
 		String st = null;
-		IndexAlphaPNService ser = new IndexAlphaPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
+		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
 		ser.openIndexReader();
 		for(int i = Global.numNodes; i < Global.numNodes + Global.numKeywords; i++) {
 			if(null != (st = ser.getPlaceNeighborhoodStr(i))) {

@@ -91,18 +91,18 @@ public class RTreeWithGI extends RTree {
 	 * @param numNodes
 	 * @throws Exception
 	 */
-	private RadiusNeighborhood precomputeAlphaWN(int nodeid, NidToDateWidIndex nidToDateWidIndex,
+	private PlaceRadiusNeighborhood precomputeAlphaWN(int nodeid, NidToDateWidIndex nidToDateWidIndex,
 			int radius, PrintWriter writer, int[] count) throws Exception {
 		Node n = readNode(nodeid);
 		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
 		if (n.isLeaf()) {
 
-			RadiusNeighborhood leafRadiusWN = new RadiusNeighborhood(Boolean.TRUE, radius);
+			PlaceRadiusNeighborhood leafRadiusWN = new PlaceRadiusNeighborhood(radius);
 			for (int child = 0; child < n.m_children; child++) {
 				// get and output the alpha document of places in the leaf node
 				int pid = n.m_pIdentifier[child];
 				count[2]++;
-				RadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
+				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
 				this.outputAlphaWN(writer, radius, pid, radiusWN, count);
 
 				// merge the alpha document of places to get the alpha document of the leaf node
@@ -113,10 +113,10 @@ public class RTreeWithGI extends RTree {
 			return leafRadiusWN;
 
 		} else {
-			RadiusNeighborhood nodeAlphaWN = new RadiusNeighborhood(Boolean.TRUE, radius);
+			PlaceRadiusNeighborhood nodeAlphaWN = new PlaceRadiusNeighborhood(radius);
 			int child;
 			for (child = 0; child < n.m_children; child++) {
-				RadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
+				PlaceRadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
 						nidToDateWidIndex, radius, writer, count);
 				if(this.m_rootID != n.getIdentifier())	nodeAlphaWN.merge(childAlphaWN);
 //				nodeAlphaWN.merge(childAlphaWN);
@@ -135,7 +135,7 @@ public class RTreeWithGI extends RTree {
 	 * @param n
 	 * @param alphaDocOfN
 	 */
-	private void outputAlphaWN(PrintWriter writer, int radius, int vid, RadiusNeighborhood radiusWN, int[] count) {
+	private void outputAlphaWN(PrintWriter writer, int radius, int vid, PlaceRadiusNeighborhood radiusWN, int[] count) {
 		writer.print(vid + Global.delimiterLevel1);
 		SortedListNode p = null;
 		for(HashMap<Integer, SortedList> widToDateMap : radiusWN.getEachLayerWN()) {

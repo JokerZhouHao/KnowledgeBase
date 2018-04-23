@@ -97,7 +97,14 @@ public class NidToDateWidIndex {
 	}
 	
 	private Map<Integer, DateWid> nidToDateWidIndex = null;
-
+	
+	public NidToDateWidIndex(Map<Integer, String> nIdDateWidMap) {
+		nidToDateWidIndex = new HashMap<Integer, DateWid>();
+		for(Entry<Integer, String> en : nIdDateWidMap.entrySet()) {
+			nidToDateWidIndex.put(en.getKey(), new DateWid(en.getValue()));
+		}
+	}
+	
 	public NidToDateWidIndex(String nidToDateWidFile) throws Exception {
 		this.loadNidToDateWidIndex(nidToDateWidFile);
 	}

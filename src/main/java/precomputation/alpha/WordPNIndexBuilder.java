@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import entity.sp.RadiusNeighborhood;
+import entity.sp.PlaceRadiusNeighborhood;
 import entity.sp.SortedList;
 import entity.sp.SortedList.SortedListNode;
-import precomputation.sp.IndexAlphaPNService;
+import precomputation.sp.IndexWordPNService;
 import utility.Global;
 import utility.GraphUtility;
 import utility.Utility;
@@ -22,12 +22,13 @@ import utility.Utility;
  * @author jmshi
  *
  */
-public class AlphaPNIndexBuilder {
-
-	class AlphaPN{
+public class WordPNIndexBuilder {
+	
+	// 临时存放alph place neighborhood
+	class TempAlphaPN{
 		private HashMap<Integer, String>[] eachLayerWN = null;
 		
-		public AlphaPN(int radius) {
+		public TempAlphaPN(int radius) {
 			eachLayerWN = new HashMap[radius + 1];
 		}
 		
@@ -60,7 +61,7 @@ public class AlphaPNIndexBuilder {
 	 * @param vid
 	 * @param radiusWN
 	 */
-	private void outputAlphaPN(PrintWriter writer, int radius, int vid, AlphaPN alphaPN) {
+	private void outputAlphaPN(PrintWriter writer, int radius, int vid, TempAlphaPN alphaPN) {
 		writer.print(vid + Global.delimiterLevel1);
 //		for(HashMap<Integer, String> pIdToDateMap : alphaPN.eachLayerWN) {
 //			if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
@@ -100,12 +101,12 @@ public class AlphaPNIndexBuilder {
 //		writer.println(Global.delimiterPound);// just output #
 		long start = System.currentTimeMillis();
 		
-		AlphaPNIndexBuilder alphaPNBuilder = new AlphaPNIndexBuilder();
-		IndexAlphaPNService alphaIndexSer = new IndexAlphaPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
+		WordPNIndexBuilder alphaPNBuilder = new WordPNIndexBuilder();
+		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
 		alphaIndexSer.openIndexWriter();
 		
-		HashMap<Integer, AlphaPN> alphaPNMap = new HashMap<>();
-		AlphaPN radiusPN = null;
+		HashMap<Integer, TempAlphaPN> alphaPNMap = new HashMap<>();
+		TempAlphaPN radiusPN = null;
 		while (startKeyword < endKeyword) {
 			System.out.println("processing keywords [" + startKeyword + "," + (startKeyword + interval) + "]");
 			// build partial inverted index
@@ -138,7 +139,7 @@ public class AlphaPNIndexBuilder {
 	}
 
 	private void buildAlphaPN(int startKeyword,
-			int endKeyword, String inputDocFile, HashMap<Integer, AlphaPN> alphaPNMap) throws Exception {
+			int endKeyword, String inputDocFile, HashMap<Integer, TempAlphaPN> alphaPNMap) throws Exception {
 		
 		// Map<Integer, Set<String>> invertedIndex = new HashMap<Integer,
 		// Set<String>>();
@@ -151,7 +152,7 @@ public class AlphaPNIndexBuilder {
 		String[] widDates = null;
 		String dates = null;
 		int i, j, pid, wid;
-		AlphaPN alphaPN = null;
+		TempAlphaPN alphaPN = null;
 		HashMap<Integer, String> tempMap = null;
 		while ((line = reader.readLine()) != null) {
 			cntlines++;
@@ -179,7 +180,7 @@ public class AlphaPNIndexBuilder {
 						
 						dates = st.substring(j + 1);
 						if(null == (alphaPN = alphaPNMap.get(wid))) {
-							alphaPN = new AlphaPN(Global.radius);
+							alphaPN = new TempAlphaPN(Global.radius);
 							alphaPNMap.put(wid, alphaPN);
 						}
 						if(null == (tempMap = alphaPN.eachLayerWN[i])) {

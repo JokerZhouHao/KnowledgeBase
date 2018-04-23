@@ -17,7 +17,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 
-import entity.sp.RadiusNeighborhood;
+import entity.sp.PlaceRadiusNeighborhood;
 import entity.sp.SortedList;
 import entity.sp.SortedList.SortedListNode;
 

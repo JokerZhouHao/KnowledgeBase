@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import entity.sp.RadiusNeighborhood;
+import entity.sp.PlaceRadiusNeighborhood;
 import entity.sp.SortedList;
 import entity.sp.SortedList.SortedListNode;
 

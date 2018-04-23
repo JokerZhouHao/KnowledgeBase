@@ -3,22 +3,21 @@ package entity.sp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import entity.sp.SortedList;
 
 import entity.sp.NidToDateWidIndex.DateWid;
-import utility.Global;
 
 /**
- * 记录带有坐标的节点的 x-raduis  word neighborhood
+ * 记录place's radius word neighborhood
  * @author Monica
  *
  */
-public class RadiusNeighborhood {
+public class PlaceRadiusNeighborhood {
 	private HashMap<Integer, Integer> firstAppearWordMap = null;
 	
 	private HashMap<Integer, SortedList>[] eachLayerWN = null;
 	
-	public RadiusNeighborhood(boolean needRecordMap, int radius) {
-		if(needRecordMap)	firstAppearWordMap = new HashMap<>();
+	public PlaceRadiusNeighborhood(int radius) {
 		eachLayerWN = new HashMap[radius + 1];
 	}
 	
@@ -67,7 +66,7 @@ public class RadiusNeighborhood {
 	 * 合并radiusWN
 	 * @param radiusWN
 	 */
-	public void merge(RadiusNeighborhood radiusWN) {
+	public void merge(PlaceRadiusNeighborhood radiusWN) {
 		int size = eachLayerWN.length;
 		HashMap<Integer, SortedList> tempMap1 = null;
 		HashMap<Integer, SortedList> tempMap2 = null;
