@@ -39,61 +39,67 @@ public class Global {
 	public static String dataVersion = "";
 	public static String dataVersionWithoutExtension = "";
 	
-	/* input file path */
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "test" + File.separator;
-	public static String edgeFile = "edgeYagoVB.txt";
-	/*nidKeywordsListMapFile is the file containing the documents of all rdf graph vertices*/
-	public static String nodeIdKeywordListOnIntDateFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
-	public static String pidCoordFile = "pidCoordYagoVB.txt";
-	public static String invertedIndexFile = null;
-	
-	/* output file path */
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
-	public static String rTreePath = outputDirectoryPath + "rtree" + File.separator;
-	public static String nidToDateWidFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
-	public static String placeWN = "placeWN";
-	public static String alphaPN = "alphaPN";
-	public static String alphaIindexFile = null;
-	public static int alphaIindexRTNodeBufferSize = -1;
-	public static String dagFile = "DAG";
-	public static String tfindexDirectoryPath = null;
-	
-	/*	index path	*/
-	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
-	public static String indexWIdDate = "wid_date" + File.separator;
-	public static String indexTFLabel = "tf-label" + File.separator;
-	public static String indexWidToPlaceNeighborhood = "wid_pn" + File.separator;
-	public static String indexWidPN = "wid_pn" + File.separator;
-	
 	/*   flag      */
 	public static String rtreeFlag = ".rtree.";
 	public static String diskFlag = ".disk.";
 	public static String sccFlag = ".SCC";
-	public static String keywordFlag = ".keyword";
+	public static String keywordFlag = ".keyword.";
 	public static String sccIndexFlag = "p2p_scc";
+	public static String dagFile = "DAG";
 	
 	/* graph statistic info */
 	public static int numPlaces = 12;
 	public static int numNodes = 12;//include nodes that are places
-	public static int numKeywords = 18;
+	public static int numKeywords = 16;
 	public static int numEdges = 16;
-	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+//	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+	public static int numSCCs = 30;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
 	public static int rtreePageSize = 16384;
 	public static int rtreeFanout = 5;
-	public static int iindexBufferSize = -1;
-	public static int iindexPageSize = -1;
+	public static int iindexBufferSize = 4096000;
+	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
 	public static boolean iindexIsWeighted = false;
 	
+	/* input file path */
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "test" + File.separator;
+	public static String edgeFile = "edgeYagoVB.txt";
+	public static String nodeIdKeywordListFile = "nidKeywordsListMapYagoVB.txt";
+	public static String nodeIdKeywordListOnDateFile = "nodeIdKeywordListOnDateMapYagoVB.txt";
+	public static String nodeIdKeywordListOnIntDateFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
+	public static String widOnIntDateFile = "widOnIntDate.txt";
+	public static String pidCoordFile = "pidCoordYagoVB.txt";
+	public static String invertedIndexFile = null;
+	
+	/* output file path */
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
+	public static String rTreePath = "rtree" + File.separator;
+	public static String sccFile = "edgeYagoVB.SCC";
+	public static String DAGFile = Global.dagFile + Global.sccFlag + Global.keywordFlag + Global.edgeFile;
+	public static String placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String wordPNFile = Global.outputDirectoryPath + "wordPN"+ Global.rtreeFlag
+			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String alphaIindexFile = null;
+	public static int alphaIindexRTNodeBufferSize = -1;
+	public static String tfindexDirectoryPath = null;
+	
+	/*	index path	*/
+	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
+	public static String indexWIdDate = "wid_date" + File.separator;
+	public static String indexTFLabel = "tf_label" + File.separator;
+	public static String indexWidPN = "wid_pn" + File.separator;
+	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+
 	/* file content delimiter sign */
 	public static String delimiterLevel1 = ": ";
 	public static String delimiterLevel2 = ",";
-	public static String delimiterDate = "@";
-	public static String delimiterPound = "#";// comment symbol in our configuration.
+	public static String delimiterDate = "#";
+	public static String delimiterPound = "#";
 	public static String delimiterSpace = " ";
 	public static String delimiterLayer = "L";
 	public static String signEmptyLayer = "N";
+	public static String delimiterCommont = "//"; // comment symbol in our configuration.
 }

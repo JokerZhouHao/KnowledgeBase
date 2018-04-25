@@ -65,8 +65,7 @@ public class RTreeWithGI extends RTree {
 		 * result remove the keyword from graph remove all the leaf nodes of
 		 * Rtree from graph
 		 */
-		PrintWriter writer = new PrintWriter(Global.outputDirectoryPath + Global.placeWN + Global.rtreeFlag
-				+ Global.rtreeFanout + "." + radius + Global.dataVersion);
+		PrintWriter writer = new PrintWriter(Global.placeWNFile);
 		PrintWriter writerrt = new PrintWriter(Global.outputDirectoryPath + "alphaDocCompTime"
 				+ Global.rtreeFlag + Global.rtreeFanout + "." + radius + Global.rtreeFanout
 				+ Global.dataVersion);
@@ -211,8 +210,7 @@ public class RTreeWithGI extends RTree {
 		
 		RTreeWithGI rgi = new RTreeWithGI(psRTree, file);
 		rgi.buildSimpleGraphInMemory();
-		PrintWriter writer = new PrintWriter(Global.outputDirectoryPath + Global.placeWN + Global.rtreeFlag
-				+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion);
+		PrintWriter writer = new PrintWriter(Global.placeWNFile);
 //		RadiusNeighborhood radiusWN = rgi.graph.alphaRadiusOfVertex(2, Global.radius, idx);
 //		rgi.outputAlphaWN(writer, Global.radius, 3, radiusWN, new int[3]);
 		rgi.showRTreeStruct();

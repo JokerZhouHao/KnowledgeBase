@@ -4,7 +4,9 @@
 package precomputation.alpha;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.DirectoryNotEmptyException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +17,7 @@ import entity.sp.SortedList.SortedListNode;
 import precomputation.sp.IndexWordPNService;
 import utility.Global;
 import utility.GraphUtility;
+import utility.TimeUtility;
 import utility.Utility;
 
 /**
@@ -63,46 +66,39 @@ public class WordPNIndexBuilder {
 	 */
 	private void outputAlphaPN(PrintWriter writer, int radius, int vid, TempAlphaPN alphaPN) {
 		writer.print(vid + Global.delimiterLevel1);
-//		for(HashMap<Integer, String> pIdToDateMap : alphaPN.eachLayerWN) {
-//			if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
-//				writer.print(Global.signEmptyLayer + Global.delimiterLayer);
-//				continue;
-//			}
-//			for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
-//				writer.print(en.getKey() + Global.delimiterLevel2 + en.getValue() + Global.delimiterSpace);
-//			}
-//			writer.print(Global.delimiterLayer);
-//		}
 		writer.print(alphaPN.toString());
 		writer.println();
 		writer.flush();
 	}
 	
 	public static void main(String[] args) throws Exception {
-//		if (args.length != 4) {
-//			throw new Exception("\n Usage: runnable configFile inputAlphaWNfile outputAlphaIindexFile keywordInterval");
-//		}
-//		Utility.loadInitialConfig(args[0]);
-//		String inputDocFile = args[1];
-//		String outputIindexFile = args[2];
-//		int interval = Integer.parseInt(args[3]);
-		String inputDocFile = Global.outputDirectoryPath + Global.placeWN + Global.rtreeFlag
-				+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-		String outputIindexFile = Global.outputDirectoryPath + Global.alphaPN + Global.rtreeFlag
-				+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+		if(!new File(Global.outputDirectoryPath).exists()) {
+			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
+		}
+		if(!new File(Global.outputDirectoryPath + Global.indexWidPN).exists()) {
+			throw new DirectoryNotEmptyException("存放wPN索引的目录 ： " + Global.outputDirectoryPath + Global.indexWidPN + "不存在");
+		}
+		
+		long start = System.currentTimeMillis();
+		System.out.println("> 开始创建widPN索引 . . .");
+		
+		String inputDocFile = Global.placeWNFile;
+		String outputIindexFile = Global.wordPNFile;
 		int startKeyword = Global.numNodes;
 		int endKeyword = Global.numNodes + Global.numKeywords;
 		int interval = endKeyword - startKeyword - 1;
-
-		PrintWriter writer = new PrintWriter(outputIindexFile);
+		
+		// 在建索引过程中输出wPN文件
+		boolean isOutput = false;
+		PrintWriter writer = null;
+		
+		if(isOutput)	writer = new PrintWriter(outputIindexFile);
 		PrintWriter writerstat = new PrintWriter(outputIindexFile + ".stat.txt");
 		int iindexSize = 0;
 		int iindexTotalLength = 0;
-//		writer.println(Global.delimiterPound);// just output #
-		long start = System.currentTimeMillis();
 		
 		WordPNIndexBuilder alphaPNBuilder = new WordPNIndexBuilder();
-		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
+		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN);
 		alphaIndexSer.openIndexWriter();
 		
 		HashMap<Integer, TempAlphaPN> alphaPNMap = new HashMap<>();
@@ -118,7 +114,7 @@ public class WordPNIndexBuilder {
 				//a new keyword with nonempty posting list.
 				iindexSize++;
 				iindexTotalLength += 1;
-				alphaPNBuilder.outputAlphaPN(writer, Global.radius, kid, radiusPN);
+				if(isOutput)	alphaPNBuilder.outputAlphaPN(writer, Global.radius, kid, radiusPN);
 				alphaIndexSer.addDoc(kid, radiusPN.toString());
 				radiusPN.clear();
 			}
@@ -127,15 +123,17 @@ public class WordPNIndexBuilder {
 			startKeyword += interval + 1;
 		}
 		long end = System.currentTimeMillis();
-		System.out.println("Revision Minutes: " + ((end - start) / 1000.0f) / 60.0f);
 		
-		writer.flush();
-		writer.close();
+		if(isOutput) {
+			writer.flush();
+			writer.close();
+		}
 		
 		alphaIndexSer.closeIndexWriter();
 		
 		writerstat.println(iindexSize + Global.delimiterPound + iindexTotalLength + Global.delimiterPound);
 		writerstat.close();
+		System.out.println("> 结束构造widPN索引，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
 	}
 
 	private void buildAlphaPN(int startKeyword,
@@ -160,9 +158,9 @@ public class WordPNIndexBuilder {
 //				continue;
 //			}
 
-//			if (cntlines % 10000 == 0) {
-//				System.out.print(cntlines + ",");
-//			}
+			if (cntlines % 10000 == 0) {
+				System.out.println("> 已处理" + cntlines + "个placeWN");
+			}
 			i = line.indexOf(Global.delimiterLevel1);
 			pid = Integer.parseInt(line.substring(0, i));
 			layers = line.substring(i + Global.delimiterLevel1.length()).split(Global.delimiterLayer);

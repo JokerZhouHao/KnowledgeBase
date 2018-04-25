@@ -11,7 +11,9 @@ import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.nio.file.DirectoryNotEmptyException;
 
 import file.reader.ZipReader;
 import utility.LocalFileInfo;
@@ -29,12 +31,24 @@ public class RTreeService{
 	 * @throws Exception
 	 */
 	public static void build() throws Exception{
+		if(!new File(Global.inputDirectoryPath).exists()) {
+			throw new DirectoryNotEmptyException("目录inputDirectoryPath ： " + Global.inputDirectoryPath + "不存在");
+		}
+		if(!new File(Global.outputDirectoryPath).exists()) {
+			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
+		}
+		if(!new File(Global.outputDirectoryPath + Global.rTreePath).exists()) {
+			throw new DirectoryNotEmptyException("RTree索引目录" + Global.outputDirectoryPath + Global.rTreePath + "不存在");
+		}
+		long startTime = System.currentTimeMillis();
+		System.out.println("> 开始为" + Global.pidCoordFile + Global.dataVersion + "创建RTree索引 . . . ");
 		String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
-		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		String treefile = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 		int fanout = Global.rtreeFanout;
 		int buffersize = Global.rtreeBufferSize;
 		int pagesize = Global.rtreePageSize;
 		RTree.build(inputfile, treefile, fanout, buffersize, pagesize);
+		System.out.println("> 结束为" + Global.pidCoordFile + Global.dataVersion + "创建RT索引，用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 	}
 	
 	/**
@@ -42,7 +56,7 @@ public class RTreeService{
 	 * @throws Exception
 	 */
 	public static void testGetNext() throws Exception{
-		String treefile = Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		String treefile = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 		
 		PropertySet psRTree = new PropertySet();
 		psRTree.setProperty("FileName", treefile);
@@ -66,6 +80,7 @@ public class RTreeService{
 	}
 	
 	public static void main(String[] args) throws Exception{
+		
 		RTreeService.build();
 //		RTreeService.testGetNext();
 	}

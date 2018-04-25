@@ -1,5 +1,7 @@
 package entity.sp;
 
+import entity.sp.SortedList.SortedListNode;
+
 /**
  * 有序放置int类型数据列表
  * @author Monica
@@ -61,6 +63,11 @@ public class SortedList {
 	public SortedList removeIntersection(SortedList sdl) {
 		SortedListNode p1 = new SortedListNode(-1);
 		SortedListNode p2 = head;
+		
+//		if(null == p2) {
+//			System.out.println("head = null");
+//		}
+		
 		p1.next = p2;
 		
 		SortedListNode dp1 = sdl.head;
@@ -106,6 +113,7 @@ public class SortedList {
 				p1.next = p2;
 				if(head == p2)	head = sp1;
 				sp1 = tp;
+				size++;
 				if(null == sp1)	break;
 			} else if(sp1.value > p2.value) {
 				p1 = p2;
@@ -118,8 +126,25 @@ public class SortedList {
 		}
 		if(null != sp1) {
 			p1.next = sp1;
+			while(null != sp1) {
+				size++;
+				sp1 = sp1.next;
+			}
 		}
 		return Boolean.TRUE;
+	}
+	
+	public SortedList copy() {
+		SortedList sl = new SortedList();
+		SortedListNode slNd = null;
+		SortedListNode nd = head;
+		slNd = sl.add(nd.value);
+		nd = nd.next;
+		while(null != nd) {
+			slNd = sl.add(slNd, nd.value);
+			nd = nd.next;
+		}
+		return sl;
 	}
 	
 	public SortedListNode getHead() {

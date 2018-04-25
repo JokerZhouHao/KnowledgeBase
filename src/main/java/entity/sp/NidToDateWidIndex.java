@@ -68,16 +68,12 @@ public class NidToDateWidIndex {
 		
 		public SortedList getDateList() {
 			if(null == dateList)	format();
-			SortedList sl = new SortedList();
-			SortedListNode slNd = null;
-			SortedListNode nd = dateList.getHead();
-			slNd = sl.add(nd.getValue());
-			nd = nd.getNext();
-			while(null != nd) {
-				sl.add(slNd, nd.getValue());
-				nd = nd.getNext();
-			}
-			return sl;
+			return dateList;
+		}
+		
+		public SortedList coppyDateList() {
+			if(null == dateList)	format();
+			return dateList.copy();
 		}
 
 		public ArrayList<Integer> getWidList(){
@@ -131,9 +127,9 @@ public class NidToDateWidIndex {
 		int cntlines = 0;
 		while ((line = reader.readLine()) != null) {
 			cntlines++;
-			if (line.contains(Global.delimiterPound)) {
-				continue;
-			}
+//			if (line.contains(Global.delimiterPound)) {
+//				continue;
+//			}
 			String[] splits = line.split(Global.delimiterLevel1);
 			if (splits.length != 2) {
 				throw new Exception("Inverted index " + line + "splits should be 2, but is " + splits.length

@@ -80,23 +80,23 @@ public class ReachableQueryService {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception{
-		String sccFile = LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.SCC";
-		String indexPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + "nid_nid" + File.separator;
+		String sccFile = Global.outputDirectoryPath + Global.sccFile;
+		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
 		ReachableQueryService rqs = new ReachableQueryService(sccFile, indexPath);
 		rqs.display();
 		
 		// 测试
-		Scanner keyboard = new Scanner(System.in);
-		String inputStr = null;
-		int p=1, q;
-		while(true) {
-			inputStr = keyboard.nextLine();
-			if(null != inputStr && !inputStr.equals("")) {
-				p = Integer.parseInt(inputStr.split(" ")[0]);
-				q = Integer.parseInt(inputStr.split(" ")[1]);
-				System.out.println(rqs.queryReachable(p, q));
-			} else break;
-		}
+//		Scanner keyboard = new Scanner(System.in);
+//		String inputStr = null;
+//		int p=1, q;
+//		while(true) {
+//			inputStr = keyboard.nextLine();
+//			if(null != inputStr && !inputStr.equals("")) {
+//				p = Integer.parseInt(inputStr.split(" ")[0]);
+//				q = Integer.parseInt(inputStr.split(" ")[1]);
+//				System.out.println(rqs.queryReachable(p, q));
+//			} else break;
+//		}
 		rqs.freeQuery();
 	}
 }

@@ -1101,7 +1101,7 @@ public class RTree implements ISpatialIndex
 			Region r = new Region(f1, f2);
 			rtree.insertData(null, r, id);
 
-			if (cntLines % 10000 == 0)
+			if (cntLines % 100000 == 0)
 				System.out.println(cntLines + " places inserted");
 		}
 

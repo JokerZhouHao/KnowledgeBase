@@ -318,7 +318,7 @@ public class Region implements IShape
 
 	public static Region combinedRegion(Region[] pRegions)
 	{
-		System.out.println(" " + pRegions.length);
+//		System.out.println(" " + pRegions.length);
 		double[] mn = new double[pRegions[0].m_pLow.length];
 		double[] mx = new double[pRegions[0].m_pLow.length];
 

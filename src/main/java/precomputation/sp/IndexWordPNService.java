@@ -105,7 +105,7 @@ public class IndexWordPNService {
 	
 	public static void main(String[] args) {
 		String st = null;
-		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidToPlaceNeighborhood);
+		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN);
 		ser.openIndexReader();
 		for(int i = Global.numNodes; i < Global.numNodes + Global.numKeywords; i++) {
 			if(null != (st = ser.getPlaceNeighborhoodStr(i))) {

@@ -63,10 +63,17 @@ public class GraphByArray {
 		distance2Source[vid] = 0;
 		visitedFlag[vid] = source;
 		queue.add(vid);
-
+		DateWid containedDateWid = null;
+		
 		while (!queue.isEmpty()) {
 			int vertex = queue.poll();
 
+			containedDateWid = nidToDateWidIndex.getDateWid(vertex);
+
+			if (containedDateWid != null) {
+				radiusWN.addDateWid(distance2Source[vertex], containedDateWid);;
+			}
+			
 			// add the unvisited adj vertices of vertex into queue only
 			// if the unvisited adj vertices with distance <= radius
 			if (distance2Source[vertex] + 1 <= radius) {
@@ -88,13 +95,6 @@ public class GraphByArray {
 				}
 			}
 			
-			DateWid containedDateWid = nidToDateWidIndex.getDateWid(vertex);
-
-			if (containedDateWid == null) {
-				continue;
-			}
-			
-			radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
 		}
 		// this.reset();
 		return radiusWN;

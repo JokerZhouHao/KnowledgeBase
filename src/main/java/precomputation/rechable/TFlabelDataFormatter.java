@@ -3,6 +3,8 @@
  */
 package precomputation.rechable;
 
+import java.io.File;
+import java.nio.file.DirectoryNotEmptyException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,7 @@ import org.jgrapht.graph.DefaultEdge;
 import utility.Global;
 import utility.GraphUtility;
 import utility.TFlabelUtility;
+import utility.TimeUtility;
 import utility.Utility;
 import utility.LocalFileInfo;
 
@@ -35,7 +38,7 @@ public class TFlabelDataFormatter {
 		uti.outputListOfSets(sccFile, sccs);
 		
 		long end = System.currentTimeMillis();
-		System.out.println("> 结束构造" + edgeFile + "的SCC文件, Revision Minutes: " + ((end - start) / 1000.0f) / 60.0f);
+		System.out.println("> 结束构造" + edgeFile + "的SCC文件, 用时：" + TimeUtility.getSpendTimeStr(start, end));
 	}
 	
 	public static void tfLabelDateFormat(String DAGedgeFile, String sccFile, String edgeFile, String nidDocFile) throws Exception{
@@ -55,16 +58,36 @@ public class TFlabelDataFormatter {
 		uti.outputMapOfSetsTFLabelFormat(DAGedgeFile, DAGedges, Global.numSCCs);
 		
 		long end = System.currentTimeMillis();
-		System.out.println("> 结束构造" + DAGedgeFile + "文件。Revision Minutes: " + ((end - start) / 1000.0f) / 60.0f);
+		System.out.println("> 结束构造" + DAGedgeFile + "文件, 用时：" + TimeUtility.getSpendTimeStr(start, end));
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String DAGedgeFile = LocalFileInfo.getDataSetPath() + "test/" + Global.dagFile + Global.sccFlag
-				+ Global.keywordFlag + Global.edgeFile;
-		String sccFile = LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.SCC";
-		String edgeFile = LocalFileInfo.getDataSetPath() + "test/edgeYagoVB.txt";
-		String nidDocFile = LocalFileInfo.getDataSetPath() + "test/" + "nidKeywordsListMapYagoVB.txt";
-		TFlabelDataFormatter.buildSCC(edgeFile, sccFile);
-		TFlabelDataFormatter.tfLabelDateFormat(DAGedgeFile, sccFile, edgeFile, nidDocFile);
+		if(!new File(Global.inputDirectoryPath).exists()) {
+			throw new DirectoryNotEmptyException("目录inputDirectoryPath ： " + Global.inputDirectoryPath + "不存在");
+		}
+		if(!new File(Global.outputDirectoryPath).exists()) {
+			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
+		}
+		if(!new File(Global.outputDirectoryPath + Global.indexTFLabel).exists()) {
+			throw new DirectoryNotEmptyException("存放TF-label的目录 ： " + Global.outputDirectoryPath + Global.indexTFLabel + "不存在");
+		}
+		
+		long startTime = System.currentTimeMillis();
+		
+		String DAGedgeFile = Global.outputDirectoryPath + Global.DAGFile;
+		String sccFile = Global.outputDirectoryPath + Global.sccFile;
+		String edgeFile = Global.inputDirectoryPath + Global.edgeFile;
+		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListFile;
+		
+		System.out.println("> 开始构造创建TF-label索引所需的" + sccFile + "和" + nidDocFile + " . . . ");
+//		TFlabelDataFormatter.buildSCC(edgeFile, sccFile);
+//		TFlabelDataFormatter.tfLabelDateFormat(DAGedgeFile, sccFile, edgeFile, nidDocFile);
+		System.out.println("> 完成构造创建TF-label索引所需的" + sccFile + "和" + nidDocFile + "，用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
+		
+		// test
+		System.out.println(Global.outputDirectoryPath + Global.indexTFLabel);
+		ReachableQueryService ser = new ReachableQueryService(sccFile, Global.outputDirectoryPath + Global.indexTFLabel);
+		ser.display();
+		ser.freeQuery();
 	}
 }
