@@ -220,6 +220,7 @@ public class GraphByArray {
 		sortedQwordsList.sort(new MComparator<Integer>());
 		int qwordsNum = sortedQwordsList.size();
 		List<Integer> tempList = new ArrayList<>();
+		List<Integer> tempList1 = null;
 		DateWId dateWid = null;
 		int i, j, k, t;
 		Double d1 = null;
@@ -232,19 +233,23 @@ public class GraphByArray {
 		queue.add(source);
 		double preRadius = 0;
 		int candidateNum = 0;
+		int vertex = 0;
+		double currentRadius = 0;
+		Boolean isFound = Boolean.FALSE;
 		
 		while (!queue.isEmpty()) {
-			int vertex = queue.poll();
-			double currentRadius = distance2Source[vertex];
+			vertex = queue.poll();
+			currentRadius = distance2Source[vertex];
+			isFound = Boolean.FALSE;
 			if (currentRadius != preRadius) {
 				preRadius = currentRadius;
 				// 计算新层下的looseness
 				if(candidateNum != qwordsNum) {
 					looseness = 0;
 					for(Integer in : sortedQwordsList) {
-						d1 += wordMinDateSpanMap.get(in);
+						looseness += wordMinDateSpanMap.get(in);
 					}
-					looseness += d1 * currentRadius;
+					looseness *= currentRadius;
 					for(Double doub : recKeyDisMap.values()) {
 						looseness += doub;
 					}
@@ -270,47 +275,48 @@ public class GraphByArray {
 				}
 			}
 			
-			dateWid = dateWIdMap.get(vertex);
-			tempList = dateWid.getDateList();
-			k = Integer.MIN_VALUE;
-			Boolean isFound = Boolean.FALSE;
-			double disMSpan = 0;
-			j = 0;
-			for(i=0; i<tempList.size(); i++) {
-				for(; j<sortedQwordsList.size(); j++) {
-					if(tempList.get(i) == (t = sortedQwordsList.get(j))) {
-						if(k == Integer.MIN_VALUE) {
-							k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
-						}
-						disMSpan = currentRadius * k;
-						if(wordMinDateSpanMap.get(t) == k) {
-							recKeyVecticesMap.put(t, vertex);
-							recKeyDisMap.put(t, disMSpan);
-							recCandDisMap.remove(t);
-							recCandVecticesMap.remove(t);
-							sortedQwordsList.remove((Object)t);
-							j--;
-							if(recKeyVecticesMap.size() == qwordsNum) {
-								isFound = Boolean.TRUE;
-								break;
+			if(null != (dateWid = dateWIdMap.get(vertex))){
+				tempList1 = dateWid.getwIdList();
+				k = Integer.MIN_VALUE;
+				double disMSpan = 0;
+				j = 0;
+				for(i=0; i<tempList1.size(); i++) {
+					for(; j<sortedQwordsList.size(); j++) {
+						if(tempList1.get(i) == (t = sortedQwordsList.get(j))) {
+							if(k == Integer.MIN_VALUE) {
+								k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
 							}
-						} else {
-							if(null != (d1 = recCandDisMap.get(t))) {
-								if(d1 > disMSpan) {
-									recCandDisMap.put(t, disMSpan);
-									recCandVecticesMap.put(t, vertex);
+							disMSpan = currentRadius * k;
+							if(wordMinDateSpanMap.get(t) == k) {
+								recKeyVecticesMap.put(t, vertex);
+								recKeyDisMap.put(t, disMSpan);
+								recCandDisMap.remove(t);
+								recCandVecticesMap.remove(t);
+								sortedQwordsList.remove((Object)t);
+								j--;
+								if(recKeyVecticesMap.size() == qwordsNum) {
+									isFound = Boolean.TRUE;
+									break;
 								}
 							} else {
-								recCandDisMap.put(t, currentRadius * k);
-								recCandVecticesMap.put(t, vertex);
+								if(null != (d1 = recCandDisMap.get(t))) {
+									if(d1 > disMSpan) {
+										recCandDisMap.put(t, disMSpan);
+										recCandVecticesMap.put(t, vertex);
+									}
+								} else {
+									recCandDisMap.put(t, currentRadius * k);
+									recCandVecticesMap.put(t, vertex);
+								}
 							}
+						} else if(tempList1.get(i) < t) {
+							break;
 						}
-					} else if(tempList.get(i) < t) {
-						break;
 					}
+					if(isFound || j == sortedQwordsList.size())	break;
 				}
-				if(isFound)	break;
 			}
+			if(isFound)	break;
 			
 			// add the unvisited adj vertices of vertex into queue
 			int[] adjList = this.adjLists[vertex];
@@ -330,15 +336,25 @@ public class GraphByArray {
 			}
 		}
 
-		if (sortedQwordsList.size() > 0) {
+//		if (sortedQwordsList.size() > 0) {
+//			return Double.POSITIVE_INFINITY;
+//		}
+		if(recKeyVecticesMap.size() != qwordsNum && recCandVecticesMap.size() + recKeyVecticesMap.size() != qwordsNum) {
 			return Double.POSITIVE_INFINITY;
 		}
-
+		
+		if(!recCandVecticesMap.isEmpty()) {
+			for(Integer in : recCandVecticesMap.keySet()) {
+				recKeyVecticesMap.put(in, recCandVecticesMap.get(in));
+				recKeyDisMap.put(in, recCandDisMap.get(in));
+			}
+		}
+		
 		// compute semantic tree paths
 		looseness = 0;
 		Set<Integer> keyVertices = new HashSet<Integer>();
 		for(Entry<Integer, Double> en : recKeyDisMap.entrySet()) {
-			keyVertices.add(en.getKey());
+			keyVertices.add(recKeyVecticesMap.get(en.getKey()));
 			looseness += en.getValue();
 		}
 		for (Integer keyVertex : keyVertices) {

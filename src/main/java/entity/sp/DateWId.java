@@ -28,6 +28,7 @@ public class DateWId {
 		for(String st : tempArr) {
 			wIdList.add(Integer.parseInt(st));
 		}
+		str = null;
 	}
 
 	public List<Integer> getDateList() {
@@ -38,5 +39,9 @@ public class DateWId {
 	public List<Integer> getwIdList() {
 		if(null == wIdList)	init(str);
 		return wIdList;
+	}
+	
+	public String getStr() {
+		return str;
 	}
 }

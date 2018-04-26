@@ -15,12 +15,12 @@ import entity.sp.WordRadiusNeighborhood;
 import entity.sp.DateWId;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
+import entity.sp.RTreeWithGI;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
 import precomputation.rechable.ReachableQueryService;
 import precomputation.sp.IndexWordPNService;
 import queryindex.VertexQwordsMap;
-import rdfindex.memory.RTreeWithGI;
 import spatialindex.rtree.Data;
 import spatialindex.rtree.NNEntry;
 import spatialindex.rtree.NNEntryComparator;
@@ -39,20 +39,21 @@ import utility.Global;
  */
 public class kSP {
 	protected RTreeWithGI rgi;
-	Map<Integer, DateWId> dateWIdMap = null;
+	Map<Integer, DateWId> nIdDateWidMap = null;
 	HashMap<Integer, Integer> wordMinDateSpanMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	ReachableQueryService reachableQuerySer = null;
-	private Map<Integer, List<List<Integer>>> semanticTreeResult = null;
+	private List<KSPCandidate> semanticTreeResult = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
-	public kSP(Map<Integer, List<List<Integer>>> semanticTreeResult, RTreeWithGI rgi, Map<Integer, DateWId> dateWIdMap, HashMap<Integer, Integer> wordMinDateSpanMap,
+	public kSP(List<KSPCandidate> semanticTreeResult, RTreeWithGI rgi, Map<Integer, DateWId> nIdDateWidMap, HashMap<Integer, Integer> wordMinDateSpanMap,
 			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
 		super();
 		this.semanticTreeResult = semanticTreeResult;
 		this.rgi = rgi;
-		this.dateWIdMap = dateWIdMap;
+		this.nIdDateWidMap = nIdDateWidMap;
+		this.wordMinDateSpanMap = wordMinDateSpanMap;
  		this.wordPNMap = wordPNMap;
 		this.reachableQuerySer = reachableQuerySer;
 		
@@ -102,7 +103,7 @@ public class kSP {
 					Global.count[0]++;
 					
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
-						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]);
+						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						if (n.m_level == 0) {
 							//children of n are places
@@ -142,7 +143,7 @@ public class kSP {
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
-							qwords, date, loosenessThreshold, dateWIdMap, wordMinDateSpanMap, semanticTree);
+							qwords, date, loosenessThreshold, nIdDateWidMap, wordMinDateSpanMap, semanticTree);
 					long end = System.currentTimeMillis();
 					Global.runtime[1] += end - start;
 
@@ -159,16 +160,16 @@ public class kSP {
 								semanticTree);
 
 						if(((KSPCandidateVisitor) result).addPlaceCandidate(candidate)) {
-							semanticTreeResult.put(placeData.getIdentifier(), semanticTree);
+							semanticTreeResult.add(candidate);
 						}
 						kthScore = ((KSPCandidateVisitor) result).size() >= k ? ((KSPCandidateVisitor) result)
 								.getWorstRankingScore() : Double.POSITIVE_INFINITY;
 					}
 				}
-				long curTime = System.currentTimeMillis();
-				if (curTime - Global.startTime > Global.runtimeThreshold) {
-					break;
-				}
+//				long curTime = System.currentTimeMillis();
+//				if (curTime - Global.startTime > Global.runtimeThreshold) {
+//					break;
+//				}
 			}
 
 		} finally {
@@ -228,6 +229,7 @@ public class kSP {
 		double tempd1 = 0;
 		double tempd2 = 0;
 		for (Entry<Integer, WordRadiusNeighborhood> entry : this.wordPNMap.entrySet()) {
+			if(null == wordMinDateSpanMap)	System.out.println("wordMinDateSpanMap = null");
 			tempd1 = (alphaRadius + 2) * wordMinDateSpanMap.get(entry.getKey());
 			tempd2 = entry.getValue().getLooseness(id, date);
 			alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);

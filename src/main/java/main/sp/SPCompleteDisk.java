@@ -18,6 +18,7 @@ import entity.sp.MinHeap;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.NidToDateWidIndex.DateWid;
+import entity.sp.RTreeWithGI;
 import kSP.kSP;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
@@ -26,9 +27,13 @@ import precomputation.rechable.ReachableQueryService;
 import precomputation.sp.IndexNidKeywordsListService;
 import precomputation.sp.IndexWordPNService;
 import queryindex.VertexQwordsMap;
-import rdfindex.memory.RTreeWithGI;
 import spatialindex.spatialindex.IVisitor;
 import spatialindex.spatialindex.Point;
+import spatialindex.storagemanager.DiskStorageManager;
+import spatialindex.storagemanager.IBuffer;
+import spatialindex.storagemanager.IStorageManager;
+import spatialindex.storagemanager.PropertySet;
+import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
 import utility.LocalFileInfo;
 import utility.MComparator;
@@ -42,7 +47,7 @@ import utility.Utility;
  * @author Monica
  *
  */
-public class SPComplete {
+public class SPCompleteDisk {
 	
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private IndexNidKeywordsListService wIdDateSer = null;
@@ -51,7 +56,7 @@ public class SPComplete {
 	private LRUBuffer buffer = null;
 	private RTreeWithGI rgi = null;
 	
-	public SPComplete() {
+	public SPCompleteDisk() {
 		//buffer for alpha WN inverted index 
 		buffer = new LRUBuffer(Global.alphaIindexRTNodeBufferSize, Global.rtreePageSize);
 		
@@ -63,18 +68,42 @@ public class SPComplete {
 		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
+		nIdWIdDateSer.openIndexReader();
 		wIdDateSer = new IndexNidKeywordsListService(wIdDateIndex);
+		wIdDateSer.openIndexReader();
 		reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
 		wIdPnSer = new IndexWordPNService(wIdPNIndex);
+		wIdPnSer.openIndexReader();
 		
 		//the data index structure of RDF data with R-tree, RDF Graph, and Inverted index of keywords
 		try {
-			rgi = RGIUtility.buildRGI();
+			PropertySet psRTree = new PropertySet();
+			String indexRTree = Global.indexRTree;
+			psRTree.setProperty("FileName", indexRTree);
+			psRTree.setProperty("PageSize", Global.rtreePageSize);
+			psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
+			psRTree.setProperty("fanout", Global.rtreeFanout);
+			
+			IStorageManager diskfile = new DiskStorageManager(psRTree);
+			IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+			
+			Integer i = new Integer(1); 
+			psRTree.setProperty("IndexIdentifier", i);
+			
+			rgi = new RTreeWithGI(psRTree, file);
+			rgi.buildSimpleGraphInMemory();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
 		
+	}
+	
+	public void free() {
+		nIdWIdDateSer.closeIndexReader();
+		wIdDateSer.closeIndexReader();
+		wIdPnSer.closeIndexReader();
+		reachableQuerySer.freeQuery();
 	}
 	
 	/**
@@ -92,13 +121,11 @@ public class SPComplete {
 		
 		// 获得Mq
 		Map<Integer, DateWId> nIdDateWidMap = new HashMap<>();
-		nIdWIdDateSer.openIndexReader();
 		Map<Integer, String> tempMap = nIdWIdDateSer.searchNIDKeyListDateIndex(qwords);
 		for(Entry<Integer, String> en : tempMap.entrySet()) {
 			nIdDateWidMap.put(en.getKey(), new DateWId(en.getValue()));
 		}
 		tempMap.clear();
-		nIdWIdDateSer.closeIndexReader();
 		
 		/////////////////////////// 打印测试
 		System.out.println("searchedNodeListMap : ");
@@ -111,7 +138,6 @@ public class SPComplete {
 		String[] dateArr = null;
 		HashMap<Integer, Integer> wordMinDateSpanMap = new HashMap<>();
 		int intSearchDate = TimeUtility.getIntDate(searchDate);
-		wIdDateSer.openIndexReader();
 		for(int in : qwords) {
 			ArrayList<Integer> dateList = new ArrayList<>();
 			dateArr = wIdDateSer.searchWIDDateIndex(in).split(Global.delimiterDate);
@@ -120,7 +146,6 @@ public class SPComplete {
 			}
 			wordMinDateSpanMap.put(in, TimeUtility.getMinDateSpan(intSearchDate, dateList));
 		}
-		wIdDateSer.closeIndexReader();
 		
 		///////////////////////////////// 打印测试
 		System.out.println("wordMinDateSpanMap : ");
@@ -131,11 +156,9 @@ public class SPComplete {
 		
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
-		wIdPnSer.openIndexReader();
 		for(Integer in : qwords) {
 			wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, wIdPnSer.getPlaceNeighborhoodStr(in)));
 		}
-		wIdPnSer.closeIndexReader();
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
@@ -157,7 +180,7 @@ public class SPComplete {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		SPComplete spc = new SPComplete();
+		SPCompleteDisk spc = new SPCompleteDisk();
 		double[] pcoords = new double[2];
 		pcoords[0] = 1;
 		pcoords[1] = 3;
@@ -165,5 +188,6 @@ public class SPComplete {
 		qwords.add(25);
 		qwords.add(26);
 		Utility.showSemanticTreeResult(spc.bsp(3, pcoords, qwords, new Date()));
+		spc.free();
 	}
 }

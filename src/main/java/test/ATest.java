@@ -72,6 +72,8 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		
+		System.out.println(TimeUtility.getIntDate(new Date()));
+		
 		ArrayList<Integer> li = new ArrayList<>();
 		li.add(2);
 		li.add(9);

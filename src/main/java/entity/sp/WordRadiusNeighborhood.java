@@ -75,7 +75,7 @@ public class WordRadiusNeighborhood {
 		int minLoose = Integer.MAX_VALUE;
 		int td = 0;
 		for(int i=0; i < radius + 1; i++) {
-			if(null != eachLayerWN[i].get(pid) && minLoose > (td = ((i+1)*TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid))))) {
+			if(null != eachLayerWN[i] && null != eachLayerWN[i].get(pid) && minLoose > (td = ((i+1)*TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid))))) {
 				minLoose = td;
 			}
 		}

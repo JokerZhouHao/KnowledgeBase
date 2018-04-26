@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 import entity.sp.PlaceRadiusNeighborhood;
 import entity.sp.SortedList;
 import entity.sp.SortedList.SortedListNode;
+import kSP.candidate.KSPCandidate;
+import spatialindex.rtree.Data;
 
 import java.util.Set;
 
@@ -201,6 +203,19 @@ public class Utility<T1, T2> {
 			writer.println();
 		}
 		writer.close();
+	}
+	
+	public static void showSemanticTreeResult(List<KSPCandidate> semanticTreeResult) {
+		for(KSPCandidate sTree : semanticTreeResult) {
+			System.out.println("> > > " + ((Data)sTree.getPlaceEntry().m_pEntry).getIdentifier() + ", coorDis = " + ((Data)sTree.getPlaceEntry().m_pEntry).getWeight()+ ", total = " + sTree.getPlaceEntry().m_minDist);
+			for(List<Integer> path : sTree.getPathsofPlace()) {
+				for(Integer nid : path) {
+					System.out.print(nid + " ");
+				}
+				System.out.println();
+			}
+			System.out.println();
+		}
 	}
 	
 }
