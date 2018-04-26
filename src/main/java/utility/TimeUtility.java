@@ -11,6 +11,8 @@ public class TimeUtility {
 	// 一天的毫秒数
 	public final static int totalMillOfOneDay = 86400000;
 	
+	public final static int zoomTimeOffset = 28800000; // 时区差
+	
 	public static String getTime() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		return df.format(new Date());
@@ -58,6 +60,24 @@ public class TimeUtility {
 	}
 	
 	public static int getIntDate(Date date) {
-		return (int)(date.getTime()/TimeUtility.totalMillOfOneDay);
+//		System.out.println(date.getTime()/TimeUtility.totalMillOfOneDay);
+		return (int)((date.getTime() + TimeUtility.zoomTimeOffset)/TimeUtility.totalMillOfOneDay);
+	}
+	
+	public static String getOffsetDate(String dateStr, int offset) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			long lo = ((long)(TimeUtility.getIntDate(sdf.parse(dateStr)) + offset)) * TimeUtility.totalMillOfOneDay;
+			return sdf.format(new Date(lo));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+//		1970, 00:00:00
+//		System.out.println(TimeUtility.getOffsetDate("1991-03-04", 4));
+		System.out.println(TimeUtility.getOffsetDate("1970-06-29", 4));
 	}
 }

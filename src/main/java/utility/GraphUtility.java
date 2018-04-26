@@ -32,11 +32,12 @@ public class GraphUtility {
 		
 		BufferedReader reader = Utility.getBufferedReader(edgeFile);
 		String line = reader.readLine();//first line is statistics of graph
-		String[] stat = line.split(Global.delimiterPound);
-		int numNodes = Integer.parseInt(stat[0]);
-		Global.numNodes = numNodes;
-		int numEdges = Integer.parseInt(stat[1]);
-		Global.numEdges = numEdges;
+//		String[] stat = line.split(Global.delimiterPound);
+//		int numNodes = Integer.parseInt(stat[0]);
+//		Global.numNodes = numNodes;
+//		int numEdges = Integer.parseInt(stat[1]);
+//		Global.numEdges = numEdges;
+		int numNode = Global.numNodes;
 		
 		DirectedGraph<Integer, DefaultEdge> sdgraph = new SimpleDirectedGraph<Integer, DefaultEdge>(
 				DefaultEdge.class);

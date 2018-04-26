@@ -11,22 +11,27 @@ import java.util.Random;
 public class RandomNumGenerator {
 	private int startNum = 0;
 	private int span = Integer.MAX_VALUE;
-	private Random random = new Random();
+	private static Random random = new Random();
 	
-	public RandomNumGenerator() {}
 	public RandomNumGenerator(int startNum, int endNum) {
 		this.startNum = startNum;
 		this.span = endNum - startNum;
 	}
 	
-	public int getRandomNum() {
+	public int getRandomInt() {
 		return startNum + (int)(random.nextFloat() * span);
 	}
 	
+	public static float getRandomFloat() {
+		return random.nextFloat();
+	}
+	
 	public static void main(String[] args) {
+		
 		RandomNumGenerator rand = new RandomNumGenerator(0, 10);
 		for(int i=0; i<10; i++) {
-			System.out.println(rand.getRandomNum());
+			System.out.println(RandomNumGenerator.getRandomFloat());
+//			System.out.println(rand.getRandomInt());
 		}
 	}
 }

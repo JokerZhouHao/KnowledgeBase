@@ -48,24 +48,32 @@ public class Global {
 	public static String dagFile = "DAG";
 	
 	/* graph statistic info */
-	public static int numPlaces = 12;
-	public static int numNodes = 12;//include nodes that are places
-	public static int numKeywords = 16;
-	public static int numEdges = 16;
-//	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
-	public static int numSCCs = 30;
+//	public static int numPlaces = 12;
+	public static int numPlaces = 4774796;
+//	public static int numNodes = 12;//include nodes that are places
+	public static int numNodes = 8091179;	//include nodes that are places
+//	public static int numKeywords = 16;
+	public static int numKeywords = 3778457;
+	public static int numEdges = 50415307;
+	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+//	public static int numSCCs = 30;
+//	public static int numContainCoordWordDate = 12;
+	public static int numContainCoordWordDate = 812532;
+	public static int numTestSample = 100;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
 	public static int rtreePageSize = 16384;
-	public static int rtreeFanout = 5;
+//	public static int rtreeFanout = 5;
+	public static int rtreeFanout = 400;
 	public static int iindexBufferSize = 4096000;
 	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
 	public static boolean iindexIsWeighted = false;
 	
 	/* input file path */
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "test" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "test" + File.separator;
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "orginal" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
 	public static String nodeIdKeywordListFile = "nidKeywordsListMapYagoVB.txt";
 	public static String nodeIdKeywordListOnDateFile = "nodeIdKeywordListOnDateMapYagoVB.txt";
@@ -73,9 +81,11 @@ public class Global {
 	public static String widOnIntDateFile = "widOnIntDate.txt";
 	public static String pidCoordFile = "pidCoordYagoVB.txt";
 	public static String invertedIndexFile = null;
+	public static String testSampleFile = String.valueOf(numTestSample) + "." + "testSample";
 	
 	/* output file path */
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "orginalIndex" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;
 	public static String sccFile = "edgeYagoVB.SCC";
 	public static String DAGFile = Global.dagFile + Global.sccFlag + Global.keywordFlag + Global.edgeFile;
