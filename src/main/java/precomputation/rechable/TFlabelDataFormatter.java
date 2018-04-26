@@ -77,17 +77,18 @@ public class TFlabelDataFormatter {
 		String DAGedgeFile = Global.outputDirectoryPath + Global.DAGFile;
 		String sccFile = Global.outputDirectoryPath + Global.sccFile;
 		String edgeFile = Global.inputDirectoryPath + Global.edgeFile;
-		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListFile;
+//		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListFile;
+		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile;
 		
 		System.out.println("> 开始构造创建TF-label索引所需的" + sccFile + "和" + nidDocFile + " . . . ");
-//		TFlabelDataFormatter.buildSCC(edgeFile, sccFile);
-//		TFlabelDataFormatter.tfLabelDateFormat(DAGedgeFile, sccFile, edgeFile, nidDocFile);
+		TFlabelDataFormatter.buildSCC(edgeFile, sccFile);
+		TFlabelDataFormatter.tfLabelDateFormat(DAGedgeFile, sccFile, edgeFile, nidDocFile);
 		System.out.println("> 完成构造创建TF-label索引所需的" + sccFile + "和" + nidDocFile + "，用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 		
 		// test
-		System.out.println(Global.outputDirectoryPath + Global.indexTFLabel);
-		ReachableQueryService ser = new ReachableQueryService(sccFile, Global.outputDirectoryPath + Global.indexTFLabel);
-		ser.display();
-		ser.freeQuery();
+//		System.out.println(Global.outputDirectoryPath + Global.indexTFLabel);
+//		ReachableQueryService ser = new ReachableQueryService(sccFile, Global.outputDirectoryPath + Global.indexTFLabel);
+//		ser.display();
+//		ser.freeQuery();
 	}
 }

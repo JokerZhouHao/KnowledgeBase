@@ -59,6 +59,7 @@ public class TFlabelUtility {
 			Map<Integer, Set<Integer>> DAGedges) throws Exception {
 
 		BufferedReader reader = Utility.getBufferedReader(vertexDocumentFile);
+		reader.readLine();
 		String line;
 
 		int cntLines = 0;
@@ -67,10 +68,10 @@ public class TFlabelUtility {
 			if (cntLines % 100000 == 0) {
 				System.err.println("processed " + cntLines + " vertexDoc");
 			}
-			if (line.contains(Global.delimiterPound)) {
-				Global.numKeywords = Integer.parseInt(line.split(Global.delimiterPound)[1]);
-				continue;
-			}
+//			if (line.contains(Global.delimiterPound)) {
+//				Global.numKeywords = Integer.parseInt(line.split(Global.delimiterPound)[1]);
+//				continue;
+//			}
 			String[] nidDocument = line.split(Global.delimiterLevel1);
 			if (nidDocument.length != 2) {
 				throw new Exception("nid->doc splits wrong length, should be 2 but is "
@@ -84,7 +85,7 @@ public class TFlabelUtility {
 				endSCCsOftheStartSCC = new HashSet<Integer>();
 			}
 
-			String[] endWordsStr = nidDocument[1].split(Global.delimiterLevel2);
+			String[] endWordsStr = nidDocument[1].substring(nidDocument[1].lastIndexOf(Global.delimiterDate) + 1).split(Global.delimiterLevel2);
 			for (int i = 0; i < endWordsStr.length; i++) {
 				int endWordSCC = Integer.parseInt(endWordsStr[i]);
 				// there is an edge pointing from startSCC to endSCC
