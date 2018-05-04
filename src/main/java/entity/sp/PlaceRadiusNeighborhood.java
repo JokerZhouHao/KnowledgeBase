@@ -124,8 +124,9 @@ public class PlaceRadiusNeighborhood {
 	}
 	
 	public void clear() {
-		for(HashMap<Integer, SortedList> hm : eachLayerWN) {
-			if(null != hm)	hm.clear();
+		for(int i=0; i<eachLayerWN.length; i++) {
+			eachLayerWN[i].clear();
+			eachLayerWN[i] = null;
 		}
 	}
 	

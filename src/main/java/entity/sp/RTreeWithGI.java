@@ -106,6 +106,7 @@ public class RTreeWithGI extends RTree {
 
 				// merge the alpha document of places to get the alpha document of the leaf node
 				leafRadiusWN.merge(radiusWN);
+				radiusWN.clear();
 			}
 			this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), leafRadiusWN, count);
 			count[0]++;
@@ -118,6 +119,7 @@ public class RTreeWithGI extends RTree {
 				PlaceRadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
 						nidToDateWidIndex, radius, writer, count);
 				if(this.m_rootID != n.getIdentifier())	nodeAlphaWN.merge(childAlphaWN);
+				childAlphaWN.clear();
 //				nodeAlphaWN.merge(childAlphaWN);
 			}
 			if(this.m_rootID != n.getIdentifier()) {
