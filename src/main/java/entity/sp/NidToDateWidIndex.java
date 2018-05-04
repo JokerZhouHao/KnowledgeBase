@@ -141,7 +141,7 @@ public class NidToDateWidIndex {
 			nidToDateWidIndex.put(wid, new DateWid(splits[1]));
 
 			if (cntlines % 100000 == 0) {
-				System.out.print(cntlines + " postinglist loaded,");
+				System.out.println(cntlines + " postinglist loaded,");
 			}
 		}
 	}

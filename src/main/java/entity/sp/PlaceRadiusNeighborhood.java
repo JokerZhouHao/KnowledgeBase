@@ -30,10 +30,11 @@ public class PlaceRadiusNeighborhood {
 	public void addDateWid(int layer, DateWid dateWid) {
 		Integer i = null;
 		SortedList tempList = null;
-		SortedList dateList = dateWid.getDateList();	
+		SortedList dateList = null;;
+		SortedList dateList1 = dateWid.getDateList();
 		HashMap<Integer, SortedList> tempMap = null;
 		for(int wid : dateWid.getWidList()) {
-			dateList = dateList.copy();		// 因为SortedList为引用对象，所以采用复制方式
+			dateList = dateList1.copy();		// 因为SortedList为引用对象，所以采用复制方式
 			if(null == (i = firstAppearWordMap.get(wid))) {
 				if(null == (tempMap = eachLayerWN[layer]))
 					tempMap = eachLayerWN[layer] = new HashMap<>();
