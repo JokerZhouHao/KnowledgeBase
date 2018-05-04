@@ -125,8 +125,10 @@ public class PlaceRadiusNeighborhood {
 	
 	public void clear() {
 		for(int i=0; i<eachLayerWN.length; i++) {
-			eachLayerWN[i].clear();
-			eachLayerWN[i] = null;
+			if(null != eachLayerWN[i]) {
+				eachLayerWN[i].clear();
+				eachLayerWN[i] = null;
+			}
 		}
 	}
 	
