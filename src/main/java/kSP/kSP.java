@@ -44,14 +44,12 @@ public class kSP {
 	HashMap<Integer, Integer> wordMinDateSpanMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	ReachableQueryService reachableQuerySer = null;
-	private List<KSPCandidate> semanticTreeResult = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
-	public kSP(List<KSPCandidate> semanticTreeResult, RTreeWithGI rgi, Map<Integer, DateWId> nIdDateWidMap, HashMap<Integer, Integer> wordMinDateSpanMap,
+	public kSP(RTreeWithGI rgi, Map<Integer, DateWId> nIdDateWidMap, HashMap<Integer, Integer> wordMinDateSpanMap,
 			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
 		super();
-		this.semanticTreeResult = semanticTreeResult;
 		this.rgi = rgi;
 		this.nIdDateWidMap = nIdDateWidMap;
 		this.wordMinDateSpanMap = wordMinDateSpanMap;
@@ -192,7 +190,6 @@ public class kSP {
 								semanticTree);
 
 						if(((KSPCandidateVisitor) result).addPlaceCandidate(candidate)) {
-							semanticTreeResult.add(candidate);
 						}
 						kthScore = ((KSPCandidateVisitor) result).size() >= k ? ((KSPCandidateVisitor) result)
 								.getWorstRankingScore() : Double.POSITIVE_INFINITY;

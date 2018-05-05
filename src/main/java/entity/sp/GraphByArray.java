@@ -263,9 +263,12 @@ public class GraphByArray {
 					if(en.getValue() <= currentRadius * wordMinDateSpanMap.get(en.getKey())) {
 						recKeyVecticesMap.put(en.getKey(), recCandVecticesMap.get(en.getKey()));
 						recKeyDisMap.put(en.getKey(), recCandDisMap.get(en.getKey()));
-						if(qwordsNum == recKeyVecticesMap.size())	break;
 						recCandVecticesMap.remove(en.getKey());
 						tempList.add(en.getKey());
+						if(qwordsNum == recKeyVecticesMap.size()) {
+							isFound = Boolean.TRUE;
+							break;
+						}
 					}
 				}
 				if(!tempList.isEmpty()) {
@@ -273,6 +276,7 @@ public class GraphByArray {
 						recCandDisMap.remove(in);
 					}
 				}
+				if(isFound)	break;
 			}
 			
 			if(null != (dateWid = dateWIdMap.get(vertex))){
@@ -290,8 +294,12 @@ public class GraphByArray {
 							if(wordMinDateSpanMap.get(t) == k) {
 								recKeyVecticesMap.put(t, vertex);
 								recKeyDisMap.put(t, disMSpan);
-								recCandDisMap.remove(t);
-								recCandVecticesMap.remove(t);
+								if(recCandDisMap.containsKey(t)) {
+									recCandDisMap.remove(t);
+									recCandVecticesMap.remove(t);
+								} else {
+									candidateNum++;
+								}
 								sortedQwordsList.remove((Object)t);
 								j--;
 								if(recKeyVecticesMap.size() == qwordsNum) {
@@ -307,6 +315,7 @@ public class GraphByArray {
 								} else {
 									recCandDisMap.put(t, currentRadius * k);
 									recCandVecticesMap.put(t, vertex);
+									candidateNum++;
 								}
 							}
 						} else if(tempList1.get(i) < t) {
@@ -357,10 +366,11 @@ public class GraphByArray {
 			keyVertices.add(recKeyVecticesMap.get(en.getKey()));
 			looseness += en.getValue();
 		}
-		for (Integer keyVertex : keyVertices) {
-			semanticTree.add(this.getPath(source, keyVertex));
-		}
-		return looseness;
+		if(looseness <= loosenessThreshold)	return looseness;
+		else return Double.POSITIVE_INFINITY;
+//		for (Integer keyVertex : keyVertices) {
+//			semanticTree.add(this.getPath(source, keyVertex));
+//		}
 	}
 
 	/**

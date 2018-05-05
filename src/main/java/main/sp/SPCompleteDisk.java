@@ -142,8 +142,6 @@ public class SPCompleteDisk {
 			Global.frontTime = Global.bspStartTime;
 		}
 		
-		List<KSPCandidate> semanticTreeResult = new ArrayList<>();
-		
 		long start = System.currentTimeMillis();
 		
 		Point qpoint = new Point(pCoords);
@@ -225,7 +223,7 @@ public class SPCompleteDisk {
 		
 //		Global.startTime = start;
 		
-		kSP kSPExecutor = new kSP(semanticTreeResult, rgi, nIdDateWidMap, wordMinDateSpanMap, wordPNMap, reachableQuerySer);
+		kSP kSPExecutor = new kSP(rgi, nIdDateWidMap, wordMinDateSpanMap, wordPNMap, reachableQuerySer);
 		kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, intSearchDate, v);
 		long end = System.currentTimeMillis();
 		Global.runtime[0] += (end - start);
