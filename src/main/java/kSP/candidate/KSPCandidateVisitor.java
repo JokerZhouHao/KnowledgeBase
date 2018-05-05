@@ -145,5 +145,9 @@ public class KSPCandidateVisitor implements IVisitor{
 		// TODO Auto-generated method stub
 		
 	}
+
+	public ArrayList getResultQ() {
+		return resultQ;
+	}
 	
 }

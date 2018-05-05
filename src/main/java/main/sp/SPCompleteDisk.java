@@ -134,7 +134,7 @@ public class SPCompleteDisk {
 	 * @param args
 	 * @throws Exception
 	 */
-	public List<KSPCandidate> bsp(int k, double[] pCoords, ArrayList<Integer> qwords, Date searchDate) throws Exception {
+	public KSPCandidateVisitor bsp(int k, double[] pCoords, ArrayList<Integer> qwords, Date searchDate) throws Exception {
 		
 		if(Global.isDebug) {
 			System.out.println("> 开始执行bsp . . . ");
@@ -251,9 +251,9 @@ public class SPCompleteDisk {
 		for(int in : qwords) {
 			System.out.print(in + " ");
 		}
-		System.out.println("，共找到" + semanticTreeResult.size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
+		System.out.println("，共找到" + ((KSPCandidateVisitor)v).size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
 		
-		return semanticTreeResult;
+		return (KSPCandidateVisitor)v;
 	}
 	
 	public static void main(String[] args) throws Exception{
@@ -277,7 +277,7 @@ public class SPCompleteDisk {
 			qwords.add(Integer.parseInt(args[4]));
 			date  = TimeUtility.getDate(args[5]);
 		}
-		Utility.showSemanticTreeResult(spc.bsp(k, pcoords, qwords, date));
+		Utility.showSemanticTreeResult(spc.bsp(k, pcoords, qwords, date).getResultQ());
 		spc.free();
 	}
 }
