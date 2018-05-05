@@ -406,7 +406,7 @@ public class GraphByArray {
 		String[] adjVerticesStr;
 		while ((line = reader.readLine()) != null) {
 			cntlines++;
-			if (cntlines % 100000 == 0) {
+			if (cntlines % 1000000 == 0) {
 				System.out.println("adding vertex with edges " + cntlines);
 			}
 			if (line.contains(Global.delimiterPound)) {

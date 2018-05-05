@@ -44,4 +44,9 @@ public class DateWId {
 	public String getStr() {
 		return str;
 	}
+	
+	public void clear() {
+		if(null != dateList)	dateList.clear();
+		if(null != this.wIdList) wIdList.clear();
+	}
 }

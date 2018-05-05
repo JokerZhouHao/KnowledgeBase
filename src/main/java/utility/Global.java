@@ -28,7 +28,6 @@ public class Global {
 	// radius
 	public final static int radius = 3;
 	
-	public static long startTime = -1;
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
 	
@@ -112,4 +111,13 @@ public class Global {
 	public static String delimiterLayer = "L";
 	public static String signEmptyLayer = "N";
 	public static String delimiterCommont = "//"; // comment symbol in our configuration.
+	
+	/* using for test */
+	public static Boolean isDebug = Boolean.TRUE;
+	public static long startTime = 0;
+	public static long bspStartTime = 0;
+	public static long frontTime = 0;
+	public static long tempTime = 0;
+	public static boolean isFirstRTree = true;
+	
 }

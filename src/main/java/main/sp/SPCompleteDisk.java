@@ -57,9 +57,14 @@ public class SPCompleteDisk {
 	private RTreeWithGI rgi = null;
 	
 	public SPCompleteDisk() {
-		//buffer for alpha WN inverted index 
-		buffer = new LRUBuffer(Global.alphaIindexRTNodeBufferSize, Global.rtreePageSize);
+		if(Global.isDebug) {
+			Global.startTime = System.currentTimeMillis();
+			System.out.println("> 开始构造SPCompleteDisk . . . \n");
+		}
 		
+		if(Global.isDebug) {
+			System.out.println("> 开始打开各个lucen索引 . . . ");
+		}
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 		String wIdDateIndex = Global.outputDirectoryPath + Global.indexWIdDate;
@@ -74,6 +79,17 @@ public class SPCompleteDisk {
 		reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
 		wIdPnSer = new IndexWordPNService(wIdPNIndex);
 		wIdPnSer.openIndexReader();
+		
+		if(Global.isDebug) {
+			Global.frontTime = System.currentTimeMillis();
+			System.out.println("> 完全打开各个lucen索引，用时" + TimeUtility.getSpendTimeStr(Global.startTime, Global.frontTime));
+		}
+		
+		if(Global.isDebug) {
+			System.out.println("> 初始化RTreeWithGI . . . . ");
+		}
+		//buffer for alpha WN inverted index 
+		buffer = new LRUBuffer(Global.alphaIindexRTNodeBufferSize, Global.rtreePageSize);
 		
 		//the data index structure of RDF data with R-tree, RDF Graph, and Inverted index of keywords
 		try {
@@ -96,7 +112,15 @@ public class SPCompleteDisk {
 			e.printStackTrace();
 			System.exit(0);
 		}
+		if(Global.isDebug) {
+			Global.tempTime = System.currentTimeMillis();
+			System.out.println("> 完成初始化RTreeWithGI，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, Global.tempTime));
+			Global.frontTime = Global.tempTime;
+		}
 		
+		if(Global.isDebug) {
+			System.out.println("\n> 完成构造SPCompleteDisk，用时" + TimeUtility.getSpendTimeStr(Global.startTime, Global.frontTime));
+		}
 	}
 	
 	public void free() {
@@ -112,13 +136,21 @@ public class SPCompleteDisk {
 	 */
 	public List<KSPCandidate> bsp(int k, double[] pCoords, ArrayList<Integer> qwords, Date searchDate) throws Exception {
 		
+		if(Global.isDebug) {
+			System.out.println("> 开始执行bsp . . . ");
+			Global.bspStartTime = System.currentTimeMillis();
+			Global.frontTime = Global.bspStartTime;
+		}
+		
 		List<KSPCandidate> semanticTreeResult = new ArrayList<>();
 		
 		long start = System.currentTimeMillis();
-		System.out.println("> 开始执行bsp . . . ");
 		
 		Point qpoint = new Point(pCoords);
 		
+		if(Global.isDebug) {
+			System.out.println("> 开始计算nIdDateWidMap . . . ");
+		}
 		// 获得Mq
 		Map<Integer, DateWId> nIdDateWidMap = new HashMap<>();
 		Map<Integer, String> tempMap = nIdWIdDateSer.searchNIDKeyListDateIndex(qwords);
@@ -126,14 +158,21 @@ public class SPCompleteDisk {
 			nIdDateWidMap.put(en.getKey(), new DateWId(en.getValue()));
 		}
 		tempMap.clear();
+		if(Global.isDebug) {
+			System.out.println("> 完成计算nIdDateWidMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
+			Global.frontTime = System.currentTimeMillis();
+		}
 		
 		/////////////////////////// 打印测试
-		System.out.println("searchedNodeListMap : ");
-		for(Entry<Integer, DateWId> en : nIdDateWidMap.entrySet()) {
-			System.out.println(en.getKey() + " : " + en.getValue().getStr());
-		}
-		System.out.println();
+//		System.out.println("searchedNodeListMap : ");
+//		for(Entry<Integer, DateWId> en : nIdDateWidMap.entrySet()) {
+//			System.out.println(en.getKey() + " : " + en.getValue().getStr());
+//		}
+//		System.out.println();
 		
+		if(Global.isDebug) {
+			System.out.println("> 开始计算wordMinDateSpanMap . . . ");
+		}
 		// 计算与当前时间时差最小的word组成的map
 		String[] dateArr = null;
 		HashMap<Integer, Integer> wordMinDateSpanMap = new HashMap<>();
@@ -146,23 +185,45 @@ public class SPCompleteDisk {
 			}
 			wordMinDateSpanMap.put(in, TimeUtility.getMinDateSpan(intSearchDate, dateList));
 		}
-		
-		///////////////////////////////// 打印测试
-		System.out.println("wordMinDateSpanMap : ");
-		for(Entry<Integer, Integer> en : wordMinDateSpanMap.entrySet()) {
-			System.out.println(en.getKey() + " - " + en.getValue());
+		if(Global.isDebug) {
+			System.out.println("> 完成计算wordMinDateSpanMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
+			Global.frontTime = System.currentTimeMillis();
 		}
-		System.out.println();
+		///////////////////////////////// 打印测试
+//		System.out.println("wordMinDateSpanMap : ");
+//		for(Entry<Integer, Integer> en : wordMinDateSpanMap.entrySet()) {
+//			System.out.println(en.getKey() + " - " + en.getValue());
+//		}
+//		System.out.println();
 		
+		if(Global.isDebug) {
+			System.out.println("> 开始计算wordPNMap . . . ");
+		}
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		for(Integer in : qwords) {
-			wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, wIdPnSer.getPlaceNeighborhoodStr(in)));
+			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
+			if(st1.startsWith(Global.delimiterPound)) {
+				// pidDate串太长，被切分了
+				StringBuffer sBuf = new StringBuffer();
+				int starti = Integer.parseInt(st1.split(Global.delimiterPound)[1]);
+				int endi = Integer.parseInt(st1.split(Global.delimiterPound)[2]);
+				for(int i = starti; i< endi; i++) {
+					sBuf.append(wIdPnSer.getPlaceNeighborhoodStr(i));
+				}
+				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, sBuf.toString()));
+			} else {
+				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, wIdPnSer.getPlaceNeighborhoodStr(in)));
+			}
+		}
+		if(Global.isDebug) {
+			System.out.println("> 完成计算wordPNMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
+			Global.frontTime = System.currentTimeMillis();
 		}
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
-		Global.startTime = start;
+//		Global.startTime = start;
 		
 		kSP kSPExecutor = new kSP(semanticTreeResult, rgi, nIdDateWidMap, wordMinDateSpanMap, wordPNMap, reachableQuerySer);
 		kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, intSearchDate, v);
@@ -171,23 +232,42 @@ public class SPCompleteDisk {
 
 		// ATTENTION: MUST reset graph after each query
 		rgi.getGraph().reset();
+		
+		// 清空释放内存
+		for(Entry<Integer, DateWId> en : nIdDateWidMap.entrySet()) {
+			if(null != en.getValue()) {
+				en.getValue().clear();
+			}
+		}
+		nIdDateWidMap.clear();
+		wordMinDateSpanMap.clear();
+		
+		for(Entry<Integer, WordRadiusNeighborhood> en : wordPNMap.entrySet()) {
+			if(null != en.getValue())	en.getValue().clear();
+		}
+		wordPNMap.clear();
+				
 		System.out.print("> 查找词");
 		for(int in : qwords) {
 			System.out.print(in + " ");
 		}
-		System.out.println("，共找到" + semanticTreeResult.size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
+		System.out.println("，共找到" + semanticTreeResult.size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
+		
 		return semanticTreeResult;
 	}
 	
 	public static void main(String[] args) throws Exception{
 		SPCompleteDisk spc = new SPCompleteDisk();
+		
+		int k = 10;
 		double[] pcoords = new double[2];
-		pcoords[0] = 1;
-		pcoords[1] = 3;
+		pcoords[0] = 49.014446;
+		pcoords[1] = 48.799393;
 		ArrayList<Integer> qwords = new ArrayList<>();
-		qwords.add(25);
-		qwords.add(26);
-		Utility.showSemanticTreeResult(spc.bsp(3, pcoords, qwords, new Date()));
+		qwords.add(11381939);
+		qwords.add(8511774);
+		Date date = TimeUtility.getDate("1936-01-08");
+		Utility.showSemanticTreeResult(spc.bsp(k, pcoords, qwords, date));
 		spc.free();
 	}
 }

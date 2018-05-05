@@ -31,6 +31,7 @@ import spatialindex.spatialindex.INearestNeighborComparator;
 import spatialindex.spatialindex.IShape;
 import spatialindex.spatialindex.IVisitor;
 import utility.Global;
+import utility.TimeUtility;
 
 /**
  * Implementation of SP
@@ -65,6 +66,10 @@ public class kSP {
 			throw new IllegalArgumentException(
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
 		NNComparator nnc = rgi.new NNComparator();
+		if(Global.isDebug) {
+			System.out.println("> 开始进入遍历RTree . . . ");
+			Global.frontTime = System.currentTimeMillis();
+		}
 		kSPComputation(k, alphaRadius, qpoint, qwords, date, result, nnc);
 
 	}
@@ -126,14 +131,41 @@ public class kSP {
 						insertIntoHeapH(queue, eChild2);
 					}
 				} else {
+					if(Global.isDebug && Global.isFirstRTree) {
+						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
+						Global.frontTime = System.currentTimeMillis();
+						Global.isFirstRTree = false;
+					}
+					
+					if(Global.isDebug) {
+						System.out.println("> 开始计算kspTree . . . ");
+						Global.frontTime = System.currentTimeMillis();
+					}
+					
 					Data placeData = (Data) first.m_pEntry;
-
+					
+					if(Global.isDebug) {
+						System.out.println("> 计算是否可达 . . . ");
+						Global.frontTime = System.currentTimeMillis();
+					}
 					// unqualified place pruning
 					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
+						if(Global.isDebug) {
+							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+							Global.frontTime = System.currentTimeMillis();
+						}
 						Global.count[5]++;// pruned
 						continue;
 					}
-
+					if(Global.isDebug) {
+						System.out.println("> 可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
+						Global.frontTime = System.currentTimeMillis();
+					}
+					if(Global.isDebug) {
+						System.out.println("> 开始计算Tree . . . ");
+						Global.frontTime = System.currentTimeMillis();
+					}
+					
 					double loosenessThreshold = Double.POSITIVE_INFINITY;
 					if (kthScore != Double.POSITIVE_INFINITY) {
 						loosenessThreshold = kthScore / placeData.getWeight();
@@ -164,6 +196,16 @@ public class kSP {
 						}
 						kthScore = ((KSPCandidateVisitor) result).size() >= k ? ((KSPCandidateVisitor) result)
 								.getWorstRankingScore() : Double.POSITIVE_INFINITY;
+						
+						if(Global.isDebug) {
+							System.out.println("> 成功一个可用Tree，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+							Global.frontTime = System.currentTimeMillis();
+						}
+					} else {
+						if(Global.isDebug) {
+							System.out.println("> 失败一个可用Tree，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+							Global.frontTime = System.currentTimeMillis();
+						}
 					}
 				}
 //				long curTime = System.currentTimeMillis();

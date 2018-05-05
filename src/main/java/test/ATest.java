@@ -56,6 +56,7 @@ import precomputation.freebase.IndexNodeMapService;
 import file.reader.ZipBase64Reader;
 import file.reader.ZipReader;
 import file.writer.ZipWriter;
+import utility.Global;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
 
@@ -71,6 +72,9 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		String str = "#11869638#11869640";
+		System.out.println(str.split(Global.delimiterPound)[1]);
+		
 		
 		System.out.println(TimeUtility.getIntDate(new Date()));
 		

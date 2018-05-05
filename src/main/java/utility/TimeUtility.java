@@ -39,6 +39,17 @@ public class TimeUtility {
 		return null;
 	}
 	
+	// 格式化时间串
+	public static Date getDate(String dateStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			return sdf.parse(dateStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	// 计算与所给时间最小的日期差
 	public static int getMinDateSpan(int curDate, List<Integer> dateList) {
 		int reIndex = Collections.binarySearch(dateList, curDate);

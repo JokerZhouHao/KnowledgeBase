@@ -16,12 +16,16 @@ import utility.TimeUtility;
 
 public class SampleChooser {
 	public static void productTestSample(int sampleNum, String vidFile, String pidCoordFile, String sampleFile) throws Exception{
+		Long start = System.currentTimeMillis();
+		System.out.println("> 开始从原始文件中随机选取" + sampleNum + "个测试样本 . . . ");
+		
 		Map<Integer, float[]> pidCoordMap = new HashMap<>();
 		float[] floatArr = null;
 		BufferedReader br = new BufferedReader(new FileReader(pidCoordFile));
 		String line = br.readLine();
 		String[] strArr = null;
 		int id = 0;
+		int samNum = sampleNum;
 		
 		// 将坐标信息读入内存
 		while(null != (line = br.readLine())) {
@@ -67,7 +71,7 @@ public class SampleChooser {
 						if (sampCoord[0] >= -90 && sampCoord[0] <= 90 && sampCoord[1] >= -180 && sampCoord[1] <= 180) {
 							strArr = strArr[1].split(Global.delimiterDate);
 							// 时间
-							sampDate = TimeUtility.getOffsetDate(strArr[0], lineOffsetGe.getRandomInt());
+							sampDate = TimeUtility.getOffsetDate(strArr[0], dateOffsetGe.getRandomInt());
 							// qwords
 							strArr = strArr[strArr.length - 1].split(Global.delimiterLevel2);
 							if(strArr.length > 2) {
@@ -95,6 +99,7 @@ public class SampleChooser {
 			br.close();
 		}
 		bw.close();
+		System.out.println("> 完成选取" + samNum + "个测试样本.");
 	}
 	
 	public static void main(String[] args) throws Exception{

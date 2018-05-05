@@ -87,7 +87,12 @@ public class WordRadiusNeighborhood {
 	 */
 	public void clear() {
 		for(HashMap<Integer, ArrayList<Integer>> hm : eachLayerWN) {
-			if(null != hm)	hm.clear();
+			if(null != hm) {
+				for(Entry<Integer, ArrayList<Integer>> en : hm.entrySet()) {
+					if(en.getValue() != null)	en.getValue().clear();
+				}
+				hm.clear();
+			}
 		}
 	}
 	
