@@ -267,6 +267,16 @@ public class SPCompleteDisk {
 		qwords.add(11381939);
 		qwords.add(8511774);
 		Date date = TimeUtility.getDate("1936-01-08");
+		if(args.length >= 6) {
+			System.out.println("> 初始化输入参数\n");
+			k = Integer.parseInt(args[0]);
+			pcoords[0] = Double.parseDouble(args[1]);
+			pcoords[1] = Double.parseDouble(args[2]);
+			qwords = new ArrayList<>();
+			qwords.add(Integer.parseInt(args[3]));
+			qwords.add(Integer.parseInt(args[4]));
+			date  = TimeUtility.getDate(args[5]);
+		}
 		Utility.showSemanticTreeResult(spc.bsp(k, pcoords, qwords, date));
 		spc.free();
 	}

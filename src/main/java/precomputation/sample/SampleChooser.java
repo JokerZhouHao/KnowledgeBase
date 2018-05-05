@@ -80,6 +80,7 @@ public class SampleChooser {
 									sampQwords.add(Integer.parseInt(strArr[i]));
 								}
 								// 输出
+								bw.write(line + '\n');
 								bw.write(String.valueOf(sampK) + " ");
 								for(i=0; i<sampCoord.length; i++) {
 									bw.write(String.valueOf(sampCoord[i]) + " ");
