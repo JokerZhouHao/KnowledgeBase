@@ -19,8 +19,8 @@ public class SampleChooser {
 		Long start = System.currentTimeMillis();
 		System.out.println("> 开始从原始文件中随机选取" + sampleNum + "个测试样本 . . . ");
 		
-		Map<Integer, float[]> pidCoordMap = new HashMap<>();
-		float[] floatArr = null;
+		Map<Integer, double[]> pidCoordMap = new HashMap<>();
+		double[] doubleArr = null;
 		BufferedReader br = new BufferedReader(new FileReader(pidCoordFile));
 		String line = br.readLine();
 		String[] strArr = null;
@@ -32,11 +32,11 @@ public class SampleChooser {
 			strArr = line.split(Global.delimiterLevel1);
 			id = Integer.parseInt(strArr[0]);
 			strArr = strArr[1].split(Global.delimiterSpace);
-			floatArr = new float[2];
+			doubleArr = new double[2];
 			for(int i=0; i<strArr.length; i++) {
-				floatArr[i] = Float.parseFloat(strArr[0]);
+				doubleArr[i] = Double.parseDouble(strArr[i]);
 			}
-			pidCoordMap.put(id, floatArr);
+			pidCoordMap.put(id, doubleArr);
 		}
 		br.close();
 		
@@ -50,7 +50,8 @@ public class SampleChooser {
 		RandomNumGenerator dateOffsetGe = new RandomNumGenerator(1, 10);
 		
 		int sampK = 10;
-		float[] sampCoord = null;
+		double[] sampCoord = null;
+		double[] tempCoord = null;
 		String sampDate = null;
 		ArrayList<Integer> sampQwords = null;
 		int i =0;
@@ -64,13 +65,15 @@ public class SampleChooser {
 					lineOffset = lineOffsetGe.getRandomInt();
 					strArr = line.split(Global.delimiterLevel1);
 					id = Integer.parseInt(strArr[0]);
-					if(!recSet.contains(id) && null != (sampCoord = pidCoordMap.get(id))) {
+					if(!recSet.contains(id) && null != (tempCoord = pidCoordMap.get(id))) {
 						// 坐标
-						sampCoord[0] += RandomNumGenerator.getRandomFloat();
-						sampCoord[1] += RandomNumGenerator.getRandomFloat();
+						sampCoord = new double[2];
+						sampCoord[0] = tempCoord[0] + RandomNumGenerator.getRandomFloat();
+						sampCoord[1] = tempCoord[1] + RandomNumGenerator.getRandomFloat();
 						if (sampCoord[0] >= -90 && sampCoord[0] <= 90 && sampCoord[1] >= -180 && sampCoord[1] <= 180) {
 							strArr = strArr[1].split(Global.delimiterDate);
 							// 时间
+							String orgDate = strArr[0];
 							sampDate = TimeUtility.getOffsetDate(strArr[0], dateOffsetGe.getRandomInt());
 							// qwords
 							strArr = strArr[strArr.length - 1].split(Global.delimiterLevel2);
@@ -80,7 +83,12 @@ public class SampleChooser {
 									sampQwords.add(Integer.parseInt(strArr[i]));
 								}
 								// 输出
-								bw.write(line + '\n');
+								bw.write(String.valueOf(sampK) + " ");
+								bw.write(String.valueOf(tempCoord[0]) + " ");
+								bw.write(String.valueOf(tempCoord[1]) + " ");
+								bw.write(strArr[0] + " ");
+								bw.write(strArr[1] + " ");
+								bw.write(orgDate + "\n");
 								bw.write(String.valueOf(sampK) + " ");
 								for(i=0; i<sampCoord.length; i++) {
 									bw.write(String.valueOf(sampCoord[i]) + " ");
