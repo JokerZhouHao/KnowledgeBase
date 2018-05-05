@@ -58,10 +58,10 @@ public class TimeUtility {
 		else {
 			reIndex = -reIndex;
 			if(0 < reIndex-1 && reIndex-1 < dateList.size()) {	// 当前日期在所有日期中间
-				if(curDate - dateList.get(reIndex -1) < dateList.get(reIndex) - curDate)
-					return curDate - dateList.get(reIndex -1) + 1;
+				if(curDate - dateList.get(reIndex -2) < dateList.get(reIndex - 1) - curDate)
+					return curDate - dateList.get(reIndex -2) + 1;
 				else
-					return dateList.get(reIndex)-curDate + 1;
+					return dateList.get(reIndex - 1)-curDate + 1;
 			} else if(reIndex == dateList.size() + 1) {	// 当前日期晚于于当前所有日期
 				return curDate - dateList.get(dateList.size() -1) + 1;
 			} else {	// 当前时间早于所有时间

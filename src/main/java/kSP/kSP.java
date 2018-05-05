@@ -138,22 +138,22 @@ public class kSP {
 					}
 					
 					if(Global.isDebug) {
-						System.out.println("> 开始计算kspTree . . . ");
+//						System.out.println("> 开始计算kspTree . . . ");
 						Global.frontTime = System.currentTimeMillis();
 					}
 					
 					Data placeData = (Data) first.m_pEntry;
 					
-					if(Global.isDebug) {
-						System.out.println("> 计算是否可达 . . . ");
-						Global.frontTime = System.currentTimeMillis();
-					}
+//					if(Global.isDebug) {
+//						System.out.println("> 计算是否可达 . . . ");
+//						Global.frontTime = System.currentTimeMillis();
+//					}
 					// unqualified place pruning
 					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
-						if(Global.isDebug) {
-							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-							Global.frontTime = System.currentTimeMillis();
-						}
+//						if(Global.isDebug) {
+//							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+//							Global.frontTime = System.currentTimeMillis();
+//						}
 						Global.count[5]++;// pruned
 						continue;
 					}

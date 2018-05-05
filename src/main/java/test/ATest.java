@@ -72,6 +72,13 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		ArrayList<Integer> al = new ArrayList<>();
+		al.add(2);
+		al.add(6);
+		al.add(10);
+		System.out.println(Collections.binarySearch(al, 3));
+		
+		
 		int lineNum = 1;
 		if(args.length > 0) {
 		}
