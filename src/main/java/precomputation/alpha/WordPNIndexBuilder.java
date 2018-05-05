@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.lucene.index.IndexWriter;
+
 import entity.sp.PlaceRadiusNeighborhood;
 import entity.sp.SortedList;
 import entity.sp.SortedList.SortedListNode;
@@ -86,7 +88,7 @@ public class WordPNIndexBuilder {
 		String outputIindexFile = Global.wordPNFile;
 		int startKeyword = Global.numNodes;
 		int endKeyword = Global.numNodes + Global.numKeywords;
-		int interval = endKeyword - startKeyword - 1;
+		int interval = (endKeyword - startKeyword - 1)/15;
 		
 		// 在建索引过程中输出wPN文件
 		boolean isOutput = false;
@@ -101,9 +103,14 @@ public class WordPNIndexBuilder {
 		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN);
 		alphaIndexSer.openIndexWriter();
 		
-		HashMap<Integer, TempAlphaPN> alphaPNMap = new HashMap<>();
 		TempAlphaPN radiusPN = null;
+		
+		///////////////////////////
+//		startKeyword = 10358261;
+		int offsetStart = Global.numNodes + Global.numKeywords;
+		
 		while (startKeyword < endKeyword) {
+			HashMap<Integer, TempAlphaPN> alphaPNMap = new HashMap<>();
 			System.out.println("processing keywords [" + startKeyword + "," + (startKeyword + interval) + "]");
 			// build partial inverted index
 			alphaPNBuilder.buildAlphaPN(startKeyword,
@@ -115,14 +122,42 @@ public class WordPNIndexBuilder {
 				iindexSize++;
 				iindexTotalLength += 1;
 				if(isOutput)	alphaPNBuilder.outputAlphaPN(writer, Global.radius, kid, radiusPN);
-				alphaIndexSer.addDoc(kid, radiusPN.toString());
+				
+				// 解决pIdDates太长，Lucene无法处理
+				String st = radiusPN.toString();
+				if(st.length() > IndexWriter.MAX_STORED_STRING_LENGTH) {
+					int stSplitNum = st.length()%IndexWriter.MAX_STORED_STRING_LENGTH;
+					if(stSplitNum == 0 ) {
+						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH;
+					} else {
+						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH + 1;
+					}
+					alphaIndexSer.addDoc(kid, Global.delimiterPound + String.valueOf(offsetStart) + Global.delimiterPound + String.valueOf(offsetStart + stSplitNum));
+					int strStart = 0;
+					int strEnd = 0;
+					for(int i=0; i<stSplitNum; i++) {
+						strStart = strEnd;
+						strEnd = strStart + IndexWriter.MAX_STORED_STRING_LENGTH;
+						if(strEnd <= st.length()) {
+							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, strEnd));
+						} else {
+							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, st.length()));
+						}
+					}
+					offsetStart += stSplitNum;
+				} else {
+					alphaIndexSer.addDoc(kid, st);
+				}
 				radiusPN.clear();
 			}
 			// clear and go to next batch
 			alphaPNMap.clear();
+			System.gc();
 			startKeyword += interval + 1;
+			
+			/////////////////////////
+//			break;
 		}
-		long end = System.currentTimeMillis();
 		
 		if(isOutput) {
 			writer.flush();
