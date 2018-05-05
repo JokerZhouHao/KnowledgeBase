@@ -72,21 +72,45 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		String str = "#11869638#11869640";
-		System.out.println(str.split(Global.delimiterPound)[1]);
-		
-		
-		System.out.println(TimeUtility.getIntDate(new Date()));
-		
-		ArrayList<Integer> li = new ArrayList<>();
-		li.add(2);
-		li.add(9);
-		li.add(5);
-		Set<Integer> set = new TreeSet<Integer>(li);;
-		set.remove(2);
-		for(Integer in : set) {
-			System.out.println(in);
+		int lineNum = 1;
+		if(args.length > 0) {
 		}
+		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
+		br.readLine();
+		br.close();
+		
+		String line1 = "10 29.017887 29.083847 ";
+		String line2 = "8973992 11381939 2005-01-03";
+		String[] strArr = line1.split(Global.delimiterSpace);
+		int k = Integer.parseInt(strArr[0]);
+		double[] pcoords = new double[2];
+		pcoords[0] = Double.parseDouble(strArr[1]);
+		pcoords[1] = Double.parseDouble(strArr[2]);
+		strArr = line2.split(Global.delimiterSpace);
+		ArrayList<Integer> qwords = new ArrayList<>();
+		for(int i=0; i<strArr.length-1; i++) {
+			qwords.add(Integer.parseInt(strArr[i]));
+		}
+		Date date = TimeUtility.getDate(strArr[strArr.length - 1]);
+		System.out.println(line1.split(Global.delimiterSpace).length);
+		System.out.println(line2.split(Global.delimiterSpace).length);
+		
+		
+//		String str = "#11869638#11869640";
+//		System.out.println(str.split(Global.delimiterPound)[1]);
+//		
+//		
+//		System.out.println(TimeUtility.getIntDate(new Date()));
+//		
+//		ArrayList<Integer> li = new ArrayList<>();
+//		li.add(2);
+//		li.add(9);
+//		li.add(5);
+//		Set<Integer> set = new TreeSet<Integer>(li);;
+//		set.remove(2);
+//		for(Integer in : set) {
+//			System.out.println(in);
+//		}
 		
 //		Integer in = new Integer(5);
 //		Integer in1 = 5;

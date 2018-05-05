@@ -84,11 +84,11 @@ public class SampleChooser {
 								for(i=0; i<sampCoord.length; i++) {
 									bw.write(String.valueOf(sampCoord[i]) + " ");
 								}
+								bw.write('\n');
 								for(i=0; i<sampQwords.size(); i++) {
 									bw.write(String.valueOf(sampQwords.get(i)) + " ");
 								}
-								bw.write(sampDate + " ");
-								bw.write('\n');
+								bw.write(sampDate + "\n");
 								recSet.add(id);
 								if(0 == (--sampleNum))	break;
 							}
