@@ -122,7 +122,7 @@ public class Global {
 	public static boolean isFirstRTree = true;
 	
 	public static Boolean isTest = Boolean.TRUE;
-	public static long limitTime = 300 * 1000; // 限制每次bsp运行时间为120s
+	public static long limitTime = 300 * 1000; // 限制每次bsp运行时间为300s
 	public static String timeTotal = null;
 	public static String timeBuildSPCompleteDisk = null;
 	public static String timeOpenLuceneIndex = null;
