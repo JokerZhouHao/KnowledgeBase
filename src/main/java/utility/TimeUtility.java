@@ -23,6 +23,10 @@ public class TimeUtility {
 		return  spendTime/1000/3600 + "h" + spendTime/1000%3600/60 + "m" + spendTime/1000%3600000%60 + "s";
 	}
 	
+	public static String getSpanSecondStr(Long startTime, Long endTime) {
+		return String.valueOf((endTime - startTime)/1000);
+	}
+	
 	// 计算两个日期之间的天数差，同一天返回1
 	public static int calGapBetweenDate(Date d1, Date d2) {
 		return (int)(Math.abs((d1.getTime()-d2.getTime())/86400000) + 1);

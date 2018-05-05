@@ -25,7 +25,8 @@ public class SampleChooser {
 		String line = br.readLine();
 		String[] strArr = null;
 		int id = 0;
-		int samNum = sampleNum;
+		int recSamNum = 1;
+		
 		
 		// 将坐标信息读入内存
 		while(null != (line = br.readLine())) {
@@ -57,7 +58,7 @@ public class SampleChooser {
 		int i =0;
 		Set<Integer> recSet = new TreeSet<Integer>();
 		
-		while(0 < sampleNum) {
+		while(recSamNum <= sampleNum) {
 			br = new BufferedReader(new FileReader(vidFile));
 			br.readLine();
 			while(null != (line = br.readLine())) {
@@ -83,6 +84,7 @@ public class SampleChooser {
 									sampQwords.add(Integer.parseInt(strArr[i]));
 								}
 								// 输出
+								bw.write(String.valueOf(recSamNum) + Global.delimiterLevel1 + String.valueOf(id) + " ");
 								bw.write(String.valueOf(sampK) + " ");
 								bw.write(String.valueOf(tempCoord[0]) + " ");
 								bw.write(String.valueOf(tempCoord[1]) + " ");
@@ -93,13 +95,12 @@ public class SampleChooser {
 								for(i=0; i<sampCoord.length; i++) {
 									bw.write(String.valueOf(sampCoord[i]) + " ");
 								}
-								bw.write('\n');
 								for(i=0; i<sampQwords.size(); i++) {
 									bw.write(String.valueOf(sampQwords.get(i)) + " ");
 								}
 								bw.write(sampDate + "\n");
 								recSet.add(id);
-								if(0 == (--sampleNum))	break;
+								if(++recSamNum > sampleNum)	break;
 							}
 						}
 					}
@@ -108,7 +109,7 @@ public class SampleChooser {
 			br.close();
 		}
 		bw.close();
-		System.out.println("> 完成选取" + samNum + "个测试样本.");
+		System.out.println("> 完成选取" + sampleNum + "个测试样本.");
 	}
 	
 	public static void main(String[] args) throws Exception{

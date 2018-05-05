@@ -81,6 +81,7 @@ public class Global {
 	public static String pidCoordFile = "pidCoordYagoVB.txt";
 	public static String invertedIndexFile = null;
 	public static String testSampleFile = String.valueOf(numTestSample) + "." + "testSample";
+	public static String testSampleResultFile = String.valueOf(numTestSample) + "." + "testSampleResultFile";
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
@@ -113,11 +114,21 @@ public class Global {
 	public static String delimiterCommont = "//"; // comment symbol in our configuration.
 	
 	/* using for test */
-	public static Boolean isDebug = Boolean.TRUE;
+	public static Boolean isDebug = Boolean.FALSE;
 	public static long startTime = 0;
 	public static long bspStartTime = 0;
 	public static long frontTime = 0;
 	public static long tempTime = 0;
 	public static boolean isFirstRTree = true;
 	
+	public static Boolean isTest = Boolean.TRUE;
+	public static long limitTime = 300 * 1000; // 限制每次bsp运行时间为120s
+	public static String timeTotal = null;
+	public static String timeBuildSPCompleteDisk = null;
+	public static String timeOpenLuceneIndex = null;
+	public static String timeLoadTFLable = null;
+	public static String timeBuildRGI = null;
+	public static int curRecIndex = 0;
+	public static String[][] timeBsp = new String[100][6];
+	public static String[][] bspRes = new String[100][2];
 }

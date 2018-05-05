@@ -77,7 +77,9 @@ public class kSP {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
 			throw new IllegalArgumentException(
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
-
+		
+		double minDist = 0;
+		
 		rgi.readLock();
 
 		try {
@@ -96,6 +98,7 @@ public class kSP {
 			
 			while (queue.size() != 0) {
 				NNEntry first = (NNEntry) queue.remove(0);
+				minDist = first.m_minDist;
 				if (kthScore < first.m_minDist) {
 					break;
 				}
@@ -174,6 +177,13 @@ public class kSP {
 					long start = System.currentTimeMillis();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
 							qwords, date, loosenessThreshold, nIdDateWidMap, wordMinDateSpanMap, semanticTree);
+					
+					if(Global.isTest) {
+						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
+							break;
+						}
+					}
+					
 					long end = System.currentTimeMillis();
 					Global.runtime[1] += end - start;
 
@@ -213,6 +223,10 @@ public class kSP {
 
 		} finally {
 			rgi.readUnlock();
+		}
+		if(Global.isTest) {
+			Global.bspRes[Global.curRecIndex][0] = String.valueOf(minDist);
+			Global.bspRes[Global.curRecIndex][1] = String.valueOf(kthScore);
 		}
 	}
 
