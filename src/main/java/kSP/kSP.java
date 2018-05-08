@@ -225,8 +225,8 @@ public class kSP {
 			rgi.readUnlock();
 		}
 		if(Global.isTest) {
-			Global.bspRes[Global.curRecIndex][0] = String.valueOf(minDist);
-			Global.bspRes[Global.curRecIndex][1] = String.valueOf(kthScore);
+			Global.bspRes[0] = String.valueOf(minDist);
+			Global.bspRes[1] = String.valueOf(kthScore);
 		}
 	}
 

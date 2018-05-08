@@ -121,14 +121,15 @@ public class Global {
 	public static long tempTime = 0;
 	public static boolean isFirstRTree = true;
 	
+	public static int testK = 1;
 	public static Boolean isTest = Boolean.TRUE;
-	public static long limitTime = 300 * 1000; // 限制每次bsp运行时间为300s
+	public static long limitTime = 150 * 1000; // 限制每次bsp运行的最大时间
 	public static String timeTotal = null;
 	public static String timeBuildSPCompleteDisk = null;
 	public static String timeOpenLuceneIndex = null;
 	public static String timeLoadTFLable = null;
 	public static String timeBuildRGI = null;
 	public static int curRecIndex = 0;
-	public static String[][] timeBsp = new String[100][6];
-	public static String[][] bspRes = new String[100][2];
+	public static String[] timeBsp = new String[6];
+	public static String[] bspRes = new String[2];
 }

@@ -198,7 +198,7 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBsp[Global.curRecIndex][0] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
+			Global.timeBsp[0] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
@@ -231,7 +231,7 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBsp[Global.curRecIndex][1] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
+			Global.timeBsp[1] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
@@ -268,7 +268,7 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBsp[Global.curRecIndex][2] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
+			Global.timeBsp[2] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
@@ -280,8 +280,8 @@ public class SPCompleteDisk {
 		kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, intSearchDate, v);
 		
 		if(Global.isTest) {
-			Global.timeBsp[Global.curRecIndex][3] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
-			Global.timeBsp[Global.curRecIndex][4] = String.valueOf(((KSPCandidateVisitor)v).size());
+			Global.timeBsp[3] = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
+			Global.timeBsp[4] = String.valueOf(((KSPCandidateVisitor)v).size());
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
@@ -314,8 +314,8 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBsp[Global.curRecIndex][5] = TimeUtility.getSpanSecondStr(Global.bspStartTime, System.currentTimeMillis());
 			Global.curRecIndex++;
+			Global.timeBsp[5] = TimeUtility.getSpanSecondStr(Global.bspStartTime, System.currentTimeMillis());
 			System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
 		}
 		
@@ -328,7 +328,10 @@ public class SPCompleteDisk {
 			Global.startTime = System.currentTimeMillis();
 			System.out.println("> 开始测试样本 . . . ");
 		}
+		System.out.println("> 开始初始化SPCompleteDisk . . . ");
 		SPCompleteDisk spc = new SPCompleteDisk();
+		System.out.println("> 成功初始化SPCompleteDisk ！ ！ ！ ");
+//		SPCompleteDisk spc = null;
 		int k = 10;
 		double[] pcoords = new double[2];
 		pcoords[0] = 49.014446;
@@ -339,14 +342,25 @@ public class SPCompleteDisk {
 		Date date = TimeUtility.getDate("1936-01-08");
 		int samNum = Global.numTestSample;
 		int samNumCopy = 0;
+		BufferedWriter bw = null;
 		if(Global.isTest) {
 			if(args.length > 0) {
-				samNum = Integer.parseInt(args[0]);
-				if(samNum > Global.numTestSample) {
-					samNum = Global.numTestSample;
+				for(int i=0; i<args.length; i++) {
+					if(args[i].contains("sn")){
+						samNum = Integer.parseInt(args[i].split("=")[1].trim());
+						if(samNum > Global.numTestSample) {
+							samNum = Global.numTestSample;
+						}
+					} else if (args[i].contains("k")) {
+						Global.testK = Integer.parseInt(args[i].split("=")[1].trim());
+					}
 				}
 			}
 			samNumCopy = samNum;
+			
+			// 输出结果
+			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + Global.testSampleResultFile));
+			
 			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
 			br.readLine();
 			String lineStr = null;
@@ -355,6 +369,7 @@ public class SPCompleteDisk {
 				lineStr = br.readLine();
 				String[] strArr = lineStr.split(Global.delimiterSpace);
 				k = Integer.parseInt(strArr[0]);
+				k = Global.testK;
 				pcoords[0] = Double.parseDouble(strArr[1]);
 				pcoords[1] = Double.parseDouble(strArr[2]);
 				qwords = new ArrayList<>();
@@ -363,6 +378,26 @@ public class SPCompleteDisk {
 				date = TimeUtility.getDate(strArr[5]);
 				spc.bsp(k, pcoords, qwords, date);
 				samNum--;
+				
+				// 写数据
+				if(Global.curRecIndex == 1) {
+					bw.write(String.valueOf(samNumCopy) + "#\n");
+					bw.write("timeOpenLuceneIndex : " + Global.timeOpenLuceneIndex + "\n");
+					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
+					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
+					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
+					bw.write("num nIdDateWidMap wordMinDateSpanMap wordPNMap treeTime resultNum bspTime first.m_minDist kthScore\n");
+				}
+				
+				bw.write(String.valueOf(Global.curRecIndex) + " ");
+				for(int j=0; j<6; j++) {
+					bw.write(Global.timeBsp[j] + " ");
+				}
+				for(int j=0; j<2; j++) {
+					bw.write(Global.bspRes[j] + " ");
+				}
+				bw.write('\n');
+				bw.flush();
 			}
 			br.close();
 		}
@@ -381,27 +416,6 @@ public class SPCompleteDisk {
 		spc.free();
 		if(Global.isTest) {
 			Global.timeTotal = TimeUtility.getSpanSecondStr(Global.startTime, System.currentTimeMillis());
-			
-			// 输出结果
-			BufferedWriter bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + Global.testSampleResultFile));
-			bw.write(String.valueOf(samNumCopy) + "#\n");
-			bw.write("timeOpenLuceneIndex : " + Global.timeOpenLuceneIndex + "\n");
-			bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
-			bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
-			bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-			
-			bw.write("num nIdDateWidMap wordMinDateSpanMap wordPNMap treeTime resultNum bspTime first.m_minDist kthScore\n");
-			for(int i = 0; i<samNumCopy; i++) {
-				bw.write(String.valueOf(i + 1) + " ");
-				for(int j=0; j<6; j++) {
-					bw.write(Global.timeBsp[i][j] + " ");
-				}
-				for(int j=0; j<2; j++) {
-					bw.write(Global.bspRes[i][j] + " ");
-				}
-				bw.write('\n');
-			}
-			
 			bw.write("\n" + "timeTotal : " + Global.timeTotal);
 			bw.flush();
 			bw.close();
