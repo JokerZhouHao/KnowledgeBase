@@ -340,7 +340,7 @@ public class SPCompleteDisk {
 		qwords.add(11381939);
 		qwords.add(8511774);
 		Date date = TimeUtility.getDate("1936-01-08");
-		int samNum = Global.numTestSample;
+		int samNum = Global.testSampleNum;
 		int samNumCopy = 0;
 		BufferedWriter bw = null;
 		if(Global.isTest) {
@@ -348,9 +348,10 @@ public class SPCompleteDisk {
 				for(int i=0; i<args.length; i++) {
 					if(args[i].contains("sn")){
 						samNum = Integer.parseInt(args[i].split("=")[1].trim());
-						if(samNum > Global.numTestSample) {
-							samNum = Global.numTestSample;
+						if(samNum > Global.testOrgSampleNum) {
+							samNum = Global.testOrgSampleNum;
 						}
+						Global.testSampleNum = samNum;
 					} else if (args[i].contains("k")) {
 						Global.testK = Integer.parseInt(args[i].split("=")[1].trim());
 					}
@@ -359,7 +360,7 @@ public class SPCompleteDisk {
 			samNumCopy = samNum;
 			
 			// 输出结果
-			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + Global.testSampleResultFile));
+			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + String.valueOf(Global.testK) + "." + String.valueOf(Global.testSampleNum) + Global.testSampleResultFile));
 			
 			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
 			br.readLine();

@@ -58,7 +58,6 @@ public class Global {
 //	public static int numSCCs = 30;
 //	public static int numContainCoordWordDate = 12;
 	public static int numContainCoordWordDate = 812532;
-	public static int numTestSample = 100;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
@@ -80,8 +79,6 @@ public class Global {
 	public static String widOnIntDateFile = "widOnIntDate.txt";
 	public static String pidCoordFile = "pidCoordYagoVB.txt";
 	public static String invertedIndexFile = null;
-	public static String testSampleFile = String.valueOf(numTestSample) + "." + "testSample";
-	public static String testSampleResultFile = String.valueOf(numTestSample) + "." + "testSampleResultFile";
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
@@ -121,7 +118,11 @@ public class Global {
 	public static long tempTime = 0;
 	public static boolean isFirstRTree = true;
 	
-	public static int testK = 1;
+	public static int testK = 10;
+	public static int testOrgSampleNum = 100;
+	public static int testSampleNum = testOrgSampleNum;
+	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
+	public static String testSampleResultFile =  "." + "testSampleResultFile";
 	public static Boolean isTest = Boolean.TRUE;
 	public static long limitTime = 150 * 1000; // 限制每次bsp运行的最大时间
 	public static String timeTotal = null;
