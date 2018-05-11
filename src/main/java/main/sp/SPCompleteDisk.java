@@ -128,7 +128,7 @@ public class SPCompleteDisk {
 			psRTree.setProperty("IndexIdentifier", i);
 			
 			rgi = new RTreeWithGI(psRTree, file);
-			rgi.buildSimpleGraphInMemory();
+//			rgi.buildSimpleGraphInMemory();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -248,20 +248,40 @@ public class SPCompleteDisk {
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		for(Integer in : qwords) {
+			if(Global.isTest) {
+				Global.frontTime = System.currentTimeMillis();
+			}
 			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
 			if(st1.startsWith(Global.delimiterPound)) {
+				if(Global.isTest) {
+					Global.timePn[2] = 1;
+					Global.frontTime = System.currentTimeMillis();
+				}
 				// pidDate串太长，被切分了
 				StringBuffer sBuf = new StringBuffer();
 				int starti = Integer.parseInt(st1.split(Global.delimiterPound)[1]);
 				int endi = Integer.parseInt(st1.split(Global.delimiterPound)[2]);
 				for(int i = starti; i< endi; i++) {
+					if(Global.isTest && i==starti) {
+						Global.tempTime = System.currentTimeMillis();
+						Global.isFirstReadPn = true;
+					}
 					sBuf.append(wIdPnSer.getPlaceNeighborhoodStr(i));
 				}
 				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, sBuf.toString()));
 			} else {
-				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, wIdPnSer.getPlaceNeighborhoodStr(in)));
+				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
 			}
 		}
+		
+		///////测试//////////////////////
+		if(Global.isTest) {
+			return null;
+		}
+		//////测试/////////////////////////
+		
+		
+		
 		if(Global.isDebug) {
 			System.out.println("> 完成计算wordPNMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 			Global.frontTime = System.currentTimeMillis();
@@ -387,10 +407,14 @@ public class SPCompleteDisk {
 					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
 					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
 					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-					bw.write("num nIdDateWidMap wordMinDateSpanMap wordPNMap treeTime resultNum bspTime first.m_minDist kthScore\n");
+					bw.write("num FindPNTime ReadPNTime IsJoin nIdDateWidMap wordMinDateSpanMap wordPNMap treeTime resultNum bspTime first.m_minDist kthScore\n");
 				}
 				
 				bw.write(String.valueOf(Global.curRecIndex) + " ");
+				for(int j=0; j<3; j++) {
+					bw.write(String.valueOf(Global.timePn[j] + " "));
+					Global.timePn[j] = 0;
+				}
 				for(int j=0; j<6; j++) {
 					bw.write(Global.timeBsp[j] + " ");
 				}
@@ -417,6 +441,9 @@ public class SPCompleteDisk {
 		spc.free();
 		if(Global.isTest) {
 			Global.timeTotal = TimeUtility.getSpanSecondStr(Global.startTime, System.currentTimeMillis());
+			
+			bw.write("\ntimeReadLuceneMax : " + Global.timeReadLuceneMax);
+			
 			bw.write("\n" + "timeTotal : " + Global.timeTotal);
 			bw.flush();
 			bw.close();

@@ -19,6 +19,7 @@ import org.apache.lucene.store.FSDirectory;
 
 import utility.Global;
 import utility.PatternAnalyzer;
+import utility.TimeUtility;
 
 public class IndexWordPNService {
 	
@@ -81,9 +82,23 @@ public class IndexWordPNService {
 	public String getPlaceNeighborhoodStr(int wid) {
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
+			if(Global.isTest) {
+				Global.timePn[0] += TimeUtility.getSpanSecond(Global.frontTime, System.currentTimeMillis());
+				Global.frontTime = System.currentTimeMillis();
+			}
 			ScoreDoc[] hits = results.scoreDocs;
 			if(hits.length == 0)	return null;
-			return indexSearcher.doc(hits[0].doc).get("pIdDates");
+			
+			String st = indexSearcher.doc(hits[0].doc).get("pIdDates");
+			if(Global.isTest) {
+				if(Global.isFirstReadPn) {
+					Global.timeReadLuceneMax = TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
+					Global.isFirstReadPn = false;
+				}
+				Global.timePn[1] += TimeUtility.getSpanSecond(Global.frontTime, System.currentTimeMillis());
+				Global.frontTime = System.currentTimeMillis();
+			}
+			return st;
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("检索seachedWId：" + wid + "失败而退出！！！");

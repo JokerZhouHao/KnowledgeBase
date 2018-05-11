@@ -132,5 +132,8 @@ public class Global {
 	public static String timeBuildRGI = null;
 	public static int curRecIndex = 0;
 	public static String[] timeBsp = new String[6];
+	public static long[] timePn = new long[3];
+	public static long timeReadLuceneMax = 0;
+	public static boolean isFirstReadPn = false;
 	public static String[] bspRes = new String[2];
 }
