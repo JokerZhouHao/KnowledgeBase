@@ -5,6 +5,8 @@ package utility;
 
 import java.io.File;
 
+import org.apache.lucene.index.IndexWriter;
+
 /**
  * Global variables for statistics, configurations, file directories, etc.
  * Feel free to custom your own Global variables.
@@ -136,4 +138,5 @@ public class Global {
 	public static long timeReadLuceneMax = 0;
 	public static boolean isFirstReadPn = false;
 	public static String[] bspRes = new String[2];
+	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
 }

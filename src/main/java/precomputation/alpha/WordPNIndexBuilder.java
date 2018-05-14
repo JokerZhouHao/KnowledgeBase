@@ -125,29 +125,32 @@ public class WordPNIndexBuilder {
 				
 				// 解决pIdDates太长，Lucene无法处理
 				String st = radiusPN.toString();
-				if(st.length() > IndexWriter.MAX_STORED_STRING_LENGTH) {
-					int stSplitNum = st.length()%IndexWriter.MAX_STORED_STRING_LENGTH;
-					if(stSplitNum == 0 ) {
-						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH;
-					} else {
-						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH + 1;
-					}
-					alphaIndexSer.addDoc(kid, Global.delimiterPound + String.valueOf(offsetStart) + Global.delimiterPound + String.valueOf(offsetStart + stSplitNum));
-					int strStart = 0;
-					int strEnd = 0;
-					for(int i=0; i<stSplitNum; i++) {
-						strStart = strEnd;
-						strEnd = strStart + IndexWriter.MAX_STORED_STRING_LENGTH;
-						if(strEnd <= st.length()) {
-							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, strEnd));
-						} else {
-							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, st.length()));
-						}
-					}
-					offsetStart += stSplitNum;
-				} else {
+				if(st.length() < Global.MAX_STORED_STRING_LENGTH) {
 					alphaIndexSer.addDoc(kid, st);
 				}
+//				if(st.length() > IndexWriter.MAX_STORED_STRING_LENGTH) {
+//					int stSplitNum = st.length()%IndexWriter.MAX_STORED_STRING_LENGTH;
+//					if(stSplitNum == 0 ) {
+//						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH;
+//					} else {
+//						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH + 1;
+//					}
+//					alphaIndexSer.addDoc(kid, Global.delimiterPound + String.valueOf(offsetStart) + Global.delimiterPound + String.valueOf(offsetStart + stSplitNum));
+//					int strStart = 0;
+//					int strEnd = 0;
+//					for(int i=0; i<stSplitNum; i++) {
+//						strStart = strEnd;
+//						strEnd = strStart + IndexWriter.MAX_STORED_STRING_LENGTH;
+//						if(strEnd <= st.length()) {
+//							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, strEnd));
+//						} else {
+//							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, st.length()));
+//						}
+//					}
+//					offsetStart += stSplitNum;
+//				} else {
+//					alphaIndexSer.addDoc(kid, st);
+//				}
 				radiusPN.clear();
 			}
 			// clear and go to next batch

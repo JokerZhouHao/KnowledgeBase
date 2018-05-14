@@ -47,6 +47,7 @@ import org.apache.lucene.analysis.CharArrayMap.EntrySet;
 import entity.freebase.IndividualBlockingQueue;
 import entity.freebase.Node;
 import entity.freebase.Pair;
+import entity.sp.NidToDateWidIndex.DateWid;
 import utility.MComparator;
 import file.reader.GZIPReader;
 import processor.freebase.GoogleFreebaseLineProcessService;
@@ -72,35 +73,38 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		System.out.println(Global.MAX_STORED_STRING_LENGTH);
+		
+		
 		ArrayList<Integer> al = new ArrayList<>();
 		al.add(2);
 		al.add(6);
 		al.add(10);
-		System.out.println(Collections.binarySearch(al, 3));
+		System.out.println(Collections.binarySearch(al, 1));
 		
 		
-		int lineNum = 1;
-		if(args.length > 0) {
-		}
-		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
-		br.readLine();
-		br.close();
-		
-		String line1 = "10 29.017887 29.083847 ";
-		String line2 = "8973992 11381939 2005-01-03";
-		String[] strArr = line1.split(Global.delimiterSpace);
-		int k = Integer.parseInt(strArr[0]);
-		double[] pcoords = new double[2];
-		pcoords[0] = Double.parseDouble(strArr[1]);
-		pcoords[1] = Double.parseDouble(strArr[2]);
-		strArr = line2.split(Global.delimiterSpace);
-		ArrayList<Integer> qwords = new ArrayList<>();
-		for(int i=0; i<strArr.length-1; i++) {
-			qwords.add(Integer.parseInt(strArr[i]));
-		}
-		Date date = TimeUtility.getDate(strArr[strArr.length - 1]);
-		System.out.println(line1.split(Global.delimiterSpace).length);
-		System.out.println(line2.split(Global.delimiterSpace).length);
+//		int lineNum = 1;
+//		if(args.length > 0) {
+//		}
+//		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
+//		br.readLine();
+//		br.close();
+//		
+//		String line1 = "10 29.017887 29.083847 ";
+//		String line2 = "8973992 11381939 2005-01-03";
+//		String[] strArr = line1.split(Global.delimiterSpace);
+//		int k = Integer.parseInt(strArr[0]);
+//		double[] pcoords = new double[2];
+//		pcoords[0] = Double.parseDouble(strArr[1]);
+//		pcoords[1] = Double.parseDouble(strArr[2]);
+//		strArr = line2.split(Global.delimiterSpace);
+//		ArrayList<Integer> qwords = new ArrayList<>();
+//		for(int i=0; i<strArr.length-1; i++) {
+//			qwords.add(Integer.parseInt(strArr[i]));
+//		}
+//		Date date = TimeUtility.getDate(strArr[strArr.length - 1]);
+//		System.out.println(line1.split(Global.delimiterSpace).length);
+//		System.out.println(line2.split(Global.delimiterSpace).length);
 		
 		
 //		String str = "#11869638#11869640";
