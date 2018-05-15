@@ -15,5 +15,6 @@ public class FilePathTest {
 		File resultFile = new File(LocalFileInfo.getTestGzipPath());
 		if(resultFile.exists()) System.out.println("resultFile exits");
 		else System.out.println("resultFile not exits");
+		System.out.println();
 	}
 }
