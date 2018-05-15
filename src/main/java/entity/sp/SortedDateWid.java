@@ -120,7 +120,7 @@ public class SortedDateWid {
 	}
 	
 	public void clear() {
-		this.dateWidList.clear();
+		if(null != dateWidList)	this.dateWidList.clear();
 	}
 	
 	public String toString() {

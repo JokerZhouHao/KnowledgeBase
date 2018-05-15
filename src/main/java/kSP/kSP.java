@@ -116,12 +116,12 @@ public class kSP {
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
 						if (n.m_level == 0) {
-							//children of n are places，先计算可达性
-							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius,
+							//children of n are places
+							alphaLoosenessBound = this.getAlphaLoosenessBound(false, nid, alphaRadius,
 									qpoint, qwords, date);
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
-							alphaLoosenessBound = this.getAlphaLoosenessBound((-nid - 1),
+							alphaLoosenessBound = this.getAlphaLoosenessBound(false, (-nid - 1),
 									alphaRadius, qpoint, qwords, date);
 						}
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
@@ -305,14 +305,18 @@ public class kSP {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getAlphaLoosenessBound(int id, int alphaRadius, final IShape qpoint, ArrayList<Integer> qwords, int date) throws IOException {
+	public double getAlphaLoosenessBound(boolean testReachable, int id, int alphaRadius, final IShape qpoint, ArrayList<Integer> qwords, int date) throws IOException {
 		double alphaLoosenessBound = 0;
 		double tempd1 = 0;
 		double tempd2 = 0;
 		for(int wid : qwords) {
 			if(widDatesMap.get(wid) == null)	return Double.POSITIVE_INFINITY;
-			if(id < 0) tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date);
-			else tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date, id, reachableQuerySer);
+			if(testReachable) {
+				if(id < 0) tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date);
+				else tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date, id, reachableQuerySer);
+			} else {
+				tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date);
+			}
 			if(tempd1 < 0) {
 				// 不可达
 				return Double.POSITIVE_INFINITY;

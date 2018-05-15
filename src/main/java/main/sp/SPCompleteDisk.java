@@ -176,6 +176,7 @@ public class SPCompleteDisk {
 		}
 		
 		long start = System.currentTimeMillis();
+		Boolean isOver = Boolean.FALSE;
 		
 		Point qpoint = new Point(pCoords);
 		
@@ -202,7 +203,8 @@ public class SPCompleteDisk {
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if((++tt)%1000 == 0 && Global.isTest) {
 					if(System.currentTimeMillis() - Global.frontTime > Global.limitTime0) {
-						return null;
+						isOver = Boolean.TRUE;
+						break;
 					}
 				}
 				if(null == (dws = nIdDateWidMap.get(en.getKey()))) {
@@ -222,13 +224,16 @@ public class SPCompleteDisk {
 			}
 			if(Global.isTest) {
 				Global.timeBsp[1] += System.currentTimeMillis() - Global.frontTime;
+				if(isOver)	break;
 			}
 		}
 		if(Global.isTest) {
 			Global.frontTime = System.currentTimeMillis();
 		}
-		for(SortedDateWid sdw : widDatesMap.values()) {
-			sdw.formatDateWidList();
+		if(!isOver) {
+			for(SortedDateWid sdw : widDatesMap.values()) {
+				sdw.formatDateWidList();
+			}
 		}
 		if(Global.isDebug) {
 			System.out.println("> 完成计算nIdDateWidMap和widDatesMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
@@ -308,7 +313,7 @@ public class SPCompleteDisk {
 //		Global.startTime = start;
 		
 		kSP kSPExecutor = new kSP(rgi, nIdDateWidMap, widDatesMap, wordPNMap, reachableQuerySer);
-		kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, TimeUtility.getIntDate(searchDate), v);
+		if(!isOver)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, TimeUtility.getIntDate(searchDate), v);
 		
 		if(Global.isTest) {
 			Global.timeBsp[4] = (System.currentTimeMillis() - Global.frontTime) / 1000;
@@ -433,6 +438,7 @@ public class SPCompleteDisk {
 				}
 				for(int j=0; j<2; j++) {
 					bw.write(Global.bspRes[j] + " ");
+					Global.bspRes[j] = null;
 				}
 				bw.write('\n');
 				bw.flush();
