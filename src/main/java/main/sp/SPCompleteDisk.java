@@ -198,7 +198,13 @@ public class SPCompleteDisk {
 			}
 			DatesWIds dws = null;
 			SortedDateWid sdw = null;
+			int tt = 0;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
+				if((++tt)%1000 == 0 && Global.isTest) {
+					if(System.currentTimeMillis() - Global.frontTime > Global.limitTime0) {
+						return null;
+					}
+				}
 				if(null == (dws = nIdDateWidMap.get(en.getKey()))) {
 					dws = new DatesWIds(en.getValue());
 					dws.addWid(in);
@@ -357,14 +363,15 @@ public class SPCompleteDisk {
 		SPCompleteDisk spc = new SPCompleteDisk();
 		System.out.println("> 成功初始化SPCompleteDisk ！ ！ ！ ");
 //		SPCompleteDisk spc = null;
-		int k = 2;
+//		10 35.68275862680435 -85.23272932806015 11691841 11381939 1954-01-09
+		int k = 10;
 		double[] pcoords = new double[2];
-		pcoords[0] = 1;
-		pcoords[1] = 3;
+		pcoords[0] = 35.68275862680435;
+		pcoords[1] = -85.23272932806015;
 		ArrayList<Integer> qwords = new ArrayList<>();
-		qwords.add(12);
-		qwords.add(26);
-		Date date = TimeUtility.getDate("2018-05-15");
+		qwords.add(11691841);
+		qwords.add(11381939);
+		Date date = TimeUtility.getDate("1954-01-09");
 		int samNum = Global.testSampleNum;
 		int samNumCopy = 0;
 		BufferedWriter bw = null;

@@ -117,19 +117,9 @@ public class kSP {
 						nid = n.getChildIdentifier(cChild);
 						if (n.m_level == 0) {
 							//children of n are places，先计算可达性
-							if (this.placeReachablePrune(nid, qwords)) {
-								if(Global.isTest) {
-									if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime1) {
-										sign = Boolean.TRUE;
-										break;
-									}
-								}
-								continue;
-							}
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius,
 									qpoint, qwords, date);
-						}
-						else{
+						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							alphaLoosenessBound = this.getAlphaLoosenessBound((-nid - 1),
 									alphaRadius, qpoint, qwords, date);
@@ -159,19 +149,18 @@ public class kSP {
 					
 					Data placeData = (Data) first.m_pEntry;
 					
-//					if(Global.isDebug) {
-//						System.out.println("> 计算是否可达 . . . ");
-//						Global.frontTime = System.currentTimeMillis();
-//					}
 					// unqualified place pruning
-//					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
-////						if(Global.isDebug) {
-////							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-////							Global.frontTime = System.currentTimeMillis();
-////						}
-//						Global.count[5]++;// pruned
-//						continue;
-//					}
+					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
+						if(Global.isDebug) {
+							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+							Global.frontTime = System.currentTimeMillis();
+						}
+						if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+							break;
+						}
+						Global.count[5]++;// pruned
+						continue;
+					}
 					if(Global.isDebug) {
 						System.out.println("> 可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -230,12 +219,7 @@ public class kSP {
 						}
 					}
 				}
-//				long curTime = System.currentTimeMillis();
-//				if (curTime - Global.startTime > Global.runtimeThreshold) {
-//					break;
-//				}
 			}
-
 		} finally {
 			rgi.readUnlock();
 		}
