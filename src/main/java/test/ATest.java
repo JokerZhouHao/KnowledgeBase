@@ -74,7 +74,7 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
-		
+		System.out.println();
 //		System.out.println(Global.MAX_STORED_STRING_LENGTH);
 //		
 //		double a = 233;
