@@ -424,14 +424,19 @@ public class SPCompleteDisk {
 					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
 					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
 					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-					bw.write("num FindPNTime ReadPNTime IsJoin nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
+					bw.write("num ReachTime FindMinDateSpan InsertHeap GetSemTree queueSize FindPNTime ReadPNTime IsJoin nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
 				}
 				
 				bw.write(String.valueOf(Global.curRecIndex) + " ");
-				for(int j=0; j<3; j++) {
-					bw.write(String.valueOf(Global.timePn[j] + " "));
-					Global.timePn[j] = 0;
+//				for(int j=0; j<3; j++) {
+//					bw.write(String.valueOf(Global.timePn[j] + " "));
+//					Global.timePn[j] = 0;
+//				}
+				for(int j=0; j<4; j++) {
+					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
+					Global.timePTree[j] = 0;
 				}
+				bw.write(String.valueOf(Global.queueSize) + " ");
 				for(int j=0; j<7; j++) {
 					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
 					Global.timeBsp[j] = 0;

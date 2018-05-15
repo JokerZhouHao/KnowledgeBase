@@ -107,29 +107,42 @@ public class kSP {
 				}
 				if (first.level >= 0) {// node
 					Data firstData = (Data) first.m_pEntry;
-
 					n = rgi.readNode(firstData.getIdentifier());
 					Global.count[0]++;
-					
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
+						if(Global.isTest) {
+							Global.tempTime = System.currentTimeMillis();
+						}
 						if (n.m_level == 0) {
 							//children of n are places
 							if (this.placeReachablePrune(nid, qwords)) {
+								if(Global.isTest) {
+									Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
+									Global.tempTime = System.currentTimeMillis();
+								}
 								if(Global.isDebug) {
 									System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
 									Global.frontTime = System.currentTimeMillis();
 								}
 								if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+									sign = Boolean.TRUE;
 									break;
 								}
 								Global.count[5]++;// pruned
 								continue;
 							}
+							if(Global.isTest) {
+								Global.tempTime = System.currentTimeMillis();
+							}
 							alphaLoosenessBound = this.getAlphaLoosenessBound(true, nid, alphaRadius,
 									qpoint, qwords, date);
+							if(Global.isTest) {
+								Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
+								Global.tempTime = System.currentTimeMillis();
+							}
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							alphaLoosenessBound = this.getAlphaLoosenessBound(false, (-nid - 1),
@@ -142,11 +155,20 @@ public class kSP {
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
 								n.m_pIdentifier[cChild], n.m_identifier);
 						NNEntry eChild2 = new NNEntry(eChild, alphaRankingScoreBound, n.m_level - 1);
-
+						if(Global.isTest) {
+							Global.tempTime = System.currentTimeMillis();
+						}
 						insertIntoHeapH(queue, eChild2);
+						if(Global.isTest) {
+							Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
+							Global.tempTime = System.currentTimeMillis();
+						}
 					}
 					if(sign)	break;
 				} else {
+					if(Global.isTest) {
+						Global.tempTime = System.currentTimeMillis();
+					}
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -189,12 +211,19 @@ public class kSP {
 					Global.count[3]++;
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
+//					if(Global.isTest) {
+//						Global.timeT0 = System.currentTimeMillis();
+//					}
 					HashMap<Integer, Integer> widMinDateSpanMap = this.getWidMinDateSpan(placeData.getIdentifier(), alphaRadius, qwords, date);
 //					if(this.getAlphaLoosenessBound(placeData.getIdentifier(), alphaRadius, widMinDateSpanMap, qwords, date) > loosenessThreshold) {
 //						continue;
 //					}
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
 							qwords, date, loosenessThreshold, nIdDateWidMap, widMinDateSpanMap, semanticTree);
+//					if(Global.isTest) {
+//						Global.timeT3 += System.currentTimeMillis() - Global.timeT0;
+//						Global.timeT0 = System.currentTimeMillis();
+//					}
 					
 					if(Global.isTest) {
 						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
@@ -232,12 +261,23 @@ public class kSP {
 							Global.frontTime = System.currentTimeMillis();
 						}
 					}
+					if(Global.isTest) {
+						Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
+						Global.tempTime = System.currentTimeMillis();
+					}
 				}
 			}
+//			System.out.println(queue.size());
+			Global.queueSize = queue.size();
 		} finally {
 			rgi.readUnlock();
 		}
 		if(Global.isTest) {
+//			for(int i=0; i<4; i++) {
+//				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
+//				Global.timePTree[i] = 0;
+//			}
+//			System.out.println();
 			Global.bspRes[0] = String.valueOf(minDist);
 			Global.bspRes[1] = String.valueOf(kthScore);
 		}

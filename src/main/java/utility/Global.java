@@ -141,4 +141,6 @@ public class Global {
 	public static boolean isFirstReadPn = false;
 	public static String[] bspRes = new String[2];
 	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
+	public static long[] timePTree = new long[4];
+	public static long queueSize = 0;
 }
