@@ -81,7 +81,8 @@ public class PlaceRadiusNeighborhood {
 			if(null == (tempMap1 = eachLayerWN[curLayer])) {
 				// 判断radiusWN的第curLayer层是否为空
 				if(null != (tempMap2 = radiusWN.eachLayerWN[curLayer])) {
-					tempMap1 = eachLayerWN[curLayer] = tempMap2;
+					tempMap1 = eachLayerWN[curLayer] = new HashMap<>();
+					tempMap1.putAll(tempMap2);
 				} else
 					continue;
 			} else {

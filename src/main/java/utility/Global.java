@@ -53,7 +53,7 @@ public class Global {
 	public static int numPlaces = 4774796;
 //	public static int numNodes = 12;//include nodes that are places
 	public static int numNodes = 8091179;	//include nodes that are places
-//	public static int numKeywords = 16;
+//	public static int numKeywords = 18;
 	public static int numKeywords = 3778457;
 	public static int numEdges = 50415307;
 	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
@@ -120,20 +120,21 @@ public class Global {
 	public static long tempTime = 0;
 	public static boolean isFirstRTree = true;
 	
+	public static Boolean isTest = !isDebug;
 	public static int testK = 10;
 	public static int testOrgSampleNum = 100;
 	public static int testSampleNum = testOrgSampleNum;
 	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
 	public static String testSampleResultFile =  "." + "testSampleResultFile";
-	public static Boolean isTest = Boolean.TRUE;
 	public static long limitTime = 150 * 1000; // 限制每次bsp运行的最大时间
+	public static long limitTime1 = 200 * 1000; 
 	public static String timeTotal = null;
 	public static String timeBuildSPCompleteDisk = null;
 	public static String timeOpenLuceneIndex = null;
 	public static String timeLoadTFLable = null;
 	public static String timeBuildRGI = null;
 	public static int curRecIndex = 0;
-	public static String[] timeBsp = new String[6];
+	public static long[] timeBsp = new long[7];
 	public static long[] timePn = new long[3];
 	public static long timeReadLuceneMax = 0;
 	public static boolean isFirstReadPn = false;

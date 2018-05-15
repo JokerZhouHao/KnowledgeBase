@@ -11,7 +11,7 @@ public class DateNidNode {
 	
 	public DateNidNode() {}
 	
-	public DateNidNode(int date, int wid) {
+	public DateNidNode(int date, int nid) {
 		this.date = date;
 		this.nid = nid;
 	}

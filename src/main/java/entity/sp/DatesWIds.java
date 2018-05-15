@@ -12,6 +12,7 @@ public class DatesWIds {
 	
 	public DatesWIds(String datesStr) {
 		this.datesStr = datesStr;
+		formatDatesStr();
 	}
 	
 	private void formatDatesStr() {
@@ -28,7 +29,7 @@ public class DatesWIds {
 	}
 	
 	public List<Integer> getDateList() {
-		if(null == dateList) formatDatesStr();
+//		if(null == dateList) formatDatesStr();s
 		return dateList;
 	}
 

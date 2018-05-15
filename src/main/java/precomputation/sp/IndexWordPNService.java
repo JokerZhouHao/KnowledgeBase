@@ -83,8 +83,8 @@ public class IndexWordPNService {
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
 			if(Global.isTest) {
-				Global.timePn[0] += TimeUtility.getSpanSecond(Global.frontTime, System.currentTimeMillis());
-				Global.frontTime = System.currentTimeMillis();
+				Global.timePn[0] += TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
+				Global.tempTime = System.currentTimeMillis();
 			}
 			ScoreDoc[] hits = results.scoreDocs;
 			if(hits.length == 0)	return null;
@@ -95,8 +95,8 @@ public class IndexWordPNService {
 					Global.timeReadLuceneMax = TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
 					Global.isFirstReadPn = false;
 				}
-				Global.timePn[1] += TimeUtility.getSpanSecond(Global.frontTime, System.currentTimeMillis());
-				Global.frontTime = System.currentTimeMillis();
+				Global.timePn[1] += TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
+				Global.tempTime = System.currentTimeMillis();
 			}
 			return st;
 		} catch (Exception e) {

@@ -656,7 +656,7 @@ public class IndexNidKeywordsListService {
 	 * @throws Exception
 	 */
 	public static void main(String args[]) throws Exception{
-		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
+		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(false);
 //		String nWIntDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 //		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(nWIntDateIndex);
 //		int wid = 0;

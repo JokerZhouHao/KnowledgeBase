@@ -12,10 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import entity.sp.WordRadiusNeighborhood;
-import entity.sp.DateWId;
+import entity.sp.DatesWIds;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.RTreeWithGI;
+import entity.sp.SortedDateWid;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
 import precomputation.rechable.ReachableQueryService;
@@ -40,19 +41,19 @@ import utility.TimeUtility;
  */
 public class kSP {
 	protected RTreeWithGI rgi;
-	Map<Integer, DateWId> nIdDateWidMap = null;
-	HashMap<Integer, Integer> wordMinDateSpanMap = null;
+	Map<Integer, DatesWIds> nIdDateWidMap = null;
+	HashMap<Integer, SortedDateWid> widDatesMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	ReachableQueryService reachableQuerySer = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
-	public kSP(RTreeWithGI rgi, Map<Integer, DateWId> nIdDateWidMap, HashMap<Integer, Integer> wordMinDateSpanMap,
+	public kSP(RTreeWithGI rgi, Map<Integer, DatesWIds> nIdDateWidMap, HashMap<Integer, SortedDateWid> widDatesMap,
 			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
 		super();
 		this.rgi = rgi;
 		this.nIdDateWidMap = nIdDateWidMap;
-		this.wordMinDateSpanMap = wordMinDateSpanMap;
+		this.widDatesMap = widDatesMap;
  		this.wordPNMap = wordPNMap;
 		this.reachableQuerySer = reachableQuerySer;
 		
@@ -79,6 +80,8 @@ public class kSP {
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
 		
 		double minDist = 0;
+		int nid;
+		Boolean sign = Boolean.FALSE;
 		
 		rgi.readLock();
 
@@ -111,14 +114,24 @@ public class kSP {
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
+						nid = n.getChildIdentifier(cChild);
 						if (n.m_level == 0) {
-							//children of n are places
-							alphaLoosenessBound = this.getAlphaLoosenessBound(n.getChildIdentifier(cChild), alphaRadius,
+							//children of n are places，先计算可达性
+							if (this.placeReachablePrune(nid, qwords)) {
+								if(Global.isTest) {
+									if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime1) {
+										sign = Boolean.TRUE;
+										break;
+									}
+								}
+								continue;
+							}
+							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius,
 									qpoint, qwords, date);
 						}
 						else{
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
-							alphaLoosenessBound = this.getAlphaLoosenessBound((-n.getChildIdentifier(cChild) - 1),
+							alphaLoosenessBound = this.getAlphaLoosenessBound((-nid - 1),
 									alphaRadius, qpoint, qwords, date);
 						}
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
@@ -131,6 +144,7 @@ public class kSP {
 
 						insertIntoHeapH(queue, eChild2);
 					}
+					if(sign)	break;
 				} else {
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
@@ -150,14 +164,14 @@ public class kSP {
 //						Global.frontTime = System.currentTimeMillis();
 //					}
 					// unqualified place pruning
-					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
-//						if(Global.isDebug) {
-//							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-//							Global.frontTime = System.currentTimeMillis();
-//						}
-						Global.count[5]++;// pruned
-						continue;
-					}
+//					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
+////						if(Global.isDebug) {
+////							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+////							Global.frontTime = System.currentTimeMillis();
+////						}
+//						Global.count[5]++;// pruned
+//						continue;
+//					}
 					if(Global.isDebug) {
 						System.out.println("> 可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -175,8 +189,9 @@ public class kSP {
 					Global.count[3]++;
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
+					HashMap<Integer, Integer> widMinDateSpanMap = this.getWidMinDateSpan(placeData.getIdentifier(), alphaRadius, qwords, date);
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
-							qwords, date, loosenessThreshold, nIdDateWidMap, wordMinDateSpanMap, semanticTree);
+							qwords, date, loosenessThreshold, nIdDateWidMap, widMinDateSpanMap, semanticTree);
 					
 					if(Global.isTest) {
 						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
@@ -271,23 +286,60 @@ public class kSP {
 	 * 
 	 * @param id
 	 * @param alphaRadius
+	 * @param qwords
+	 * @param date
+	 * @return
+	 * @throws IOException
+	 */
+	public HashMap<Integer, Integer> getWidMinDateSpan(int id, int alphaRadius, ArrayList<Integer> qwords, int date) throws IOException {
+		int tempd1 = 0;
+		int tempd2 = 0;
+		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
+		for(int wid : qwords) {
+			if(id < 0) tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date);
+			else tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date, id, reachableQuerySer);
+			if(tempd1 < 0) {
+				// 不可达
+				return null;
+			}
+			if(null == wordPNMap.get(wid)) {
+				widMinDateSpan.put(wid, tempd1);
+			} else {
+				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
+				widMinDateSpan.put(wid, tempd1 >= tempd2 ? tempd2 : tempd1);
+			}
+		}
+		return widMinDateSpan;
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param alphaRadius
 	 * @param qpoint
 	 * @param qwords
 	 * @return
 	 * @throws IOException
 	 */
 	public double getAlphaLoosenessBound(int id, int alphaRadius, final IShape qpoint, ArrayList<Integer> qwords, int date) throws IOException {
-
 		double alphaLoosenessBound = 0;
 		double tempd1 = 0;
 		double tempd2 = 0;
-		for (Entry<Integer, WordRadiusNeighborhood> entry : this.wordPNMap.entrySet()) {
-			if(null == wordMinDateSpanMap)	System.out.println("wordMinDateSpanMap = null");
-			tempd1 = (alphaRadius + 2) * wordMinDateSpanMap.get(entry.getKey());
-			tempd2 = entry.getValue().getLooseness(id, date);
-			alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
+		for(int wid : qwords) {
+			if(widDatesMap.get(wid) == null)	return Double.POSITIVE_INFINITY;
+			if(id < 0) tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date);
+			else tempd1 = (alphaRadius + 2) * widDatesMap.get(wid).getMinDateSpan(date, id, reachableQuerySer);
+			if(tempd1 < 0) {
+				// 不可达
+				return Double.POSITIVE_INFINITY;
+			}
+			if(null == wordPNMap.get(wid)) {
+				alphaLoosenessBound += tempd1;
+			} else {
+				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
+				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
+			}
 		}
-
 		return alphaLoosenessBound;
 	}
 }

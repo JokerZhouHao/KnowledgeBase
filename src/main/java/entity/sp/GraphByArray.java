@@ -195,7 +195,7 @@ public class GraphByArray {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getSemanticPlaceP(int source, ArrayList<Integer> qwords, int date, double loosenessThreshold, Map<Integer, DateWId> dateWIdMap,
+	public double getSemanticPlaceP(int source, ArrayList<Integer> qwords, int date, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
 			HashMap<Integer, Integer> wordMinDateSpanMap, List<List<Integer>> semanticTree) throws Exception {
 
 		if (qwords.size() == 0) {
@@ -221,7 +221,7 @@ public class GraphByArray {
 		int qwordsNum = sortedQwordsList.size();
 		List<Integer> tempList = new ArrayList<>();
 		List<Integer> tempList1 = null;
-		DateWId dateWid = null;
+		DatesWIds dateWid = null;
 		int i, j, k, t;
 		Double d1 = null;
 		
@@ -366,11 +366,11 @@ public class GraphByArray {
 			keyVertices.add(recKeyVecticesMap.get(en.getKey()));
 			looseness += en.getValue();
 		}
+		for (Integer keyVertex : keyVertices) {
+			semanticTree.add(this.getPath(source, keyVertex));
+		}
 		if(looseness <= loosenessThreshold)	return looseness;
 		else return Double.POSITIVE_INFINITY;
-//		for (Integer keyVertex : keyVertices) {
-//			semanticTree.add(this.getPath(source, keyVertex));
-//		}
 	}
 
 	/**

@@ -91,7 +91,7 @@ public class WordPNIndexBuilder {
 		int interval = (endKeyword - startKeyword - 1)/15;
 		
 		// 在建索引过程中输出wPN文件
-		boolean isOutput = false;
+		boolean isOutput = true;
 		PrintWriter writer = null;
 		
 		if(isOutput)	writer = new PrintWriter(outputIindexFile);

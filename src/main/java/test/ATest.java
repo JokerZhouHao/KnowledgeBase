@@ -73,14 +73,19 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		System.out.println(Global.MAX_STORED_STRING_LENGTH);
+		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
 		
-		
-		ArrayList<Integer> al = new ArrayList<>();
-		al.add(2);
-		al.add(6);
-		al.add(10);
-		System.out.println(Collections.binarySearch(al, 1));
+//		System.out.println(Global.MAX_STORED_STRING_LENGTH);
+//		
+//		double a = 233;
+//		int b = 233;
+//		System.out.println(a == b);
+//		
+//		ArrayList<Integer> al = new ArrayList<>();
+//		al.add(2);
+//		al.add(6);
+//		al.add(10);
+//		System.out.println(Collections.binarySearch(al, 1));
 		
 		
 //		int lineNum = 1;
