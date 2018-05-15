@@ -117,7 +117,18 @@ public class kSP {
 						nid = n.getChildIdentifier(cChild);
 						if (n.m_level == 0) {
 							//children of n are places
-							alphaLoosenessBound = this.getAlphaLoosenessBound(false, nid, alphaRadius,
+							if (this.placeReachablePrune(nid, qwords)) {
+								if(Global.isDebug) {
+									System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+									Global.frontTime = System.currentTimeMillis();
+								}
+								if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+									break;
+								}
+								Global.count[5]++;// pruned
+								continue;
+							}
+							alphaLoosenessBound = this.getAlphaLoosenessBound(true, nid, alphaRadius,
 									qpoint, qwords, date);
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
@@ -150,17 +161,17 @@ public class kSP {
 					Data placeData = (Data) first.m_pEntry;
 					
 					// unqualified place pruning
-					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
-						if(Global.isDebug) {
-							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-							Global.frontTime = System.currentTimeMillis();
-						}
-						if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
-							break;
-						}
-						Global.count[5]++;// pruned
-						continue;
-					}
+//					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
+//						if(Global.isDebug) {
+//							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+//							Global.frontTime = System.currentTimeMillis();
+//						}
+//						if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+//							break;
+//						}
+//						Global.count[5]++;// pruned
+//						continue;
+//					}
 					if(Global.isDebug) {
 						System.out.println("> 可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -179,6 +190,9 @@ public class kSP {
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
 					HashMap<Integer, Integer> widMinDateSpanMap = this.getWidMinDateSpan(placeData.getIdentifier(), alphaRadius, qwords, date);
+//					if(this.getAlphaLoosenessBound(placeData.getIdentifier(), alphaRadius, widMinDateSpanMap, qwords, date) > loosenessThreshold) {
+//						continue;
+//					}
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
 							qwords, date, loosenessThreshold, nIdDateWidMap, widMinDateSpanMap, semanticTree);
 					
@@ -321,6 +335,32 @@ public class kSP {
 				// 不可达
 				return Double.POSITIVE_INFINITY;
 			}
+			if(null == wordPNMap.get(wid)) {
+				alphaLoosenessBound += tempd1;
+			} else {
+				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
+				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
+			}
+		}
+		return alphaLoosenessBound;
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param alphaRadius
+	 * @param widMinDateSpanMap
+	 * @param qwords
+	 * @param date
+	 * @return
+	 * @throws IOException
+	 */
+	public double getAlphaLoosenessBound(int id, int alphaRadius, HashMap<Integer, Integer> widMinDateSpanMap, ArrayList<Integer> qwords, int date) throws IOException {
+		double alphaLoosenessBound = 0;
+		double tempd1 = 0;
+		double tempd2 = 0;
+		for(int wid : qwords) {
+			tempd1 = (alphaRadius + 1) * widMinDateSpanMap.get(wid);
 			if(null == wordPNMap.get(wid)) {
 				alphaLoosenessBound += tempd1;
 			} else {
