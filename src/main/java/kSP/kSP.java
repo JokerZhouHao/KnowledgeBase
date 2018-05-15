@@ -70,18 +70,20 @@ public class kSP {
 			Global.frontTime = System.currentTimeMillis();
 		}
 		kSPComputation(k, alphaRadius, qpoint, qwords, date, result, nnc);
-
+		
 	}
 
 	private void kSPComputation(int k, int alphaRadius, final IShape qpoint, ArrayList<Integer> qwords, int date,
 			final IVisitor result, final INearestNeighborComparator nnc) throws Exception {
+		if(Global.isTest) {
+			Global.timePTree[5] = System.currentTimeMillis();
+		}
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
 			throw new IllegalArgumentException(
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
 		
 		double minDist = 0;
 		int nid;
-		Boolean sign = Boolean.FALSE;
 		
 		rgi.readLock();
 
@@ -100,7 +102,14 @@ public class kSP {
 			queue.add(new NNEntry(nd, 0.0, rgi.getTreeHeight()));
 			
 			while (queue.size() != 0) {
+				if(Global.isTest) {
+					Global.tempTime = System.currentTimeMillis();
+				}
 				NNEntry first = (NNEntry) queue.remove(0);
+				if(Global.isTest) {
+					Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
+					Global.tempTime = System.currentTimeMillis();
+				}
 				minDist = first.m_minDist;
 				if (kthScore < first.m_minDist) {
 					break;
@@ -113,36 +122,10 @@ public class kSP {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
-						if(Global.isTest) {
-							Global.tempTime = System.currentTimeMillis();
-						}
 						if (n.m_level == 0) {
 							//children of n are places
-							if (this.placeReachablePrune(nid, qwords)) {
-								if(Global.isTest) {
-									Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
-									Global.tempTime = System.currentTimeMillis();
-								}
-								if(Global.isDebug) {
-									System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-									Global.frontTime = System.currentTimeMillis();
-								}
-								if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
-									sign = Boolean.TRUE;
-									break;
-								}
-								Global.count[5]++;// pruned
-								continue;
-							}
-							if(Global.isTest) {
-								Global.tempTime = System.currentTimeMillis();
-							}
-							alphaLoosenessBound = this.getAlphaLoosenessBound(true, nid, alphaRadius,
+							alphaLoosenessBound = this.getAlphaLoosenessBound(false, nid, alphaRadius,
 									qpoint, qwords, date);
-							if(Global.isTest) {
-								Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
-								Global.tempTime = System.currentTimeMillis();
-							}
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							alphaLoosenessBound = this.getAlphaLoosenessBound(false, (-nid - 1),
@@ -160,15 +143,15 @@ public class kSP {
 						}
 						insertIntoHeapH(queue, eChild2);
 						if(Global.isTest) {
-							Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
+							Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
 							Global.tempTime = System.currentTimeMillis();
 						}
 					}
-					if(sign)	break;
+//					if(Global.isTest) {
+//						Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
+//						Global.tempTime = System.currentTimeMillis();
+//					}
 				} else {
-					if(Global.isTest) {
-						Global.tempTime = System.currentTimeMillis();
-					}
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -182,18 +165,31 @@ public class kSP {
 					
 					Data placeData = (Data) first.m_pEntry;
 					
+					if(Global.isTest) {
+						Global.tempTime = System.currentTimeMillis();
+					}
 					// unqualified place pruning
-//					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
-//						if(Global.isDebug) {
-//							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
-//							Global.frontTime = System.currentTimeMillis();
-//						}
-//						if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
-//							break;
-//						}
-//						Global.count[5]++;// pruned
-//						continue;
-//					}
+					if (this.placeReachablePrune(placeData.getIdentifier(), qwords)) {
+						if(Global.isTest) {
+							Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
+							Global.tempTime = System.currentTimeMillis();
+//							Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
+						}
+						if(Global.isDebug) {
+							System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
+							Global.frontTime = System.currentTimeMillis();
+						}
+						if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+							break;
+						}
+						Global.count[5]++;// pruned
+						continue;
+					}
+					if(Global.isTest) {
+						Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
+						Global.tempTime = System.currentTimeMillis();
+					}
+					
 					if(Global.isDebug) {
 						System.out.println("> 可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -211,25 +207,24 @@ public class kSP {
 					Global.count[3]++;
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
-//					if(Global.isTest) {
-//						Global.timeT0 = System.currentTimeMillis();
-//					}
+					if(Global.isTest) {
+						Global.tempTime = System.currentTimeMillis();
+					}
 					HashMap<Integer, Integer> widMinDateSpanMap = this.getWidMinDateSpan(placeData.getIdentifier(), alphaRadius, qwords, date);
-//					if(this.getAlphaLoosenessBound(placeData.getIdentifier(), alphaRadius, widMinDateSpanMap, qwords, date) > loosenessThreshold) {
-//						continue;
-//					}
+					if(this.getAlphaLoosenessBound(placeData.getIdentifier(), alphaRadius, widMinDateSpanMap, qwords, date) > loosenessThreshold) {
+						if(Global.isTest) {
+							Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
+							Global.tempTime = System.currentTimeMillis();
+//							Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
+						}
+						continue;
+					}
+					if(Global.isTest) {
+						Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
+						Global.tempTime = System.currentTimeMillis();
+					}
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
 							qwords, date, loosenessThreshold, nIdDateWidMap, widMinDateSpanMap, semanticTree);
-//					if(Global.isTest) {
-//						Global.timeT3 += System.currentTimeMillis() - Global.timeT0;
-//						Global.timeT0 = System.currentTimeMillis();
-//					}
-					
-					if(Global.isTest) {
-						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
-							break;
-						}
-					}
 					
 					long end = System.currentTimeMillis();
 					Global.runtime[1] += end - start;
@@ -262,20 +257,24 @@ public class kSP {
 						}
 					}
 					if(Global.isTest) {
-						Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
+						Global.timePTree[4] += System.currentTimeMillis() - Global.tempTime;
 						Global.tempTime = System.currentTimeMillis();
+//						Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
+						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
+							break;
+						}
 					}
 				}
 			}
-//			System.out.println(queue.size());
 			Global.queueSize = queue.size();
 		} finally {
 			rgi.readUnlock();
 		}
 		if(Global.isTest) {
-//			for(int i=0; i<4; i++) {
+//			Global.timePTree[5] = System.currentTimeMillis() - Global.timePTree[5];
+//			for(int i=0; i<6; i++) {
 //				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
-//				Global.timePTree[i] = 0;
+////				Global.timePTree[i] = 0;
 //			}
 //			System.out.println();
 			Global.bspRes[0] = String.valueOf(minDist);
