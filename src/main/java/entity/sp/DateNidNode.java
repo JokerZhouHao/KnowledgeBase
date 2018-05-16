@@ -7,7 +7,6 @@ package entity.sp;
 public class DateNidNode {
 	private int date = 0;
 	private int nid = 0;
-	private DateNidNode next = null;
 	
 	public DateNidNode() {}
 	
@@ -15,7 +14,13 @@ public class DateNidNode {
 		this.date = date;
 		this.nid = nid;
 	}
-
+	
+	public int compareDate(DateNidNode dn) {
+		if(date > dn.date)	return 1;
+		else if(date == dn.date)	return 0;
+		else return -1;
+	}
+	
 	public int getDate() {
 		return date;
 	}
@@ -32,11 +37,4 @@ public class DateNidNode {
 		this.nid = nid;
 	}
 
-	public DateNidNode getNext() {
-		return next;
-	}
-
-	public void setNext(DateNidNode next) {
-		this.next = next;
-	}
 }

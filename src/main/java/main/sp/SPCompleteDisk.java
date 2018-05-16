@@ -218,8 +218,10 @@ public class SPCompleteDisk {
 					sdw = new SortedDateWid();
 					widDatesMap.put(in, sdw);
 				}
+				int t0 = -1;
 				for(int din : dws.getDateList()) {
-					sdw.addDateWid(new DateNidNode(din, en.getKey()));
+					if(-1 == t0)	t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()));
+					else t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()), t0);
 				}
 			}
 			if(Global.isTest) {
@@ -229,11 +231,6 @@ public class SPCompleteDisk {
 		}
 		if(Global.isTest) {
 			Global.frontTime = System.currentTimeMillis();
-		}
-		if(!isOver) {
-			for(SortedDateWid sdw : widDatesMap.values()) {
-				sdw.formatDateWidList();
-			}
 		}
 		if(Global.isDebug) {
 			System.out.println("> 完成计算nIdDateWidMap和widDatesMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
@@ -424,7 +421,7 @@ public class SPCompleteDisk {
 					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
 					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
 					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-					bw.write("num ReachTime FindMinDateSpan InsertHeap GetSemTree queueSize FindPNTime ReadPNTime IsJoin nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
+					bw.write("num ReachTime FindMinDateSpan InsertHeap GetSemTree removeTime queueSize nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
 				}
 				
 				bw.write(String.valueOf(Global.curRecIndex) + " ");
@@ -432,7 +429,7 @@ public class SPCompleteDisk {
 //					bw.write(String.valueOf(Global.timePn[j] + " "));
 //					Global.timePn[j] = 0;
 //				}
-				for(int j=0; j<4; j++) {
+				for(int j=0; j<5; j++) {
 					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
 					Global.timePTree[j] = 0;
 				}

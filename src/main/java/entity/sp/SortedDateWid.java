@@ -2,6 +2,7 @@ package entity.sp;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import precomputation.rechable.ReachableQueryService;
 import utility.MComparator;
@@ -15,44 +16,53 @@ public class SortedDateWid {
 	
 	private static MComparator<DateNidNode> comparator = new MComparator<DateNidNode>();
 	
-	private DateNidNode head = new DateNidNode();
-	private ArrayList<DateNidNode> dateWidList = null;
+	private ArrayList<DateNidNode> dateWidList = new ArrayList<>();
 	
-	private DateNidNode addDateWid(DateNidNode dw, DateNidNode p1, DateNidNode p2) {
-		while(null != p2) {
-			if(p2.getDate() >= dw.getDate()) {
-				p1.setNext(dw);
-				dw.setNext(p2);
-				return p1;
-			} else {
-				p1 = p2;
-				p2 = p2.getNext();
+	private int addDateWid(DateNidNode dw, int start, int end) {
+		if(end < 0) {
+			dateWidList.add(dw);
+			return 0;
+		}
+		int mid = 0;
+		while(true) {
+			mid = (start + end)/2;
+			switch(dw.compareDate(dateWidList.get(mid))) {
+				case 1 : {
+					if(start == end) {
+						if(end+1 == dateWidList.size()) {
+							dateWidList.add(dw);
+						} else {
+							dateWidList.add(end + 1, dw);
+						}
+						return end+1;
+					}
+					start = mid + 1;
+					break;
+				}
+				case 0 : {
+					dateWidList.add(mid, dw);
+					return mid;
+				}
+				case -1 : {
+					if(mid == start) {
+						dateWidList.add(mid, dw);
+						return mid;
+					}
+					end = mid - 1;
+					break;
+				}
 			}
 		}
-		p1.setNext(dw);
-		return p1;
 	}
 	
-	public DateNidNode addDateWid(DateNidNode dw) {
-		DateNidNode p1 = head;
-		DateNidNode p2 = p1.getNext();
-		return addDateWid(dw, p1, p2);
+	public int addDateWid(DateNidNode dw) {
+		return this.addDateWid(dw, 0, this.dateWidList.size()-1);
 	}
 	
-	public DateNidNode addDateWid(DateNidNode startNode, DateNidNode dw) {
-		DateNidNode p1 = startNode;
-		DateNidNode p2 = p1.getNext();
-		return addDateWid(dw, p1, p2);
+	public int addDateWid(DateNidNode dw, int start) {
+		return this.addDateWid(dw, start, dateWidList.size()-1);
 	}
 	
-	public void formatDateWidList() {
-		DateNidNode p = head.getNext();
-		dateWidList = new ArrayList<>();
-		while(null != p) {
-			dateWidList.add(p);
-			p = p.getNext();
-		}
-	}
 	
 	public int getMinDateSpan(int sDate) {
 		int reIndex = Collections.binarySearch(this.dateWidList, new DateNidNode(sDate, -1), comparator);
@@ -78,10 +88,13 @@ public class SortedDateWid {
 		int left = 0;
 		int right = 0;
 		DateNidNode tempNode = null;
+		HashMap<Integer, Boolean> rec = new HashMap<>();
 		if(i >= 0) {
 			tempNode = dateWidList.get(i);
 			if(rsSer.queryReachable(p, tempNode.getNid())) {
 				return 1;
+			} else {
+				rec.put(tempNode.getNid(), Boolean.TRUE);
 			}
 			left = i - 1;
 			right = i + 1;
@@ -89,33 +102,97 @@ public class SortedDateWid {
 			left = (-i) - 2;
 			right = (-i) - 1;
 		}
-		int leftSpan = 0, rightSpan = 0;
-		while(true) {
-			if(left >= 0) {
-				leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
-				if(dateWidList.size() > right) {
-					rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
-				}
-			} else {
-				if(dateWidList.size() > right) {
-					rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
-				} else return -1;
-			}
-			if(left >= 0 && rsSer.queryReachable(p, dateWidList.get(left).getNid())) {
-				if(dateWidList.size() > right && rsSer.queryReachable(p, dateWidList.get(right).getNid())) {
-					return leftSpan<rightSpan?leftSpan:rightSpan;
-				} else {
-					return leftSpan;
-				}
-			} else {
-				if(dateWidList.size() > right && rsSer.queryReachable(p, dateWidList.get(right).getNid())) {
-					return rightSpan;
-				} else {
+		
+		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
+		if(left + 1 <= (dateWidList.size() - right)) {
+			i = -1;
+			while(left >= 0) {
+				if(i == dateWidList.get(left).getNid()) {
 					left--;
-					right++;
-					if(left<0 && right >= dateWidList.size())	return -1;
+					continue;
+				} else {
+					i = dateWidList.get(left).getNid();
+				}
+				if(rec.containsKey(i)) {
+					left--;
+				} else {
+					if(rsSer.queryReachable(p, i)){
+						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
+						break;
+					} else {
+						rec.put(i, Boolean.TRUE);
+					}
 				}
 			}
+			i = -1;
+			while(right < dateWidList.size()) {
+				tempSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
+				if(tempSpan >= leftSpan)	break;
+				if(i == dateWidList.get(right).getNid()) {
+					right++;
+					continue;
+				} else {
+					i = dateWidList.get(right).getNid();
+				}
+				if(rec.containsKey(i)) {
+					right++;
+				} else {
+					if(rsSer.queryReachable(p, i)){
+						rightSpan = tempSpan;
+						break;
+					} else {
+						rec.put(i, Boolean.TRUE);
+					}
+				}
+			}
+		} else {
+			i = -1;
+			while(right < dateWidList.size()) {
+				if(i == dateWidList.get(right).getNid()) {
+					right++;
+					continue;
+				} else {
+					i = dateWidList.get(right).getNid();
+				}
+				if(rec.containsKey(i)) {
+					right++;
+				} else {
+					if(rsSer.queryReachable(p, i)){
+						rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
+						break;
+					} else {
+						rec.put(i, Boolean.TRUE);
+					}
+				}
+			}
+			i = -1;
+			while(left >= 0) {
+				tempSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
+				if(tempSpan >= rightSpan)	break;
+				if(i == dateWidList.get(left).getNid()) {
+					left--;
+					continue;
+				} else {
+					i = dateWidList.get(left).getNid();
+				}
+				if(rec.containsKey(i)) {
+					left--;
+				} else {
+					if(rsSer.queryReachable(p, i)){
+						leftSpan = tempSpan;
+						break;
+					} else {
+						rec.put(i, Boolean.TRUE);
+					}
+				}
+			}
+		}
+		if(leftSpan == Integer.MAX_VALUE) {
+			if(rightSpan == Integer.MAX_VALUE)	return -1;
+			else return rightSpan;
+		} else {
+			if(rightSpan == Integer.MAX_VALUE)	return leftSpan;
+			else return leftSpan<=rightSpan?leftSpan:rightSpan;
 		}
 	}
 	
@@ -124,12 +201,21 @@ public class SortedDateWid {
 	}
 	
 	public String toString() {
-		DateNidNode p = head.getNext();
 		StringBuffer sb = new StringBuffer();
-		while(null != p) {
-			sb.append("<" + String.valueOf(p.getDate()) + ", " + String.valueOf(p.getNid()) + "> ");
-			p = p.getNext();
+		for(DateNidNode dn : dateWidList) {
+			sb.append("<" + String.valueOf(dn.getDate()) + ", " + String.valueOf(dn.getNid()) + "> ");
 		}
 		return sb.toString();
+	}
+	
+	public static void main(String[] args) {
+		SortedDateWid sdw = new SortedDateWid();
+		sdw.addDateWid(new DateNidNode(1, 1));
+		sdw.addDateWid(new DateNidNode(4, 2));
+		sdw.addDateWid(new DateNidNode(2, 3));
+		sdw.addDateWid(new DateNidNode(0, 4));
+		sdw.addDateWid(new DateNidNode(2, 5));
+		sdw.addDateWid(new DateNidNode(5, 6));
+		System.err.println(sdw);
 	}
 }

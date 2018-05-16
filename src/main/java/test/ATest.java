@@ -73,6 +73,7 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		System.out.println((int)(5.5/2));
 		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
 		
 //		System.out.println(Global.MAX_STORED_STRING_LENGTH);
