@@ -4,6 +4,7 @@
 package utility;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.apache.lucene.index.IndexWriter;
 
@@ -143,4 +144,7 @@ public class Global {
 	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
 	public static long[] timePTree = new long[5];
 	public static long queueSize = 0;
+	public static long recCount[] = new long[3];
+	
+	public static HashMap<Integer, Integer> minDateSpan = null;
 }

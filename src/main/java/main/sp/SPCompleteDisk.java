@@ -220,6 +220,7 @@ public class SPCompleteDisk {
 				}
 				int t0 = -1;
 				for(int din : dws.getDateList()) {
+					Global.recCount[0]++;
 					if(-1 == t0)	t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()));
 					else t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()), t0);
 				}
@@ -229,6 +230,11 @@ public class SPCompleteDisk {
 				if(isOver)	break;
 			}
 		}
+//		Global.minDateSpan = new HashMap<>();
+//		for(int in : sortedQwordsList) {
+//			Global.minDateSpan.put(in, widDatesMap.get(in).getMinDateSpan(TimeUtility.getIntDate(searchDate)));
+//		}
+		
 		if(Global.isTest) {
 			Global.frontTime = System.currentTimeMillis();
 		}
@@ -421,7 +427,7 @@ public class SPCompleteDisk {
 					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
 					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
 					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-					bw.write("num ReachTime FindMinDateSpan InsertHeap GetSemTree removeTime queueSize nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
+					bw.write("num couConsMinMap couReach couGetMinDate ReachTime FindMinDateSpan InsertHeap GetSemTree removeTime queueSize nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
 				}
 				
 				bw.write(String.valueOf(Global.curRecIndex) + " ");
@@ -429,12 +435,19 @@ public class SPCompleteDisk {
 //					bw.write(String.valueOf(Global.timePn[j] + " "));
 //					Global.timePn[j] = 0;
 //				}
+				for(int j=0; j<3; j++) {
+					bw.write(String.valueOf(Global.recCount[j] + " "));
+					Global.recCount[j] = 0;
+				}
 				for(int j=0; j<5; j++) {
 					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
 					Global.timePTree[j] = 0;
 				}
 				bw.write(String.valueOf(Global.queueSize) + " ");
 				for(int j=0; j<7; j++) {
+					if(j==1) {
+						Global.timeBsp[5] -= Global.timeBsp[1];
+					}
 					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
 					Global.timeBsp[j] = 0;
 				}

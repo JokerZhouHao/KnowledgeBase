@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import precomputation.rechable.ReachableQueryService;
+import utility.Global;
 import utility.MComparator;
 
 /**
@@ -83,12 +84,11 @@ public class SortedDateWid {
 		}
 	}
 	
-	public int getMinDateSpan(int sDate, int p, ReachableQueryService rsSer) {
+	public int getMinDateSpan(HashMap<Integer, Boolean> rec,int sDate, int p, ReachableQueryService rsSer) {
 		int i = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
 		DateNidNode tempNode = null;
-		HashMap<Integer, Boolean> rec = new HashMap<>();
 		if(i >= 0) {
 			tempNode = dateWidList.get(i);
 			if(rsSer.queryReachable(p, tempNode.getNid())) {
@@ -116,6 +116,7 @@ public class SortedDateWid {
 				if(rec.containsKey(i)) {
 					left--;
 				} else {
+					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
 						break;
@@ -137,6 +138,7 @@ public class SortedDateWid {
 				if(rec.containsKey(i)) {
 					right++;
 				} else {
+					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						rightSpan = tempSpan;
 						break;
@@ -157,6 +159,7 @@ public class SortedDateWid {
 				if(rec.containsKey(i)) {
 					right++;
 				} else {
+					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
 						break;
@@ -178,6 +181,7 @@ public class SortedDateWid {
 				if(rec.containsKey(i)) {
 					left--;
 				} else {
+					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						leftSpan = tempSpan;
 						break;
