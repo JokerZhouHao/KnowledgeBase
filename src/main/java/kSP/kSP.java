@@ -126,6 +126,7 @@ public class kSP {
 						}
 						if (n.m_level == 0) {
 							//children of n are places
+							Global.recCount[1]++;
 							if (this.placeReachablePrune(nid, qwords)) {
 								if(Global.isTest) {
 									Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
@@ -143,11 +144,14 @@ public class kSP {
 								continue;
 							}
 							if(Global.isTest) {
+								Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
 								Global.tempTime = System.currentTimeMillis();
 							}
-							minDateSpanMap = this.getWidMinDateSpan(nid, qwords, date);
+							minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
 							recMinDateSpanMap.put(nid, minDateSpanMap);
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, qwords, date);
+//							alphaLoosenessBound = this.getAlphaLoosenessBound(nid,
+//													alphaRadius, qpoint, qwords, date);
 							if(Global.isTest) {
 								Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
 								Global.tempTime = System.currentTimeMillis();
@@ -189,6 +193,7 @@ public class kSP {
 					}
 					
 					Data placeData = (Data) first.m_pEntry;
+					nid = placeData.getIdentifier();
 					
 					// unqualified place pruning
 					if(Global.isDebug) {
@@ -204,12 +209,28 @@ public class kSP {
 					if (kthScore != Double.POSITIVE_INFINITY) {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
+					
+					
+//					if(Global.isTest) {
+//						Global.tempTime = System.currentTimeMillis();
+//					}
+//					minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
+//					if(Global.isTest) {
+//						Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
+//						Global.tempTime = System.currentTimeMillis();
+//					}
+//					if(kthScore <= this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, qwords, date)) {
+//						continue;
+//					}
+					
 					// compute shortest path between place and qword
 					Global.count[3]++;
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					long start = System.currentTimeMillis();
-					double looseness = this.rgi.getGraph().getSemanticPlaceP(placeData.getIdentifier(),
-							qwords, date, loosenessThreshold, nIdDateWidMap, recMinDateSpanMap.get(placeData.getIdentifier()), semanticTree);
+					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
+							qwords, date, loosenessThreshold, nIdDateWidMap, recMinDateSpanMap.get(nid), semanticTree);
+//					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
+//							qwords, date, loosenessThreshold, nIdDateWidMap, minDateSpanMap, semanticTree);
 					
 					if(Global.isTest) {
 						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
@@ -258,6 +279,7 @@ public class kSP {
 		} finally {
 			rgi.readUnlock();
 		}
+		recMinDateSpanMap.clear();
 		if(Global.isTest) {
 			for(int i=0; i<5; i++) {
 				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
@@ -314,11 +336,14 @@ public class kSP {
 	 * @return
 	 * @throws IOException
 	 */
-	public HashMap<Integer, Integer> getWidMinDateSpan(int id, ArrayList<Integer> qwords, int date) throws IOException {
+	public HashMap<Integer, Integer> getWidMinDateSpan(Boolean testReachable, int id, ArrayList<Integer> qwords, int date) throws IOException {
 		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
+		HashMap<Integer, Boolean> rec = new HashMap<>();
 		for(int wid : qwords) {
-			widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(date, id, reachableQuerySer));
+			if(testReachable)	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(rec, date, id, reachableQuerySer));
+			else 	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(date));
 		}
+		rec.clear();
 		return widMinDateSpan;
 	}
 	
