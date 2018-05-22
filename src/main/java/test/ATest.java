@@ -82,7 +82,7 @@ public class ATest {
 		System.out.println((int)(5.5/2));
 		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
 		
-//		System.out.println(Global.MAX_STORED_STRING_LENGTH);
+		System.out.println(Global.MAX_STORED_STRING_LENGTH);
 //		
 //		double a = 233;
 //		int b = 233;
