@@ -58,7 +58,7 @@ public class Global {
 	public static int numKeywords = 3778457;
 	public static int numEdges = 50415307;
 	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
-	public static long numSCCs0 = (long)numNodes + numKeywords;
+//	public static long numSCCs0 = (long)numNodes + numKeywords;
 //	public static int numSCCs = 30;
 //	public static int numContainCoordWordDate = 12;
 	public static int numContainCoordWordDate = 812532;
@@ -147,5 +147,5 @@ public class Global {
 	public static long queueSize = 0;
 	public static long recCount[] = new long[3];
 	
-	public static HashMap<Long, Boolean> recReachable = new HashMap<>();	// 记录点对的可达性
+//	public static HashMap<Long, Boolean> recReachable = new HashMap<>();	// 记录点对的可达性
 }
