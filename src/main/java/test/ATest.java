@@ -73,6 +73,12 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		
+		System.out.println(Boolean.TRUE == null);
+		
+		long a = Global.numSCCs * Global.numSCCs + (long)20;
+		System.out.println(a);
+		
 		System.out.println((int)(5.5/2));
 		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
 		

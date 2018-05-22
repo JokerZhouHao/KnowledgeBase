@@ -319,8 +319,14 @@ public class kSP {
 		 * Furthermore, the least Frequent query keyword is powerful enough for pruning.
 		 * */
 		Global.count[4]++;
+//		long tempL = place * Global.numSCCs0;
 		for(Integer in : qwords) {
-			if (!reachableQuerySer.queryReachable(place, in)) {
+//			if (Global.recReachable.containsKey(tempL + in)) {
+//				isPruned = true;
+//				break;
+//			} else 
+			if(!reachableQuerySer.queryReachable(place, in)){
+//				Global.recReachable.put(tempL + in, Boolean.FALSE);
 				isPruned = true;
 				break;
 			}
@@ -338,12 +344,10 @@ public class kSP {
 	 */
 	public HashMap<Integer, Integer> getWidMinDateSpan(Boolean testReachable, int id, ArrayList<Integer> qwords, int date) throws IOException {
 		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
-		HashMap<Integer, Boolean> rec = new HashMap<>();
 		for(int wid : qwords) {
-			if(testReachable)	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(rec, date, id, reachableQuerySer));
+			if(testReachable)	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan( date, id, reachableQuerySer));
 			else 	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(date));
 		}
-		rec.clear();
 		return widMinDateSpan;
 	}
 	

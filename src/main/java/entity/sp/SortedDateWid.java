@@ -84,17 +84,18 @@ public class SortedDateWid {
 		}
 	}
 	
-	public int getMinDateSpan(HashMap<Integer, Boolean> rec,int sDate, int p, ReachableQueryService rsSer) {
+	public int getMinDateSpan(int sDate, int p, ReachableQueryService rsSer) {
 		int i = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
 		DateNidNode tempNode = null;
+		long tempL = p * Global.numSCCs0;
 		if(i >= 0) {
 			tempNode = dateWidList.get(i);
-			if(rsSer.queryReachable(p, tempNode.getNid())) {
+			if(!Global.recReachable.containsKey(tempL + tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
 				return 1;
 			} else {
-				rec.put(tempNode.getNid(), Boolean.TRUE);
+				Global.recReachable.put(tempL + tempNode.getNid(), Boolean.FALSE);
 			}
 			left = i - 1;
 			right = i + 1;
@@ -113,7 +114,7 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(left).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(Global.recReachable.containsKey(tempL + i)) {
 					left--;
 				} else {
 					Global.recCount[2]++;
@@ -121,7 +122,7 @@ public class SortedDateWid {
 						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
 						break;
 					} else {
-						rec.put(i, Boolean.TRUE);
+						Global.recReachable.put(tempL + i, Boolean.FALSE);
 					}
 				}
 			}
@@ -135,7 +136,7 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(right).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(Global.recReachable.containsKey(tempL + i)) {
 					right++;
 				} else {
 					Global.recCount[2]++;
@@ -143,7 +144,7 @@ public class SortedDateWid {
 						rightSpan = tempSpan;
 						break;
 					} else {
-						rec.put(i, Boolean.TRUE);
+						Global.recReachable.put(tempL + i, Boolean.FALSE);
 					}
 				}
 			}
@@ -156,7 +157,7 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(right).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(Global.recReachable.containsKey(tempL + i)) {
 					right++;
 				} else {
 					Global.recCount[2]++;
@@ -164,7 +165,7 @@ public class SortedDateWid {
 						rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
 						break;
 					} else {
-						rec.put(i, Boolean.TRUE);
+						Global.recReachable.put(tempL + i, Boolean.FALSE);
 					}
 				}
 			}
@@ -178,7 +179,7 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(left).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(Global.recReachable.containsKey(tempL + i)) {
 					left--;
 				} else {
 					Global.recCount[2]++;
@@ -186,7 +187,7 @@ public class SortedDateWid {
 						leftSpan = tempSpan;
 						break;
 					} else {
-						rec.put(i, Boolean.TRUE);
+						Global.recReachable.put(tempL + i, Boolean.FALSE);
 					}
 				}
 			}
