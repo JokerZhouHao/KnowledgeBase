@@ -29,7 +29,7 @@ public class Global {
 	public static long[] runtime = new long[10];
 	
 	// radius
-	public final static int radius = 3;
+	public static int radius = 1;
 	
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
@@ -100,7 +100,7 @@ public class Global {
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
 	public static String indexWIdDate = "wid_date" + File.separator;
 	public static String indexTFLabel = "tf_label" + File.separator;
-	public static String indexWidPN = "wid_pn" + File.separator;
+	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 
 	/* file content delimiter sign */

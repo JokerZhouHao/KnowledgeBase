@@ -73,8 +73,13 @@ public class ATest {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		System.out.println((int)(5.5/2));
-		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
+		Global.indexWidPN = Global.outputDirectoryPath + "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+		if(!(new File(Global.indexWidPN).exists())) {
+			new File(Global.indexWidPN).mkdir();
+		}
+		
+//		System.out.println((int)(5.5/2));
+//		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("2018-05-15")));
 		
 //		System.out.println(Global.MAX_STORED_STRING_LENGTH);
 //		

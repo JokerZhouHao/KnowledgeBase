@@ -93,7 +93,7 @@ public class RTreeWithGI extends RTree {
 	private PlaceRadiusNeighborhood precomputeAlphaWN(int nodeid, NidToDateWidIndex nidToDateWidIndex,
 			int radius, PrintWriter writer, int[] count) throws Exception {
 		Node n = readNode(nodeid);
-		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
+//		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
 		if (n.isLeaf()) {
 
 			PlaceRadiusNeighborhood leafRadiusWN = new PlaceRadiusNeighborhood(radius);

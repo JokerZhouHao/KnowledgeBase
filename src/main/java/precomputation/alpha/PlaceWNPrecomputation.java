@@ -21,9 +21,35 @@ import utility.Utility;
  * Compute the alpha Word Neighborhoods of all the places and all the Rtree nodes together
  * @author jmshi
  */
-public class PlaceWNPrecomputation {
-	public static void main(String[] args) throws Exception {
 
+public class PlaceWNPrecomputation {
+	private static RTreeWithGI rgi = null;
+	private static NidToDateWidIndex nidToDateWidIndex = null;
+	
+	private static void init() throws Exception{
+		if(null == rgi) {
+			PropertySet psRTree = new PropertySet();
+			String indexRTree = Global.indexRTree;
+			psRTree.setProperty("FileName", indexRTree);
+			psRTree.setProperty("PageSize", Global.rtreePageSize);
+			psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
+			psRTree.setProperty("fanout", Global.rtreeFanout);
+			
+			IStorageManager diskfile = new DiskStorageManager(psRTree);
+			IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+			
+			Integer i = new Integer(1); 
+			psRTree.setProperty("IndexIdentifier", i);
+			
+			rgi = new RTreeWithGI(psRTree, file);
+			rgi.buildSimpleGraphInMemory();
+			
+			String nidToDateWidFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+			nidToDateWidIndex = new NidToDateWidIndex(nidToDateWidFile);
+		}
+	}
+	
+	public static void BuildingPlaceWN() throws Exception{
 		if(!new File(Global.inputDirectoryPath).exists()) {
 			throw new DirectoryNotEmptyException("目录inputDirectoryPath ： " + Global.inputDirectoryPath + "不存在");
 		}
@@ -38,25 +64,14 @@ public class PlaceWNPrecomputation {
 		String pidWNFile = Global.placeWNFile;
 		System.out.println("> 开始构造" + pidWNFile + "文件 . . .");
 		
-		PropertySet psRTree = new PropertySet();
-		String indexRTree = Global.indexRTree;
-		psRTree.setProperty("FileName", indexRTree);
-		psRTree.setProperty("PageSize", Global.rtreePageSize);
-		psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
-		psRTree.setProperty("fanout", Global.rtreeFanout);
+		// 初始化
+		PlaceWNPrecomputation.init();
 		
-		IStorageManager diskfile = new DiskStorageManager(psRTree);
-		IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
-		
-		Integer i = new Integer(1); 
-		psRTree.setProperty("IndexIdentifier", i);
-		
-		RTreeWithGI rgi = new RTreeWithGI(psRTree, file);
-		rgi.buildSimpleGraphInMemory();
-		
-		String nidToDateWidFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
-		NidToDateWidIndex nidToDateWidIndex = new NidToDateWidIndex(nidToDateWidFile);
 		rgi.precomputeAlphaWN(nidToDateWidIndex, Global.radius);
 		System.out.println("> 结束构造" + pidWNFile + "，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
+	}
+	
+	public static void main(String[] args) throws Exception {
+		PlaceWNPrecomputation.BuildingPlaceWN();
 	}
 }

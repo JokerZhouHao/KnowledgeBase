@@ -4,9 +4,12 @@
 package precomputation.alpha;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.file.DirectoryNotEmptyException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,11 +76,11 @@ public class WordPNIndexBuilder {
 		writer.flush();
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void buildingWordPN() throws Exception{
 		if(!new File(Global.outputDirectoryPath).exists()) {
 			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
 		}
-		if(!new File(Global.outputDirectoryPath + Global.indexWidPN).exists()) {
+		if(!new File(Global.outputDirectoryPath + Global.indexWidPN ).exists()) {
 			throw new DirectoryNotEmptyException("存放wPN索引的目录 ： " + Global.outputDirectoryPath + Global.indexWidPN + "不存在");
 		}
 		
@@ -88,14 +91,13 @@ public class WordPNIndexBuilder {
 		String outputIindexFile = Global.wordPNFile;
 		int startKeyword = Global.numNodes;
 		int endKeyword = Global.numNodes + Global.numKeywords;
-		int interval = (endKeyword - startKeyword - 1)/15;
+		int interval = (endKeyword - startKeyword - 1)/5;
 		
 		// 在建索引过程中输出wPN文件
-		boolean isOutput = true;
+		boolean isOutput = false;
 		PrintWriter writer = null;
 		
 		if(isOutput)	writer = new PrintWriter(outputIindexFile);
-		PrintWriter writerstat = new PrintWriter(outputIindexFile + ".stat.txt");
 		int iindexSize = 0;
 		int iindexTotalLength = 0;
 		
@@ -169,11 +171,9 @@ public class WordPNIndexBuilder {
 		
 		alphaIndexSer.closeIndexWriter();
 		
-		writerstat.println(iindexSize + Global.delimiterPound + iindexTotalLength + Global.delimiterPound);
-		writerstat.close();
 		System.out.println("> 结束构造widPN索引，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
 	}
-
+	
 	private void buildAlphaPN(int startKeyword,
 			int endKeyword, String inputDocFile, HashMap<Integer, TempAlphaPN> alphaPNMap) throws Exception {
 		
@@ -183,7 +183,7 @@ public class WordPNIndexBuilder {
 		BufferedReader reader = Utility.getBufferedReader(inputDocFile);
 		String line;
 
-		int cntlines = 0;
+//		int cntlines = 0;
 		String[] layers = null;
 		String[] widDates = null;
 		String dates = null;
@@ -191,14 +191,14 @@ public class WordPNIndexBuilder {
 		TempAlphaPN alphaPN = null;
 		HashMap<Integer, String> tempMap = null;
 		while ((line = reader.readLine()) != null) {
-			cntlines++;
+//			cntlines++;
 //			if (line.contains(Global.delimiterPound)) {
 //				continue;
 //			}
 
-			if (cntlines % 10000 == 0) {
-				System.out.println("> 已处理" + cntlines + "个placeWN");
-			}
+//			if (cntlines % 10000 == 0) {
+//				System.out.println("> 已处理" + cntlines + "个placeWN");
+//			}
 			i = line.indexOf(Global.delimiterLevel1);
 			pid = Integer.parseInt(line.substring(0, i));
 			layers = line.substring(i + Global.delimiterLevel1.length()).split(Global.delimiterLayer);
@@ -228,5 +228,37 @@ public class WordPNIndexBuilder {
 			}
 		}
 		reader.close();
+	}
+	
+	/**
+	 * 主函数
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		ArrayList<Integer> radiusList = new ArrayList<>();
+		radiusList.add(1);
+		radiusList.add(2);
+		radiusList.add(3);
+		radiusList.add(5);
+//		HashMap<Integer, String> rec = new HashMap<>();
+		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt"));
+		for(int radius : radiusList) {
+			Long start = System.currentTimeMillis();
+			Global.radius = radius;
+			Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+			if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
+				new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
+			}
+			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+			PlaceWNPrecomputation.BuildingPlaceWN();
+			WordPNIndexBuilder.buildingWordPN();
+			new File(Global.placeWNFile).delete();
+			System.out.println();
+//			rec.put(radius, TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
+			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
+			bw.flush();
+		}
+		bw.close();
 	}
 }
