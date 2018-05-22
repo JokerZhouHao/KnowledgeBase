@@ -20,7 +20,7 @@ public class Static {
 		int ss = 0;
 		while(null != (line = br.readLine())) {
 			if(line.length()>0 && !line.contains(Global.delimiterPound) && line.charAt(0)>='0' && line.charAt(0)<='9') {
-				System.out.println(line.split(" ")[15]);
+				System.out.println(line.split(" ")[4]);
 				x = (Integer.parseInt(line.split(" ")[15]) - 1)/5;
 				if(x < 0)	x = 0;
 				else if(x > 5) x = 5;

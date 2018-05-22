@@ -320,7 +320,7 @@ public class kSP {
 		 * */
 		Global.count[4]++;
 		for(Integer in : qwords) {
-			if (!reachableQuerySer.queryReachable(place, in)) {
+			if(!reachableQuerySer.queryReachable(place, in)){
 				isPruned = true;
 				break;
 			}
