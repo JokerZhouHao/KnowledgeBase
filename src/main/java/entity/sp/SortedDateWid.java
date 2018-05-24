@@ -3,6 +3,7 @@ package entity.sp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import precomputation.rechable.ReachableQueryService;
 import utility.Global;
@@ -84,17 +85,21 @@ public class SortedDateWid {
 		}
 	}
 	
-	public int getMinDateSpan(HashMap<Integer, Boolean> rec, int sDate, int p, ReachableQueryService rsSer) {
-		int i = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
+	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, ReachableQueryService rsSer) {
+		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
+		int i = mid;
 		DateNidNode tempNode = null;
+		long tempL = p * Global.numSCCs0;
 		if(i >= 0) {
 			tempNode = dateWidList.get(i);
-			if(!rec.containsKey(tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
+			if(!rec.contains(tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
+//			if(!rec.contains(tempL + tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
 				return 1;
 			} else {
-				rec.put(tempNode.getNid(), Boolean.FALSE);
+				rec.add(tempNode.getNid());
+//				rec.add(tempL + tempNode.getNid());
 			}
 			left = i - 1;
 			right = i + 1;
@@ -113,7 +118,8 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(left).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(rec.contains(i)) {
+//				if(rec.contains(tempL + i)) {
 					left--;
 				} else {
 					Global.recCount[2]++;
@@ -121,10 +127,14 @@ public class SortedDateWid {
 						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
 						break;
 					} else {
-						rec.put(i, Boolean.FALSE);
+						rec.add(i);
+//						rec.add(tempL + i);
 					}
 				}
 			}
+			
+			Global.leftMaxSpan  = Global.leftMaxSpan < mid - left?mid-left:Global.leftMaxSpan;
+			
 			i = -1;
 			while(right < dateWidList.size()) {
 				tempSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
@@ -135,7 +145,8 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(right).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(rec.contains(i)) {
+//				if(rec.contains(tempL + i)) {
 					right++;
 				} else {
 					Global.recCount[2]++;
@@ -143,10 +154,14 @@ public class SortedDateWid {
 						rightSpan = tempSpan;
 						break;
 					} else {
-						rec.put(i, Boolean.FALSE);
+						rec.add(i);
+//						rec.add(tempL + i);
 					}
 				}
 			}
+			
+			Global.rightMaxSpan  = Global.rightMaxSpan < right-mid?right-mid:Global.rightMaxSpan;
+			
 		} else {
 			i = -1;
 			while(right < dateWidList.size()) {
@@ -156,7 +171,8 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(right).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(rec.contains(i)) {
+//				if(rec.contains(tempL + i)) {
 					right++;
 				} else {
 					Global.recCount[2]++;
@@ -164,10 +180,14 @@ public class SortedDateWid {
 						rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
 						break;
 					} else {
-						rec.put(i, Boolean.FALSE);
+						rec.add(i);
+//						rec.add(tempL + i);
 					}
 				}
 			}
+			
+			Global.rightMaxSpan  = Global.rightMaxSpan < right-mid?right-mid:Global.rightMaxSpan;
+			
 			i = -1;
 			while(left >= 0) {
 				tempSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
@@ -178,7 +198,8 @@ public class SortedDateWid {
 				} else {
 					i = dateWidList.get(left).getNid();
 				}
-				if(rec.containsKey(i)) {
+				if(rec.contains(i)) {
+//				if(rec.contains(tempL + i)) {
 					left--;
 				} else {
 					Global.recCount[2]++;
@@ -186,10 +207,14 @@ public class SortedDateWid {
 						leftSpan = tempSpan;
 						break;
 					} else {
-						rec.put(i, Boolean.FALSE);
+						rec.add(i);
+//						rec.add(tempL + i);
 					}
 				}
 			}
+			
+			Global.leftMaxSpan  = Global.leftMaxSpan < mid - left?mid-left:Global.leftMaxSpan;
+			
 		}
 		if(leftSpan == Integer.MAX_VALUE) {
 			if(rightSpan == Integer.MAX_VALUE)	return -1;

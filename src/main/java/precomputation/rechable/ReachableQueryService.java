@@ -19,6 +19,8 @@ public class ReachableQueryService {
 	
 	private Map<Integer, Integer> vertexSCCMap = null;
 	
+	public ReachableQueryService() {}
+	
 	/**
 	 * 初始化
 	 * @param sccFilePath
@@ -43,12 +45,30 @@ public class ReachableQueryService {
 	 * @return
 	 */
 	public boolean queryReachable(int p, int q) {
+		int pp = vertexSCCMap.get(p);
+		int qq = 0;
+		if(q < Global.numNodes) {
+			qq = vertexSCCMap.get(q);
+		} else qq = q;
+		
 		if(p < Global.numNodes) {
-			if(q < Global.numNodes) {
-				return this.queryReachable(vertexSCCMap.get(p), vertexSCCMap.get(q), Global.numSCCs);
-			} else {
-				return this.queryReachable(vertexSCCMap.get(p), q, Global.numSCCs);
+			Boolean res = Boolean.FALSE;
+			Global.timeRecTemp = System.currentTimeMillis();
+			res = this.queryReachable(pp, qq, Global.numSCCs);
+			Global.timeRecTemp1 = System.currentTimeMillis();
+			try {
+				Global.recReachBW.write(String.valueOf(p) + " " + String.valueOf(q) + " " + String.valueOf(System.currentTimeMillis() - Global.timeRecTemp) + '\n');
+				Global.timeRecReachable += System.currentTimeMillis() - Global.timeRecTemp1;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
 			}
+			return res;
+//			if(q < Global.numNodes) {
+//				return this.queryReachable(vertexSCCMap.get(p), vertexSCCMap.get(q), Global.numSCCs);
+//			} else {
+//				return this.queryReachable(vertexSCCMap.get(p) , q, Global.numSCCs);
+//			}
 		} else return Boolean.FALSE;
 	}
 	
@@ -80,10 +100,28 @@ public class ReachableQueryService {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception{
-		String sccFile = Global.outputDirectoryPath + Global.sccFile;
-		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
-		ReachableQueryService rqs = new ReachableQueryService(sccFile, indexPath);
-		rqs.display();
+		ReachableQueryService rqs = new ReachableQueryService();
+		String indexPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + Global.indexTFLabel;
+		System.loadLibrary("TFLabelReachable");
+		int numScc = 8;
+		rqs.initQuery(numScc, indexPath);
+		System.out.println("> test TF-label . . . ");
+		for(int i=0; i<numScc; i++) {
+			System.out.print(i + ": ");
+			for(int j=0; j<numScc; j++) {
+				if(i != j && rqs.queryReachable(i, j, numScc))
+					System.out.print(j + " ");
+			}
+			System.out.println();
+		}
+		rqs.freeQuery(numScc);
+		
+		
+		
+//		String sccFile = Global.outputDirectoryPath + Global.sccFile;
+//		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
+//		ReachableQueryService rqs = new ReachableQueryService(sccFile, indexPath);
+//		rqs.display();
 		
 		// 测试
 //		Scanner keyboard = new Scanner(System.in);
@@ -97,6 +135,5 @@ public class ReachableQueryService {
 //				System.out.println(rqs.queryReachable(p, q));
 //			} else break;
 //		}
-		rqs.freeQuery();
 	}
 }

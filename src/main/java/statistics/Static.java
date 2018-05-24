@@ -41,30 +41,37 @@ public class Static {
 	}
 	
 	// 输出所用总时间
-	public static void printTotal() throws Exception{
+	public static void printAllTotal() throws Exception{
 		ArrayList<String> pathList = new ArrayList<>();
-		pathList.add(Global.inputDirectoryPath + "07.if12.else.now.10.100.testSampleResultFile");
+//		pathList.add(Global.inputDirectoryPath + "07.if12.else.now.10.100.testSampleResultFile");
 		pathList.add(Global.inputDirectoryPath + "08.if13.else.10.100.testSampleResultFile");
-//		pathList.add(Global.inputDirectoryPath + "09.if13.else2.10.100.testSampleResultFile");
+		pathList.add(Global.inputDirectoryPath + "10.if13.else.HashSet.10.100.testSampleResultFile");
+		
+		ArrayList<Integer> postList = new ArrayList<>();
+		postList.add(15);
+		postList.add(19);
 		
 		ArrayList<BufferedReader> brList = new ArrayList<>();
 		for(String st : pathList) {
 			brList.add(new BufferedReader(new FileReader(st)));
 		}
+		
 		String lineArr[] = new String[pathList.size()];
 		int count = 1;
+		String line = null;
 		while(null != (lineArr[0] = brList.get(0).readLine())) {
 			for(int i=1; i<pathList.size(); i++) {
 				lineArr[i] = brList.get(i).readLine();
 			}
 			Boolean sign = Boolean.FALSE;
-			for(String line : lineArr) {
+			for(int i=0; i<lineArr.length; i++) {
+				line = lineArr[i];
 				if(line.length()>0 && !line.contains(Global.delimiterPound) && line.charAt(0)>='0' && line.charAt(0)<='9') {
 					if(!sign) {
 						System.out.print((count++) + " : ");
 					}
 					sign = Boolean.TRUE;
-					System.out.print(line.split(" ")[15] + " ");
+					System.out.print(line.split(" ")[postList.get(i)] + " ");
 				}
 			}
 			if(sign)	System.out.println();
@@ -75,8 +82,8 @@ public class Static {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		Static.printTotal();
-		Static.staticTotalTime();
+		Static.printAllTotal();
+//		Static.staticTotalTime();
 //		String fPath = Global.inputDirectoryPath + "07.if12.else.10.100.testSampleResultFile";
 //		Static.staticTotalTime(fPath);
 		

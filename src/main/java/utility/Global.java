@@ -3,8 +3,14 @@
  */
 package utility;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.lucene.index.IndexWriter;
 
@@ -29,7 +35,7 @@ public class Global {
 	public static long[] runtime = new long[10];
 	
 	// radius
-	public static int radius = 1;
+	public static int radius = 3;
 	
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
@@ -58,6 +64,7 @@ public class Global {
 	public static int numKeywords = 3778457;
 	public static int numEdges = 50415307;
 	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
 //	public static int numSCCs = 30;
 //	public static int numContainCoordWordDate = 12;
 	public static int numContainCoordWordDate = 812532;
@@ -127,9 +134,9 @@ public class Global {
 	public static int testSampleNum = testOrgSampleNum;
 	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
 	public static String testSampleResultFile =  "." + "testSampleResultFile";
-	public static long limitTime = 150 * 1000; // 限制每次bsp运行的最大时间
-	public static long limitTime0 = 50 * 1000;
-	public static long limitTime1 = 200 * 1000; 
+	public static long limitTime = 300 * 1000; // 限制每次bsp运行的最大时间
+	public static long limitTime0 = 80 * 1000;
+	public static long limitTime1 = 300 * 1000; 
 	public static String timeTotal = null;
 	public static String timeBuildSPCompleteDisk = null;
 	public static String timeOpenLuceneIndex = null;
@@ -147,4 +154,13 @@ public class Global {
 	public static long recCount[] = new long[3];
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
+	public static int leftMaxSpan = 0;
+	public static int rightMaxSpan = 0;
+	public static int timeGetMinDateSpan = 0;
+	public static HashSet<Long> recReach = new HashSet();
+	public static BufferedWriter recReachBW = null;
+	public static long timeRecReachable = 0;
+	public static long timeRecTemp = 0;
+	public static long timeRecTemp1 = 0;
+	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
 }

@@ -237,12 +237,12 @@ public class WordPNIndexBuilder {
 	 */
 	public static void main(String[] args) throws Exception {
 		ArrayList<Integer> radiusList = new ArrayList<>();
-		radiusList.add(1);
-		radiusList.add(2);
-		radiusList.add(3);
+//		radiusList.add(1);
+//		radiusList.add(2);
+//		radiusList.add(3);
 		radiusList.add(5);
 //		HashMap<Integer, String> rec = new HashMap<>();
-		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt"));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt", Boolean.TRUE));
 		for(int radius : radiusList) {
 			Long start = System.currentTimeMillis();
 			Global.radius = radius;
@@ -251,7 +251,7 @@ public class WordPNIndexBuilder {
 				new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
 			}
 			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-			PlaceWNPrecomputation.BuildingPlaceWN();
+//			PlaceWNPrecomputation.BuildingPlaceWN();
 			WordPNIndexBuilder.buildingWordPN();
 			new File(Global.placeWNFile).delete();
 			System.out.println();

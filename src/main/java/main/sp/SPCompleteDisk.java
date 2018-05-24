@@ -3,10 +3,13 @@
  */
 package main.sp;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.zip.GZIPOutputStream;
 
 import entity.sp.DateNidNode;
 import entity.sp.DatesWIds;
@@ -60,7 +64,7 @@ public class SPCompleteDisk {
 	private LRUBuffer buffer = null;
 	private RTreeWithGI rgi = null;
 	
-	public SPCompleteDisk() {
+	public SPCompleteDisk() throws Exception{
 		if(Global.isDebug) {
 			Global.startTime = System.currentTimeMillis();
 			System.out.println("> 开始构造SPCompleteDisk . . . \n");
@@ -146,16 +150,21 @@ public class SPCompleteDisk {
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
+		
+		// 添加点对可达时间记录
+		Global.recReachBW = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(Global.fileReachGZip)))));
+		
 		if(Global.isTest) {
 			Global.timeBuildSPCompleteDisk = TimeUtility.getSpanSecondStr(Global.tempTime, System.currentTimeMillis());
 			Global.frontTime = System.currentTimeMillis();
 		}
 	}
 	
-	public void free() {
+	public void free() throws Exception{
 		nIdWIdDateSer.closeIndexReader();
 		wIdPnSer.closeIndexReader();
 		reachableQuerySer.freeQuery();
+		Global.recReachBW.close();
 	}
 	
 	/**
@@ -435,26 +444,48 @@ public class SPCompleteDisk {
 //					bw.write(String.valueOf(Global.timePn[j] + " "));
 //					Global.timePn[j] = 0;
 //				}
+				bw.write("| ");
+				
+				bw.write(String.valueOf(Global.recReach.size()) + " ");
+				bw.write(String.valueOf(Global.leftMaxSpan) + " ");
+				bw.write(String.valueOf(Global.rightMaxSpan) + " ");
+				bw.write(String.valueOf(Global.timeGetMinDateSpan) + " ");
+				Global.leftMaxSpan = 0;
+				Global.rightMaxSpan = 0;
+				Global.timeGetMinDateSpan = 0;
+				bw.write("| ");
+				
 				for(int j=0; j<3; j++) {
 					bw.write(String.valueOf(Global.recCount[j] + " "));
 					Global.recCount[j] = 0;
 				}
+				bw.write("| ");
+				
 				for(int j=0; j<5; j++) {
 					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
 					Global.timePTree[j] = 0;
 				}
+				bw.write("| ");
+				
 				bw.write(String.valueOf(Global.queueSize) + " ");
+				bw.write("| ");
+				
 				for(int j=0; j<7; j++) {
 					if(j==1) {
 						Global.timeBsp[5] -= Global.timeBsp[1];
+						Global.timeBsp[5] -= (Global.timeRecReachable / 1000);
+						Global.timeRecReachable = 0;
 					}
 					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
 					Global.timeBsp[j] = 0;
 				}
+				bw.write("| ");
+				
 				for(int j=0; j<2; j++) {
 					bw.write(Global.bspRes[j] + " ");
 					Global.bspRes[j] = null;
 				}
+				bw.write("| ");
 				bw.write('\n');
 				bw.flush();
 			}

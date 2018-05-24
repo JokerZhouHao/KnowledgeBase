@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -147,6 +148,9 @@ public class kSP {
 								Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
 								Global.tempTime = System.currentTimeMillis();
 							}
+							
+							Global.timeGetMinDateSpan++;
+							
 							minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
 							recMinDateSpanMap.put(nid, minDateSpanMap);
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, qwords, date);
@@ -281,6 +285,7 @@ public class kSP {
 		}
 		recMinDateSpanMap.clear();
 		if(Global.isTest) {
+			System.out.println(String.valueOf(Global.recReach.size()) + " ");
 			for(int i=0; i<5; i++) {
 				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
 //				Global.timePTree[i] = 0;
@@ -320,7 +325,16 @@ public class kSP {
 		 * */
 		Global.count[4]++;
 		for(Integer in : qwords) {
+//			if(Global.recReach.contains(in)) {
+//				isPruned = true;
+//				break;
+//			} else if(!reachableQuerySer.queryReachable(place, in)){
+//				Global.recReach.add((long)in);
+//				isPruned = true;
+//				break;
+//			}
 			if(!reachableQuerySer.queryReachable(place, in)){
+//				Global.recReach.add((long)in);
 				isPruned = true;
 				break;
 			}
@@ -338,7 +352,7 @@ public class kSP {
 	 */
 	public HashMap<Integer, Integer> getWidMinDateSpan(Boolean testReachable, int id, ArrayList<Integer> qwords, int date) throws IOException {
 		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
-		HashMap<Integer, Boolean> rec = new HashMap<>();
+		HashSet<Integer> rec = new HashSet<>();
 		for(int wid : qwords) {
 			if(testReachable)	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(rec, date, id, reachableQuerySer));
 			else 	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(date));
