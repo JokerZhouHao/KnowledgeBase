@@ -157,7 +157,6 @@ public class Global {
 	public static int leftMaxSpan = 0;
 	public static int rightMaxSpan = 0;
 	public static int timeGetMinDateSpan = 0;
-	public static HashSet<Long> recReach = new HashSet();
 	public static BufferedWriter recReachBW = null;
 	public static long timeRecReachable = 0;
 	public static long timeRecTemp = 0;

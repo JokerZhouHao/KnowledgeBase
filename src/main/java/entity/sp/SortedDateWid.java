@@ -89,7 +89,7 @@ public class SortedDateWid {
 		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
-		int i = mid;
+		int i = 0;;
 		DateNidNode tempNode = null;
 		long tempL = p * Global.numSCCs0;
 		if(i >= 0) {
@@ -101,10 +101,12 @@ public class SortedDateWid {
 				rec.add(tempNode.getNid());
 //				rec.add(tempL + tempNode.getNid());
 			}
+			mid = i;
 			left = i - 1;
 			right = i + 1;
 		} else {
 			left = (-i) - 2;
+			mid = left;
 			right = (-i) - 1;
 		}
 		

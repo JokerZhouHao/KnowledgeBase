@@ -285,11 +285,11 @@ public class kSP {
 		}
 		recMinDateSpanMap.clear();
 		if(Global.isTest) {
-			System.out.println(String.valueOf(Global.recReach.size()) + " ");
-			for(int i=0; i<5; i++) {
-				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
-//				Global.timePTree[i] = 0;
-			}
+//			for(int i=0; i<5; i++) {
+//				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
+////				Global.timePTree[i] = 0;
+//			}
+			System.out.println("leftSpan: " + Global.leftMaxSpan + " rightSpan: " + Global.rightMaxSpan + " minDateTime:" + Global.timeGetMinDateSpan);
 			System.out.println();
 			Global.bspRes[0] = String.valueOf(minDist);
 			Global.bspRes[1] = String.valueOf(kthScore);

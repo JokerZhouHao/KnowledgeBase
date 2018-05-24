@@ -445,8 +445,6 @@ public class SPCompleteDisk {
 //					Global.timePn[j] = 0;
 //				}
 				bw.write("| ");
-				
-				bw.write(String.valueOf(Global.recReach.size()) + " ");
 				bw.write(String.valueOf(Global.leftMaxSpan) + " ");
 				bw.write(String.valueOf(Global.rightMaxSpan) + " ");
 				bw.write(String.valueOf(Global.timeGetMinDateSpan) + " ");
