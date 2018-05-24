@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import entity.sp.DateNidNode;
 import precomputation.sp.IndexNidKeywordsListService;
+import statistics.ReachTime;
 
 /**
  * 
@@ -24,6 +25,12 @@ public class MComparator<T> implements Comparator<T> {
 		} else if(t1 instanceof IndexNidKeywordsListService.NodeIdDate) {
 			int i1 = ((IndexNidKeywordsListService.NodeIdDate)t1).getNodeId();
 			int i2 = ((IndexNidKeywordsListService.NodeIdDate)t2).getNodeId();
+			if(i1 > i2)	return 1;
+			else if (i1 == i2)	return 0;
+			else return -1;
+		} else if(t1 instanceof ReachTime.ReachDoublePoint) {
+			int i1 = ((ReachTime.ReachDoublePoint)t1).reachTime;
+			int i2 = ((ReachTime.ReachDoublePoint)t2).reachTime;
 			if(i1 > i2)	return 1;
 			else if (i1 == i2)	return 0;
 			else return -1;
