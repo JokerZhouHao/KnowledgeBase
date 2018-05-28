@@ -52,23 +52,23 @@ public class ReachableQueryService {
 		} else qq = q;
 		
 		if(p < Global.numNodes) {
-			Boolean res = Boolean.FALSE;
-			Global.timeRecTemp = System.currentTimeMillis();
-			res = this.queryReachable(pp, qq, Global.numSCCs);
-			Global.timeRecTemp1 = System.currentTimeMillis();
-			try {
-				Global.recReachBW.write(String.valueOf(Global.curRecIndex + 1) + " " + String.valueOf(p) + " " + String.valueOf(q) + " " + String.valueOf(System.currentTimeMillis() - Global.timeRecTemp) + '\n');
-				Global.timeRecReachable += System.currentTimeMillis() - Global.timeRecTemp1;
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(0);
-			}
-			return res;
-//			if(q < Global.numNodes) {
-//				return this.queryReachable(vertexSCCMap.get(p), vertexSCCMap.get(q), Global.numSCCs);
-//			} else {
-//				return this.queryReachable(vertexSCCMap.get(p) , q, Global.numSCCs);
+//			Boolean res = Boolean.FALSE;
+//			Global.timeRecTemp = System.currentTimeMillis();
+//			res = this.queryReachable(pp, qq, Global.numSCCs);
+//			Global.timeRecTemp1 = System.currentTimeMillis();
+//			try {
+//				Global.recReachBW.write(String.valueOf(Global.curRecIndex + 1) + " " + String.valueOf(p) + " " + String.valueOf(q) + " " + String.valueOf(System.currentTimeMillis() - Global.timeRecTemp) + '\n');
+//				Global.timeRecReachable += System.currentTimeMillis() - Global.timeRecTemp1;
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				System.exit(0);
 //			}
+//			return res;
+			if(q < Global.numNodes) {
+				return this.queryReachable(vertexSCCMap.get(p), vertexSCCMap.get(q), Global.numSCCs);
+			} else {
+				return this.queryReachable(vertexSCCMap.get(p) , q, Global.numSCCs);
+			}
 		} else return Boolean.FALSE;
 	}
 	

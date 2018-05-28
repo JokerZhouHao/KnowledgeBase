@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import file.reader.GZIPReader;
+import precomputation.rechable.ReachableQueryService;
 import utility.Global;
 import utility.MComparator;
 import utility.TimeUtility;
@@ -62,7 +63,7 @@ public class ReachTime {
 		}
 		
 		public String toString() {
-			return doublePoint.replace(' ', ',') + "," + String.valueOf(reachTime);
+			return doublePoint;
 		}
 	}
 	
@@ -70,6 +71,14 @@ public class ReachTime {
 	public static void outputNoZero() throws Exception{
 		System.out.println("开始处理 . . . ");
 		long start = System.currentTimeMillis();
+		
+		long rStart = 0;
+		String sccPath = Global.outputDirectoryPath + Global.sccFile;
+		String tfLabelIndex = Global.outputDirectoryPath + Global.indexTFLabel;
+		ReachableQueryService reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
+		int p, q;
+		long rTime = 0;
+		
 		GZIPReader gr = new GZIPReader(Global.fileReachGZip);
 		gr.open();
 		int index;
@@ -79,16 +88,32 @@ public class ReachTime {
 		int res1 = 0;
 		int res2 = 0;
 		int tempI = 0;
-		ArrayList<ReachDoublePoint> li = new ArrayList<>();
+		ArrayList<ReachDoublePoint> li1 = new ArrayList<>();
+		ArrayList<ReachDoublePoint> li2 = new ArrayList<>();
+		String strArr[] = null;
 		while(null != (line = gr.readLine())) {
 			count++;
-			index = line.lastIndexOf(' ');
-			tempI = Integer.parseInt(line.substring(index + 1));
+			strArr = line.split(" ");
+			p = Integer.parseInt(strArr[1]);
+			q = Integer.parseInt(strArr[2]);
+			tempI = Integer.parseInt(strArr[3]);
+			
+			rStart = System.currentTimeMillis();
+			reachableQuerySer.queryReachable(p, q);
+			rTime = System.currentTimeMillis() - rStart;
+			
+			strArr[0] = strArr[0] + ',' + String.valueOf(p) + ',' + String.valueOf(q) + ',' + String.valueOf(tempI) + ',' + String.valueOf(rTime);
+			
 			if(tempI > 0) {
 				countNoZero++;
 				res2 += tempI;
-				li.add(new ReachDoublePoint(line.substring(0, index), tempI));
+				li1.add(new ReachDoublePoint(strArr[0], tempI));
 			}
+			
+			if(rTime > 0) {
+				li2.add(new ReachDoublePoint(strArr[0], (int)rTime));
+			}
+			
 			if(res1 > res2) {
 				System.out.println("int不能放下所有的时间和！");
 				break;
@@ -98,13 +123,25 @@ public class ReachTime {
 		gr.close();
 		
 		// 写文件
-		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "reachNoZero.csv"));
-		li.sort(new MComparator<ReachDoublePoint>());
-		int len = li.size();
+		System.out.println("开始输出文件reachNoZero1.csv . . . ");
+		li1.sort(new MComparator<ReachDoublePoint>());
+		BufferedWriter bw1 = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "reachNoZero1.csv"));
+		int len = li1.size();
 		for(int i = len-1; i>=0; i--) {
-			bw.write(li.get(i).toString() + '\n');
+			bw1.write(li1.get(i).toString() + '\n');
 		}
-		bw.close();
+		bw1.close();
+		System.out.println("成功输出文件reachNoZero1.csv . . . ");
+		
+		System.out.println("开始输出文件reachNoZero2.csv . . . ");
+		li2.sort(new MComparator<ReachDoublePoint>());
+		BufferedWriter bw2 = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "reachNoZero2.csv"));
+		len = li2.size();
+		for(int i = len-1; i>=0; i--) {
+			bw2.write(li2.get(i).toString() + '\n');
+		}
+		bw2.close();
+		System.out.println("成功输出文件reachNoZero2.csv . . . ");
 		
 		System.out.println("count: " + count);
 		System.out.println("countNoZero: " + countNoZero);

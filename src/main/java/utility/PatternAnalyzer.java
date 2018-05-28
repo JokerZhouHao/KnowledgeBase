@@ -30,7 +30,7 @@ public class PatternAnalyzer extends Analyzer {
 	
 	public static void main(String[] args) throws Exception{
 		PatternAnalyzer pa = new PatternAnalyzer(",");
-		TokenStream ts = pa.tokenStream("k", "17531#   12,");
+		TokenStream ts = pa.tokenStream("k", "17531#,2323,12,");
 		CharTermAttribute term = ts.addAttribute(CharTermAttribute.class);
 		ts.reset();
 		while(ts.incrementToken()) {

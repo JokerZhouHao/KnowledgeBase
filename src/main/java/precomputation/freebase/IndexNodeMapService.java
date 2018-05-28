@@ -40,6 +40,7 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
 import utility.LocalFileInfo;
+import utility.PatternAnalyzer;
 import utility.TimeUtility;
 
 /**
