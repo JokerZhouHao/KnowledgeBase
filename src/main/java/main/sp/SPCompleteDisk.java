@@ -150,7 +150,6 @@ public class SPCompleteDisk {
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
-		
 		// 添加点对可达时间记录
 		Global.recReachBW = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(Global.fileReachGZip)))));
 		
