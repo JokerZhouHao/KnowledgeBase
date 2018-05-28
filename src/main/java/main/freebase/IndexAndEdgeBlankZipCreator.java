@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import file.reader.ZipBase64Reader;
 import file.reader.ZipReader;
 import file.writer.ZipWriter;
 import precomputation.freebase.IndexNodeMapService;
@@ -83,10 +84,12 @@ public class IndexAndEdgeBlankZipCreator {
 		tempNodeNum = nodeNumList.get(0);
 		System.out.println("  > 开始初始化allAttArr(" + tempNodeNum + "个点) . . . " + LocalFileInfo.getMemoryAndTime());
 		allAttArr = new String[tempNodeNum];
-		ZipReader reader = new ZipReader(LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "Google-freebase-rdf-latestZH" + File.separator + "keywordBlank.zip");
+//		ZipReader reader = new ZipReader(LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "Google-freebase-rdf-latestZH" + File.separator + "keywordBlank.zip");
+		String regStr = "\\[\\^\\\\\\]";
+		ZipBase64Reader reader = new ZipBase64Reader(LocalFileInfo.getNodeIdAndKeywordAndEdgeZipPath(), "keywordIdMapGoogleFreebase.txt");
 		reader.readLine();
 		for(i=0; i<tempNodeNum; i++) {
-			allAttArr[i] = reader.readLine();
+			allAttArr[i] = reader.readLine().replaceAll(regStr, " ");
 		}
 		reader.close();
 		System.out.println("  > 完成初始化allAttArr(" + tempNodeNum + "个点) ! ! ! " + LocalFileInfo.getMemoryAndTime() + "\n");
@@ -137,14 +140,15 @@ public class IndexAndEdgeBlankZipCreator {
 		 * 初始化allEdgeArr
 		 **********************/
 		System.out.println("  > 开始初始化allEdgeArr(" + tempNodeNum + "点) . . . " + LocalFileInfo.getMemoryAndTime());
-		ZipReader zipReader = new ZipReader(LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "Google-freebase-rdf-latestZH" + File.separator + "edgeBlank.zip");
+//		ZipReader zipReader = new ZipReader(LocalFileInfo.getBasePath() + File.separator + "data" + File.separator + "Google-freebase-rdf-latestZH" + File.separator + "edgeBlank.zip");
+		ZipBase64Reader zipReader = new ZipBase64Reader(LocalFileInfo.getNodeIdAndKeywordAndEdgeZipPath(), "edgeGoogleFreebase.txt");
 		zipReader.readLine();
 		allEdgeArr = new ArrayList[tempNodeNum];
 		for(i=0; i<tempNodeNum; i++) {
 			tempStr = zipReader.readLine();
 			if(!tempStr.equals("")) {
 				tempList = new ArrayList<>();
-				for(String s : tempStr.split(" ")) {
+				for(String s : tempStr.split(",")) {
 					j = Integer.parseInt(s);
 					if(j<tempNodeNum)	tempList.add(j);
 				}

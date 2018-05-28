@@ -375,6 +375,13 @@ public class SPCompleteDisk {
 			Global.startTime = System.currentTimeMillis();
 			System.out.println("> 开始测试样本 . . . ");
 		}
+		
+		// 添加测试样本
+		String sampleFileSign = "";
+		if(args.length > 0) {
+			sampleFileSign = args[0];
+		}
+		
 		System.out.println("> 开始初始化SPCompleteDisk . . . ");
 		SPCompleteDisk spc = new SPCompleteDisk();
 		System.out.println("> 成功初始化SPCompleteDisk ！ ！ ！ ");
@@ -408,7 +415,7 @@ public class SPCompleteDisk {
 			samNumCopy = samNum;
 			
 			// 输出结果
-			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + String.valueOf(Global.testK) + "." + String.valueOf(Global.testSampleNum) + Global.testSampleResultFile));
+			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + String.valueOf(Global.testK) + "." + String.valueOf(Global.testSampleNum) + Global.testSampleResultFile + sampleFileSign));
 			
 			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile));
 			br.readLine();

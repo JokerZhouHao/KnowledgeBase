@@ -107,7 +107,8 @@ public class Global {
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
 	public static String indexWIdDate = "wid_date" + File.separator;
 	public static String indexTFLabel = "tf_label" + File.separator;
-	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+//	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+	public static String indexWidPN = "wid_pn" + File.separator;
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 
 	/* file content delimiter sign */
@@ -134,9 +135,9 @@ public class Global {
 	public static int testSampleNum = testOrgSampleNum;
 	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
 	public static String testSampleResultFile =  "." + "testSampleResultFile";
-	public static long limitTime = 300 * 1000; // 限制每次bsp运行的最大时间
+	public static long limitTime = 200 * 1000; // 限制每次bsp运行的最大时间
 	public static long limitTime0 = 80 * 1000;
-	public static long limitTime1 = 300 * 1000; 
+	public static long limitTime1 = 200 * 1000;
 	public static String timeTotal = null;
 	public static String timeBuildSPCompleteDisk = null;
 	public static String timeOpenLuceneIndex = null;

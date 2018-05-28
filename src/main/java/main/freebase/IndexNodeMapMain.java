@@ -3,6 +3,7 @@ package main.freebase;
 import java.io.File;
 import java.util.Date;
 
+import file.reader.ZipBase64Reader;
 import file.reader.ZipReader;
 import precomputation.freebase.IndexNodeMapService;
 import utility.LocalFileInfo;
@@ -12,8 +13,11 @@ public class IndexNodeMapMain {
 
 	public static void buildIndex() {
 		Long startTime = System.currentTimeMillis();
-		ZipReader keywordReader = new ZipReader(LocalFileInfo.getKeywordBlankZipPath());
-		ZipReader edgeReader = new ZipReader(LocalFileInfo.getEdgeBlankZipPath());
+//		ZipReader keywordReader = new ZipReader(LocalFileInfo.getKeywordBlankZipPath());
+//		ZipReader edgeReader = new ZipReader(LocalFileInfo.getEdgeBlankZipPath());
+		
+		ZipBase64Reader keywordReader = new ZipBase64Reader(LocalFileInfo.getNodeIdAndKeywordAndEdgeZipPath(), "keywordIdMapGoogleFreebase.txt");
+		ZipBase64Reader edgeReader = new ZipBase64Reader(LocalFileInfo.getNodeIdAndKeywordAndEdgeZipPath(), "edgeGoogleFreebase.txt");
 		
 //		IndexNodeMapService indexNodeMapService = new IndexNodeMapService(LocalFileInfo.getIndexPath());
 		IndexNodeMapService indexNodeMapService = new IndexNodeMapService(LocalFileInfo.getSampleIndexPath());

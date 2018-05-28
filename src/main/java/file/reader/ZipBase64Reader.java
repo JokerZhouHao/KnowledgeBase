@@ -132,12 +132,18 @@ public class ZipBase64Reader {
 		
 //		System.out.println(totalLen);
 		
-		ZipBase64Reader rs = new ZipBase64Reader(LocalFileInfo.getBasePath() + "\\data\\DataSet\\YagoVB.zip", "nodeIdMapYagoVB.txt");
+		String str = null;
+		ZipBase64Reader rs = new ZipBase64Reader(LocalFileInfo.getNodeIdAndKeywordAndEdgeZipPath(), "keywordIdMapGoogleFreebase.txt");
 		System.out.println(rs.readLine());
-		
-		
+//		System.out.println(rs.readLine());
+		str = rs.readLine();
+//		System.out.println(rs.readLine());
+//		System.out.println(rs.readLine());
+//		System.out.println(rs.readLine());
+//		System.out.println(rs.readLine());
 		rs.close();
-		
+		System.out.println(str);
+		System.out.println(str.replaceAll("\\[\\^\\\\\\]", " "));
 		
 //		ZipBase64ReaderService rs = new ZipBase64ReaderService(LocalFileInfo.getBasePath() + "\\data\\DataSet\\zipTest.zip", "3");
 //		BufferedReader reader = rs.getCurBufferedReader();
