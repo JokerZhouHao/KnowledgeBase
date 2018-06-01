@@ -1,5 +1,11 @@
 package entity.sp;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+
+import utility.MComparator;
+
 /**
  * @author zhou
  * @since 2018/5/12
@@ -35,6 +41,14 @@ public class DateNidNode {
 
 	public void setNid(int nid) {
 		this.nid = nid;
+	}
+	
+	public static void main(String args[]) {
+		ArrayList<DateNidNode> dateWidList = new ArrayList<>();
+		dateWidList.add(new DateNidNode(1, -1));
+		dateWidList.add(new DateNidNode(3, -1));
+		dateWidList.add(new DateNidNode(5, -1));
+		System.out.println(Collections.binarySearch(dateWidList, new DateNidNode(-9, -1), new MComparator<DateNidNode>()));
 	}
 
 }
