@@ -59,6 +59,7 @@ public class Global {
 //	public static int numPlaces = 12;
 	public static int numPlaces = 4774796;
 //	public static int numNodes = 12;//include nodes that are places
+	public static int numNodes0 = 8091179;	//include nodes that are places
 	public static int numNodes = 8091179;	//include nodes that are places
 //	public static int numKeywords = 18;
 	public static int numKeywords = 3778457;
@@ -68,6 +69,8 @@ public class Global {
 //	public static int numSCCs = 30;
 //	public static int numContainCoordWordDate = 12;
 	public static int numContainCoordWordDate = 812532;
+	public static int numPid = 4774796;
+	public static int numWid = 518314;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
@@ -88,7 +91,11 @@ public class Global {
 	public static String nodeIdKeywordListOnIntDateFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
 	public static String widOnIntDateFile = "widOnIntDate.txt";
 	public static String pidCoordFile = "pidCoordYagoVB.txt";
+	public static String pidFile = "placeIdMapYagoVB.txt";
 	public static String invertedIndexFile = null;
+	public static String allPidFile = "allPid.bin";
+	public static String allWidFile = "allWid.bin";
+	public static String widMinMaxDateFile = "widMinMaxDate.txt";
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
@@ -102,6 +109,10 @@ public class Global {
 	public static String alphaIindexFile = null;
 	public static int alphaIindexRTNodeBufferSize = -1;
 	public static String tfindexDirectoryPath = null;
+	public static String pWReachTimesPath = outputDirectoryPath + "pWReachTimes.gz";
+	public static String noRepWReachTimesPath= outputDirectoryPath + "NoRepWReachTimes.bin";
+	public static String recPidWidReachPath = outputDirectoryPath + "recPidToWidReach.gz";
+	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.gz";
 	
 	/*	index path	*/
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;

@@ -239,6 +239,10 @@ public class SortedDateWid {
 		return sb.toString();
 	}
 	
+	public ArrayList<DateNidNode> getDateWidList() {
+		return dateWidList;
+	}
+
 	public static void main(String[] args) {
 		SortedDateWid sdw = new SortedDateWid();
 		sdw.addDateWid(new DateNidNode(1, 1));

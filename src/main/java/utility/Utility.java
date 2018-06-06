@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -216,6 +217,32 @@ public class Utility<T1, T2> {
 			}
 			System.out.println();
 		}
+	}
+	
+	public static Boolean isEqualList(List<Integer>li1, List<Integer> li2) {
+		if(li1.size() != li2.size())	return Boolean.FALSE;
+		else {
+			return li1.equals(li2);
+		}
+	}
+	
+	public static Boolean isEqualSet(Set<Integer>s1, Set<Integer> s2) {
+		if(s1.size() != s2.size())	return Boolean.FALSE;
+		else {
+			Iterator<Integer> it1 = s1.iterator();
+			Iterator<Integer> it2 = s2.iterator();
+			while(it1.hasNext()) {
+				if(it1.next() != it2.next())	return Boolean.FALSE;
+			}
+			return Boolean.TRUE;
+		}
+	}
+	
+	public static Boolean isEqualIntArr(int[] in1, int[] in2) {
+		for(int i=0; i<in1.length; i++) {
+			if(in1[i] != in2[i])	return Boolean.FALSE;
+		}
+		return Boolean.TRUE;
 	}
 	
 }

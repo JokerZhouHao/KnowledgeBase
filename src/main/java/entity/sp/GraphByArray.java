@@ -50,7 +50,11 @@ public class GraphByArray {
 			this.visitedFlag[i] = -1;
 		}
 	}
-
+	
+	public int[] getEdge(int nid) {
+		return adjLists[nid];
+	}
+	
 	/**
 	 * compute the alpha doc of vertex in BFS mode.
 	 * */
@@ -406,6 +410,7 @@ public class GraphByArray {
 	}
 
 	public void loadGraph(String edgefile) throws Exception {
+		System.out.println("> 开始读取文件" + edgefile + " . . .");
 		// add edges
 		String line;
 		int cntlines = 0;
@@ -438,6 +443,7 @@ public class GraphByArray {
 			countEdges += adjVertices.length;
 		}
 		reader.close();
+		System.out.println("> 完成读取文件" + edgefile + " . . .");
 	}
 
 	/**
