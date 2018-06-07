@@ -26,7 +26,7 @@ import utility.TimeUtility;
 public class CReach {
 	private int[] dags = null;
 	private int[] topos = null;
-	private Set[] TLs = null;
+	private int[][] TLs = null;
 	private int[] tlSizes = null;
 	private int sccNum = 0;
 	private int twoSccNum = 0;
@@ -73,7 +73,7 @@ public class CReach {
 		load(fp+"_topo_label", topos);
 		tlSizes = new int[sccNum * 2];
 		load(fp+"_tlstart", tlSizes);
-		TLs = new Set[sccNum * 2];
+		TLs = new int[sccNum * 2][];
 		loadTL(fp + "_TL");
 	}
 	
@@ -107,11 +107,11 @@ public class CReach {
 			System.out.println("> 开始读取文件" + fp + " . . . ");
 			dis = IOUtility.getDis(fp);
 			int ptr1=0, ptr2=0;
-			Set st = null;
+			int[] st = null;
 			while(ptr1 != twoSccNum) {
-				TLs[ptr1] = st = new HashSet<Integer>();
+				TLs[ptr1] = st = new int[tlSizes[ptr1]];
 				do {
-					st.add(C2J_Int(dis.readInt()));
+					st[ptr2] = C2J_Int(dis.readInt());
 				}while((++ptr2)!=tlSizes[ptr1]);
 				ptr1++;
 				ptr2=0;
@@ -138,16 +138,16 @@ public class CReach {
 		if (dags[p] != dags[q]){    //after callapsing into super node, in the same connected DAG?
 			return Boolean.FALSE;
 		} else {
-			Set<Integer> st1 = TLs[p];
-			Set<Integer> st2 = TLs[q + sccNum];
-			
-			if(st1.size() <= st2.size()) {
-				for(int in : st1) {
-					if(st2.contains(in))	return Boolean.TRUE;
-				}
-			} else {
-				for(int in : st2) {
-					if(st1.contains(in))	return Boolean.TRUE;
+			int[] st1 = TLs[p];
+			int[] st2 = TLs[q + sccNum];
+			int i=0, j=0;
+			while((i < st1.length) && (j<st2.length)) {
+				if(st1[i] < st2[j]) {
+					i++;
+				} else if(st1[i] > st2[j]) {
+					j++;
+				} else {
+					return Boolean.TRUE;
 				}
 			}
 			return Boolean.FALSE;
@@ -198,9 +198,11 @@ public class CReach {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		CReach.showReachable();
+		CReach.showReachable();
 //		CReach.inputTest();
 //		System.out.println(LocalFileInfo.getDataSetPath());
+		
+		/*
 		System.out.println("> 开始测试 . . . . " + TimeUtility.getTime());
 		String sccFile = Global.outputDirectoryPath + Global.sccFile;
 		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
@@ -257,6 +259,7 @@ public class CReach {
 			bw.close();
 		}
 		System.out.println("> 测试结束 . " + TimeUtility.getTime());
+		*/
 	}
 }
 
