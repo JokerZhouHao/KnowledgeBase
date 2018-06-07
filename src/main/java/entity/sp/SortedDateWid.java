@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import entity.sp.reach.CReach;
 import precomputation.rechable.ReachableQueryService;
 import utility.Global;
 import utility.MComparator;
@@ -85,7 +86,8 @@ public class SortedDateWid {
 		}
 	}
 	
-	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, ReachableQueryService rsSer) {
+//	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, ReachableQueryService rsSer) {
+	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer) {
 		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;

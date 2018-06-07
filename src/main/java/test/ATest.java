@@ -28,8 +28,10 @@ public class ATest {
 		TreeMap<Integer, Integer> tm = new TreeMap<>();
 		tm.put(3, 3);
 		tm.put(2, 2);
-		for(Entry<Integer, Integer> en : tm.entrySet()) {
-			System.out.println(en.getKey() + " " + en.getValue());
+		tm.put(1, 1);
+		tm.put(4, 4);
+		for(int en : tm.values()) {
+			System.out.println(en);
 		}
 		
 //		TreeSet<Integer> ts = new TreeSet<>();

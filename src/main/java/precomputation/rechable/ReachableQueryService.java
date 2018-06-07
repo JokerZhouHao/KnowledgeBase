@@ -95,11 +95,34 @@ public class ReachableQueryService {
 	}
 	
 	/**
+	 * 静态测试TF-Label
+	 */
+	public static void showReachable() {
+		System.loadLibrary("TFLabelReachable");
+		ReachableQueryService rqs = new ReachableQueryService();
+		String filePath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + "tf_label" + File.separator;
+		int sccN = 8;
+		rqs.initQuery(sccN, filePath);
+		for(int i=0; i<sccN; i++) {
+			System.out.print(i + " : ");
+			for(int j = 0; j<sccN; j++) {
+				if(i != j && rqs.queryReachable(i, j, sccN)) {
+					System.out.print(j + " ");
+				}
+			}
+			System.out.println();
+		}
+		rqs.freeQuery(sccN);
+	}
+	
+	/**
 	 * 主方法
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception{
+		ReachableQueryService.showReachable();
+		
 //		ReachableQueryService rqs = new ReachableQueryService();
 //		String indexPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator + Global.indexTFLabel;
 //		System.loadLibrary("TFLabelReachable");
@@ -118,20 +141,20 @@ public class ReachableQueryService {
 		
 		
 		
-		String sccFile = Global.outputDirectoryPath + Global.sccFile;
-		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
-		ReachableQueryService rqs = new ReachableQueryService(sccFile, indexPath);
-		int p, q = 0;
-		String line = null;
-		Scanner scan = new Scanner(System.in);
-		while(null != (line = scan.nextLine()) && !line.isEmpty()) {
-			long start = System.currentTimeMillis();
-			p = Integer.parseInt(line.split(",")[0]);
-			q = Integer.parseInt(line.split(",")[1]);
-			rqs.queryReachable(p, q);
-			System.out.println(System.currentTimeMillis() - start);
-		}
-		rqs.freeQuery();
+//		String sccFile = Global.outputDirectoryPath + Global.sccFile;
+//		String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
+//		ReachableQueryService rqs = new ReachableQueryService(sccFile, indexPath);
+//		int p, q = 0;
+//		String line = null;
+//		Scanner scan = new Scanner(System.in);
+//		while(null != (line = scan.nextLine()) && !line.isEmpty()) {
+//			long start = System.currentTimeMillis();
+//			p = Integer.parseInt(line.split(",")[0]);
+//			q = Integer.parseInt(line.split(",")[1]);
+//			rqs.queryReachable(p, q);
+//			System.out.println(System.currentTimeMillis() - start);
+//		}
+//		rqs.freeQuery();
 		
 //		rqs.display();
 		

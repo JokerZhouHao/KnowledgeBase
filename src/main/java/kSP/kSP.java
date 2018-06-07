@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import entity.sp.WordRadiusNeighborhood;
+import entity.sp.reach.CReach;
 import entity.sp.DatesWIds;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
@@ -45,18 +46,24 @@ public class kSP {
 	Map<Integer, DatesWIds> nIdDateWidMap = null;
 	HashMap<Integer, SortedDateWid> widDatesMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
-	ReachableQueryService reachableQuerySer = null;
+	ReachableQueryService reachableQuerySer0 = null;
+	private static CReach reachableQuerySer = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
 	public kSP(RTreeWithGI rgi, Map<Integer, DatesWIds> nIdDateWidMap, HashMap<Integer, SortedDateWid> widDatesMap,
-			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
+			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer0) {
 		super();
 		this.rgi = rgi;
 		this.nIdDateWidMap = nIdDateWidMap;
 		this.widDatesMap = widDatesMap;
  		this.wordPNMap = wordPNMap;
-		this.reachableQuerySer = reachableQuerySer;
+//		this.reachableQuerySer = reachableQuerySer;
+ 		if(null == reachableQuerySer) {
+ 			String sccFile = Global.outputDirectoryPath + Global.sccFile;
+ 			String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
+ 			reachableQuerySer = new CReach(sccFile, indexPath, Global.numSCCs);
+ 		}
 		
 	}
 
