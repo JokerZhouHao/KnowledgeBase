@@ -87,7 +87,7 @@ public class SortedDateWid {
 	}
 	
 //	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, ReachableQueryService rsSer) {
-	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer) {
+	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, ReachableQueryService rsSer) {
 		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;

@@ -22,6 +22,7 @@ import org.apache.lucene.index.IndexWriter;
  */
 public class Global {
 	// variable array for counting
+	public static long globalStartTime = System.currentTimeMillis();
 	public static int[] count = new int[10];
 	/**
 	 * number of nodes accessed; 
@@ -96,6 +97,8 @@ public class Global {
 	public static String allPidFile = "allPid.bin";
 	public static String allWidFile = "allWid.bin";
 	public static String widMinMaxDateFile = "widMinMaxDate.txt";
+	public static String wid2DateNidPairFile = "wid2DateNidPair.bin";
+	public static String rtreeNode2PidsFile = "rtreeNode2Pids.bin";
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
@@ -123,6 +126,7 @@ public class Global {
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator;
 	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator + "wids_block_";
+	public static String indexWid2DateNid = Global.outputDirectoryPath + "wid_2_DateNids";
 	
 	/* file content delimiter sign */
 	public static String delimiterLevel1 = ": ";

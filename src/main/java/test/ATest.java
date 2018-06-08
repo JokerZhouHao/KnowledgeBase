@@ -25,14 +25,24 @@ public class ATest {
 	public static void main(String[] args) throws Exception{
 //		System.out.format("> 已处理%d%%，用时%d\n", 1212, TimeUtility.getSpanSecond(23233L, System.currentTimeMillis()));
 		
-		TreeMap<Integer, Integer> tm = new TreeMap<>();
-		tm.put(3, 3);
-		tm.put(2, 2);
-		tm.put(1, 9);
-		tm.put(4, 4);
-		for(int en : tm.values()) {
-			System.out.println(en);
+		ArrayList<Integer> li = new ArrayList<>();
+		ArrayList<Integer> li1 = new ArrayList<>();
+		li.add(1);
+		li1.add(2);
+		li.addAll(li1);
+		for(int in : li) {
+			System.out.println(in);
 		}
+		
+		
+//		TreeMap<Integer, Integer> tm = new TreeMap<>();
+//		tm.put(3, 3);
+//		tm.put(2, 2);
+//		tm.put(1, 9);
+//		tm.put(4, 4);
+//		for(int en : tm.values()) {
+//			System.out.println(en);
+//		}
 		
 //		TreeSet<Integer> ts = new TreeSet<>();
 //		ts.add(1);

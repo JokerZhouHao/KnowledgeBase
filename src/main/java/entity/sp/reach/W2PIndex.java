@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.BinaryDocValuesField;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
@@ -53,7 +54,7 @@ public class W2PIndex {
 	// 打开索引写器
 	private void openIndexWriter() {
 		try {
-			analyzer = new PatternAnalyzer(",");
+			analyzer = new StandardAnalyzer();
 			Directory indexDir = FSDirectory.open(Paths.get(indexPath));
 			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 			iwc.setOpenMode(OpenMode.CREATE);

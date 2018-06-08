@@ -94,6 +94,10 @@ public class TimeUtility {
 		return null;
 	}
 	
+	public static String getTailTime() {
+		return getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()) + ".  " + getTime();
+	}
+	
 	public static void main(String[] args) {
 //		1970, 00:00:00
 //		System.out.println(TimeUtility.getOffsetDate("1991-03-04", 4));

@@ -46,25 +46,24 @@ public class kSP {
 	Map<Integer, DatesWIds> nIdDateWidMap = null;
 	HashMap<Integer, SortedDateWid> widDatesMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
-	ReachableQueryService reachableQuerySer0 = null;
-	private static CReach reachableQuerySer = null;
+	ReachableQueryService reachableQuerySer = null;
+//	private static CReach reachableQuerySer = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
 	public kSP(RTreeWithGI rgi, Map<Integer, DatesWIds> nIdDateWidMap, HashMap<Integer, SortedDateWid> widDatesMap,
-			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer0) {
+			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
 		super();
 		this.rgi = rgi;
 		this.nIdDateWidMap = nIdDateWidMap;
 		this.widDatesMap = widDatesMap;
  		this.wordPNMap = wordPNMap;
-//		this.reachableQuerySer = reachableQuerySer;
- 		if(null == reachableQuerySer) {
- 			String sccFile = Global.outputDirectoryPath + Global.sccFile;
- 			String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
- 			reachableQuerySer = new CReach(sccFile, indexPath, Global.numSCCs);
- 		}
-		
+		this.reachableQuerySer = reachableQuerySer;
+// 		if(null == reachableQuerySer) {
+// 			String sccFile = Global.outputDirectoryPath + Global.sccFile;
+// 			String indexPath = Global.outputDirectoryPath + Global.indexTFLabel;
+// 			reachableQuerySer = new CReach(sccFile, indexPath, Global.numSCCs);
+// 		}
 	}
 
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, ArrayList<Integer> qwords, int date,

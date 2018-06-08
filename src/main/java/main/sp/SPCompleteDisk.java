@@ -95,7 +95,7 @@ public class SPCompleteDisk {
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
-//		reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
+		reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
 		
 		if(Global.isTest) {
 			Global.timeLoadTFLable = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
