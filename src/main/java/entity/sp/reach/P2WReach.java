@@ -1,4 +1,4 @@
-package entity.sp.date;
+package entity.sp.reach;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,7 +26,7 @@ import utility.TimeUtility;
  * @author Monica
  *
  */
-public class PWReach implements Runnable{
+public class P2WReach implements Runnable{
 	class TempClass{
 		int pid;
 		Set<Integer> wids = null;
@@ -48,22 +48,22 @@ public class PWReach implements Runnable{
 	
 	private static int dealedNum = 0;
 	
-	private static int zipNum = 40;
-	public static int zipContianNodeNum = Global.numPid / zipNum;
+	public static int zipContianNodeNum = Global.numPid / 40;
+	public static int zipNum = Global.numPid%zipContianNodeNum==0?Global.numPid/zipContianNodeNum:Global.numPid/zipContianNodeNum+1;
 	
 	private ArrayBlockingQueue<TempClass> blockingQueue = null;
 	
 	private int type = 1;
 	
-	public PWReach() {
+	public P2WReach() {
 		this.init();
 	}
 	
-	public PWReach(String fp) {
+	public P2WReach(String fp) {
 		this.filePath = fp;
 	}
 	
-	public PWReach(int type, ArrayBlockingQueue<TempClass> qu, int start, int end){
+	public P2WReach(int type, ArrayBlockingQueue<TempClass> qu, int start, int end){
 		this.type = type;
 		this.start = start;
 		this.end = end;
@@ -111,6 +111,7 @@ public class PWReach implements Runnable{
 			HashSet<Integer> rec = new HashSet<Integer>();
 			queue.push(pid);
 			rec.add(pid);
+			HashSet<Integer> wids = new HashSet<>();
 			while(null != (nid = queue.poll())) {
 				// bfs
 				if(null != (edges =  graph.getEdge(nid))) {
@@ -128,13 +129,13 @@ public class PWReach implements Runnable{
 				// 添加date
 				if(null != (tDWid = allDW.get(nid))) {
 					for(int wid : tDWid.wids) {
-						rec.add(wid);
+						wids.add(wid);
 					}
 				}
 			}
 			
-			if(!rec.isEmpty()) {
-				blockingQueue.put(new TempClass(pid, rec));
+			if(!wids.isEmpty()) {
+				blockingQueue.put(new TempClass(pid, wids));
 			}
 			
 			dealedNum++;
@@ -152,7 +153,7 @@ public class PWReach implements Runnable{
 	 */
 	public void writeToFile() {
 		try {
-			DataOutputStream dos = IOUtility.getDGZos(filePath);
+			DataOutputStream dos = IOUtility.getDos(filePath);
 			TempClass tc = null;
 			while(true) {
 				tc = blockingQueue.take();
@@ -199,71 +200,15 @@ public class PWReach implements Runnable{
 			end += span;
 			if(end > Global.numPid)	end = Global.numPid;
 			ArrayBlockingQueue<TempClass> bQueue = new ArrayBlockingQueue<>(1);
-			PWReach pwd1 = new PWReach(1, bQueue, start, end);
-			PWReach pwd2 = new PWReach(2, bQueue, start, end);
+			P2WReach pwd1 = new P2WReach(1, bQueue, start, end);
+			P2WReach pwd2 = new P2WReach(2, bQueue, start, end);
 			new Thread(pwd1).start();
 			new Thread(pwd2).start();
 		}
 	}
 	
-	public static void getWidToPidFile() throws Exception{
-		int start = 0, end = 0;
-		int span = zipContianNodeNum;
-		String pTwFile = null;
-		DataInputStream dis = null;
-		Map<Integer, Set<Integer>> rec = new TreeMap<>();
-		Set<Integer> pids = null;
-		int pid, wid, wid_num, i;
-		while(end < Global.numPid) {
-			start = end;
-			end += span;
-			if(end > Global.numPid)	end = Global.numPid;
-			try {
-				pTwFile = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
-				System.out.println("> 开始读取文件" + pTwFile + " . . . " + TimeUtility.getTime());
-				dis = IOUtility.getDGZis(pTwFile);
-				while(true) {
-					pid = dis.readInt();
-					wid_num = dis.readInt();
-					for(i=0; i<wid_num; i++) {
-						wid = dis.readInt();
-						if(null == (pids = rec.get(wid))) {
-							pids = new HashSet<>();
-							rec.put(wid, pids);
-						}
-						pids.add(pid);
-					}
-				}
-			} catch(EOFException e) {
-				try {
-					dis.close();
-				} catch (Exception e2) {
-					e2.printStackTrace();
-					System.exit(0);
-				}
-				System.out.println("> 完成读取文件" + pTwFile + ", 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + ". " + TimeUtility.getTime());
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(0);
-			}
-		}
-		
-		// 写文件
-		pTwFile = Global.recWidPidReachPath;
-		System.out.println("> 开始写文件" + pTwFile + " . . . " + TimeUtility.getTime());
-		DataOutputStream dos = IOUtility.getDGZos(pTwFile);
-		for(Entry<Integer, Set<Integer>> en : rec.entrySet()) {
-			dos.writeInt(en.getKey());
-			dos.writeInt(en.getValue().size());
-			for(int in : en.getValue()) {
-				dos.writeInt(in);
-			}
-		}
-		System.out.println("> 完成写文件" + pTwFile + ", 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + ". " + TimeUtility.getTime());
-	}
-	
 	public static void main(String[] args) throws Exception{
-//		PWReach.getPidToWidReachFile();
-		PWReach.getWidToPidFile();
+		P2WReach.getPidToWidReachFile();
+//		PWReach.getWidToPidFile();
 	}
 }

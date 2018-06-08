@@ -28,7 +28,7 @@ public class ATest {
 		TreeMap<Integer, Integer> tm = new TreeMap<>();
 		tm.put(3, 3);
 		tm.put(2, 2);
-		tm.put(1, 1);
+		tm.put(1, 9);
 		tm.put(4, 4);
 		for(int en : tm.values()) {
 			System.out.println(en);

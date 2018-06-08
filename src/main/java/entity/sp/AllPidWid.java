@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import utility.Global;
 
@@ -55,9 +56,8 @@ public class AllPidWid {
 	public static void writeWid() throws Exception{
 		String line = null;
 		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile));
-		DataOutputStream dos = AllPidWid.getDos(Global.inputDirectoryPath + Global.allWidFile);
 		String[] strArr = null;
-		HashSet<Integer> rec = new HashSet<>();
+		TreeSet<Integer> rec = new TreeSet<>();
 		int wid = 0;
 		br.readLine();
 		while(null != (line = br.readLine())) {
@@ -65,11 +65,13 @@ public class AllPidWid {
 			for(String st : strArr) {
 				wid = Integer.parseInt(st);
 				if(!rec.contains(wid)) {
-					dos.writeInt(wid);
 					rec.add(wid);
 				}
-				
 			}
+		}
+		DataOutputStream dos = AllPidWid.getDos(Global.inputDirectoryPath + Global.allWidFile);
+		for(int in : rec) {
+			dos.writeInt(in);
 		}
 		br.close();
 		dos.flush();
@@ -132,8 +134,12 @@ public class AllPidWid {
 	public static void main(String[] args) throws Exception {
 //		AllPidWid.writeAllPid();
 //		AllPidWid.writeWid();
-		System.out.println(AllPidWid.getAllPid().size());
-		System.out.println(AllPidWid.getAllWid().size());
+//		System.out.println(AllPidWid.getAllPid().size());
+		List<Integer> wids = AllPidWid.getAllWid();
+		System.out.println(wids.size());
+		for(int i=0; i<20; i++) {
+			System.out.print(wids.get(i*i) + " ");
+		}
 	}
 }
 

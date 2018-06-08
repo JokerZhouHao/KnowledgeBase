@@ -121,7 +121,9 @@ public class Global {
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexWidPN = "wid_pn" + File.separator;
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
-
+	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator;
+	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator + "wids_block_";
+	
 	/* file content delimiter sign */
 	public static String delimiterLevel1 = ": ";
 	public static String delimiterLevel2 = ",";
