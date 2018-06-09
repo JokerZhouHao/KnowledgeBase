@@ -113,6 +113,6 @@ public class RunRecord {
 				String.valueOf(numGetSemanticTree) + "," + String.valueOf(timeCptGetSemanticTree/base) + "," +
 				String.valueOf(numCptGetMinDateSpanLeftSpan) + "," + String.valueOf(numCptGetMinDateSpanRightSpan) + "," + 
 				String.valueOf(timeKSPComputation/base) + "," + String.valueOf(timeBsp/base) + "," +
-				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore/base) + "," + String.valueOf(resultSize) + ",\n";
+				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore) + "," + String.valueOf(resultSize) + ",\n";
 	}
 }
