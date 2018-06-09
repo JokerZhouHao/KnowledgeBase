@@ -258,6 +258,9 @@ public class GraphByArray {
 						looseness += doub;
 					}
 					if(looseness >= loosenessThreshold) {
+						if(Global.isTest) {
+							Global.rr.numCptPruneInSemanticTree++;
+						}
 						return Double.POSITIVE_INFINITY;
 					}
 				}

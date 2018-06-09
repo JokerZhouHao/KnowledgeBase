@@ -14,6 +14,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.lucene.index.IndexWriter;
 
+import entity.sp.RunRecord;
+
 /**
  * Global variables for statistics, configurations, file directories, etc.
  * Feel free to custom your own Global variables.
@@ -23,7 +25,6 @@ import org.apache.lucene.index.IndexWriter;
 public class Global {
 	// variable array for counting
 	public static long globalStartTime = System.currentTimeMillis();
-	public static int[] count = new int[10];
 	/**
 	 * number of nodes accessed; 
 	 * number of all places applied computeGraphDistance; 
@@ -152,32 +153,33 @@ public class Global {
 	public static int testSampleNum = testOrgSampleNum;
 	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
 	public static String testSampleResultFile =  "." + "testSampleResultFile";
-	public static long limitTime = 300 * 1000; // 限制每次bsp运行的最大时间
-	public static long limitTime0 = 180 * 1000;
-	public static long limitTime1 = 300 * 1000;
-	public static String timeTotal = null;
-	public static String timeBuildSPCompleteDisk = null;
-	public static String timeOpenLuceneIndex = null;
-	public static String timeLoadTFLable = null;
-	public static String timeBuildRGI = null;
+//	public static long limitTime = 300 * 1000; // 限制每次bsp运行的最大时间
+//	public static long limitTime0 = 180 * 1000;
+//	public static long limitTime1 = 300 * 1000;
+//	public static String timeTotal = null;
+//	public static String timeBuildSPCompleteDisk = null;
+//	public static String timeOpenLuceneIndex = null;
+//	public static String timeLoadTFLable = null;
+//	public static String timeBuildRGI = null;
 	public static int curRecIndex = 0;
-	public static long[] timeBsp = new long[7];
-	public static long[] timePn = new long[3];
-	public static long timeReadLuceneMax = 0;
+//	public static long[] timeBsp = new long[7];
+//	public static long[] timePn = new long[3];
+//	public static long timeReadLuceneMax = 0;
 	public static boolean isFirstReadPn = false;
-	public static String[] bspRes = new String[2];
+//	public static String[] bspRes = new String[2];
 	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
-	public static long[] timePTree = new long[5];
-	public static long queueSize = 0;
-	public static long recCount[] = new long[3];
+//	public static long[] timePTree = new long[5];
+//	public static long queueSize = 0;
+//	public static long recCount[] = new long[3];
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
-	public static int leftMaxSpan = 0;
-	public static int rightMaxSpan = 0;
-	public static int timeGetMinDateSpan = 0;
+//	public static int leftMaxSpan = 0;
+//	public static int rightMaxSpan = 0;
+//	public static int timeGetMinDateSpan = 0;
 	public static BufferedWriter recReachBW = null;
-	public static long timeRecReachable = 0;
-	public static long timeRecTemp = 0;
-	public static long timeRecTemp1 = 0;
+//	public static long timeRecReachable = 0;
+//	public static long timeRecTemp = 0;
+//	public static long timeRecTemp1 = 0;
 	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
+	public static RunRecord rr = new RunRecord();
 }

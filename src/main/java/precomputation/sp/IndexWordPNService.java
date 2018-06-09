@@ -83,7 +83,6 @@ public class IndexWordPNService {
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
 			if(Global.isTest) {
-				Global.timePn[0] += TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
 				Global.tempTime = System.currentTimeMillis();
 			}
 			ScoreDoc[] hits = results.scoreDocs;
@@ -92,10 +91,8 @@ public class IndexWordPNService {
 			String st = indexSearcher.doc(hits[0].doc).get("pIdDates");
 			if(Global.isTest) {
 				if(Global.isFirstReadPn) {
-					Global.timeReadLuceneMax = TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
 					Global.isFirstReadPn = false;
 				}
-				Global.timePn[1] += TimeUtility.getSpanSecond(Global.tempTime, System.currentTimeMillis());
 				Global.tempTime = System.currentTimeMillis();
 			}
 			return st;

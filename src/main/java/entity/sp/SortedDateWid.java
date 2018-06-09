@@ -126,7 +126,6 @@ public class SortedDateWid {
 //				if(rec.contains(tempL + i)) {
 					left--;
 				} else {
-					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
 						break;
@@ -137,7 +136,7 @@ public class SortedDateWid {
 				}
 			}
 			
-			Global.leftMaxSpan  = Global.leftMaxSpan < mid - left?mid-left:Global.leftMaxSpan;
+			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
 			
 			i = -1;
 			while(right < dateWidList.size()) {
@@ -153,7 +152,6 @@ public class SortedDateWid {
 //				if(rec.contains(tempL + i)) {
 					right++;
 				} else {
-					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						rightSpan = tempSpan;
 						break;
@@ -164,7 +162,7 @@ public class SortedDateWid {
 				}
 			}
 			
-			Global.rightMaxSpan  = Global.rightMaxSpan < right-mid?right-mid:Global.rightMaxSpan;
+			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
 			
 		} else {
 			i = -1;
@@ -179,7 +177,6 @@ public class SortedDateWid {
 //				if(rec.contains(tempL + i)) {
 					right++;
 				} else {
-					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						rightSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
 						break;
@@ -189,8 +186,7 @@ public class SortedDateWid {
 					}
 				}
 			}
-			
-			Global.rightMaxSpan  = Global.rightMaxSpan < right-mid?right-mid:Global.rightMaxSpan;
+			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
 			
 			i = -1;
 			while(left >= 0) {
@@ -206,7 +202,6 @@ public class SortedDateWid {
 //				if(rec.contains(tempL + i)) {
 					left--;
 				} else {
-					Global.recCount[2]++;
 					if(rsSer.queryReachable(p, i)){
 						leftSpan = tempSpan;
 						break;
@@ -217,7 +212,7 @@ public class SortedDateWid {
 				}
 			}
 			
-			Global.leftMaxSpan  = Global.leftMaxSpan < mid - left?mid-left:Global.leftMaxSpan;
+			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
 			
 		}
 		if(leftSpan == Integer.MAX_VALUE) {

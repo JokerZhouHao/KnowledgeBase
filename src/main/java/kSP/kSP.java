@@ -86,11 +86,12 @@ public class kSP {
 			throw new IllegalArgumentException(
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
 		
-		double minDist = 0;
 		int nid;
 		Boolean sign = Boolean.FALSE;
 		HashMap<Integer, HashMap<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
 		HashMap<Integer, Integer> minDateSpanMap = null;
+		
+		NNEntry first = null;
 		
 		rgi.readLock();
 
@@ -110,62 +111,59 @@ public class kSP {
 			
 			while (queue.size() != 0) {
 				if(Global.isTest) {
-					Global.tempTime = System.currentTimeMillis();
+					Global.rr.setFrontTime();
 				}
-				NNEntry first = (NNEntry) queue.remove(0);
+				first = (NNEntry) queue.remove(0);
 				if(Global.isTest) {
-					Global.timePTree[4] += System.currentTimeMillis() - Global.tempTime;
+					Global.rr.timeCptQueueRemove += Global.rr.getTimeSpan();
+					Global.rr.numCptQueueRemove++;
 				}
-				minDist = first.m_minDist;
 				if (kthScore < first.m_minDist) {
 					break;
 				}
 				if (first.level >= 0) {// node
 					Data firstData = (Data) first.m_pEntry;
 					n = rgi.readNode(firstData.getIdentifier());
-					Global.count[0]++;
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
-						if(Global.isTest) {
-							Global.tempTime = System.currentTimeMillis();
-						}
 						if (n.m_level == 0) {
 							//children of n are places
-							Global.recCount[1]++;
+							if(Global.isTest) {
+								Global.rr.setFrontTime();
+							}
+							Global.rr.numCptTotalPid2Wids++;
 							if (this.placeReachablePrune(nid, qwords)) {
 								if(Global.isTest) {
-									Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
-									Global.tempTime = System.currentTimeMillis();
+									Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
+									Global.rr.setFrontTime();
+									Global.rr.numCptPrunePid2Wids++;
 								}
 								if(Global.isDebug) {
 									System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
 									Global.frontTime = System.currentTimeMillis();
 								}
-								if(Global.isTest && (System.currentTimeMillis() - Global.bspStartTime) > Global.limitTime1) {
+								if(Global.isTest && Global.rr.isCptOverTime()) {
 									sign = Boolean.TRUE;
 									break;
 								}
-								Global.count[5]++;// pruned
-								continue;
+								continue;	// pruned
 							}
 							if(Global.isTest) {
-								Global.timePTree[0] += System.currentTimeMillis() - Global.tempTime;
-								Global.tempTime = System.currentTimeMillis();
+								Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
+								Global.rr.setFrontTime();
 							}
 							
-							Global.timeGetMinDateSpan++;
-							
 							minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
+							
+							if(Global.isTest) {
+								Global.rr.timeCptGetMinDateSpan += Global.rr.getTimeSpan();
+							}
+							
 							recMinDateSpanMap.put(nid, minDateSpanMap);
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, qwords, date);
 //							alphaLoosenessBound = this.getAlphaLoosenessBound(nid,
-//													alphaRadius, qpoint, qwords, date);
-							if(Global.isTest) {
-								Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
-								Global.tempTime = System.currentTimeMillis();
-							}
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							alphaLoosenessBound = this.getAlphaLoosenessBound((-nid - 1),
@@ -173,25 +171,27 @@ public class kSP {
 						}
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
 						if (alphaRankingScoreBound > kthScore) {
+							if(n.m_level == 0) {
+								Global.rr.numCptPruneRTreePid++;
+							} else {
+								Global.rr.numCptPruneRTeeNode++;
+							}
 							continue;
 						}
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
 								n.m_pIdentifier[cChild], n.m_identifier);
 						NNEntry eChild2 = new NNEntry(eChild, alphaRankingScoreBound, n.m_level - 1);
 						if(Global.isTest) {
-							Global.tempTime = System.currentTimeMillis();
+							Global.rr.setFrontTime();
 						}
 						insertIntoHeapH(queue, eChild2);
 						if(Global.isTest) {
-							Global.timePTree[2] += System.currentTimeMillis() - Global.tempTime;
-							Global.tempTime = System.currentTimeMillis();
+							Global.rr.numCptQueuePut++;
+							Global.rr.timeCptQueuePut += Global.rr.getTimeSpan();
 						}
 					}
 					if(sign)	break;
 				} else {
-					if(Global.isTest) {
-						Global.tempTime = System.currentTimeMillis();
-					}
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -220,7 +220,6 @@ public class kSP {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
 					
-					
 //					if(Global.isTest) {
 //						Global.tempTime = System.currentTimeMillis();
 //					}
@@ -234,31 +233,27 @@ public class kSP {
 //					}
 					
 					// compute shortest path between place and qword
-					Global.count[3]++;
+					if(Global.isTest) {
+						Global.rr.numGetSemanticTree++;
+						Global.rr.setFrontTime();
+					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
-					long start = System.currentTimeMillis();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
 							qwords, date, loosenessThreshold, nIdDateWidMap, recMinDateSpanMap.get(nid), semanticTree);
 //					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
 //							qwords, date, loosenessThreshold, nIdDateWidMap, minDateSpanMap, semanticTree);
 					
 					if(Global.isTest) {
-						if(System.currentTimeMillis() - Global.bspStartTime > Global.limitTime) {
-							break;
-						}
+						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
 					}
-					
-					long end = System.currentTimeMillis();
-					Global.runtime[1] += end - start;
 
-					Global.count[1]++;
 					if (looseness < 1) {
 						throw new Exception("semantic score " + looseness + " < 1, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
 					if (looseness != Double.POSITIVE_INFINITY) {
-						Global.count[2]++;// number of valid place candidate
+						// number of valid place candidate
 						double rankingScore = placeData.getWeight() * looseness;
 						KSPCandidate candidate = new KSPCandidate(new NNEntry(placeData, rankingScore),
 								semanticTree);
@@ -278,27 +273,33 @@ public class kSP {
 							Global.frontTime = System.currentTimeMillis();
 						}
 					}
-					if(Global.isTest) {
-						Global.timePTree[3] += System.currentTimeMillis() - Global.tempTime;
-						Global.tempTime = System.currentTimeMillis();
-					}
 				}
 			}
 //			System.out.println(queue.size());
-			Global.queueSize = queue.size();
+			if(Global.isTest) {
+				Global.rr.numLastQueue = queue.size();
+				Global.rr.kthScore = this.kthScore;
+				Global.rr.queueLastValue = first.m_minDist;
+			}
 		} finally {
 			rgi.readUnlock();
 		}
 		recMinDateSpanMap.clear();
 		if(Global.isTest) {
-			System.out.println("leftSpan: " + Global.leftMaxSpan + " rightSpan: " + Global.rightMaxSpan + " minDateTime:" + Global.timeGetMinDateSpan);
-			for(int i=0; i<5; i++) {
-				System.out.print(String.valueOf(Global.timePTree[i]) + " ");
-//				Global.timePTree[i] = 0;
-			}
-			System.out.println();
-			Global.bspRes[0] = String.valueOf(minDist);
-			Global.bspRes[1] = String.valueOf(kthScore);
+			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + Global.rr.timeCptGetMinDateSpan/1000);
+//			System.out.println(
+//					"timeCptQueuePut = " + Global.rr.timeCptQueuePut/1000 + " " + 
+//					"timeCptQueueRemove = " + Global.rr.timeCptQueueRemove/1000 + " " + 
+//					"timeCptPid2Wids = " + Global.rr.timeCptPid2Wids/1000 + " " + 
+//					"timeCptGetMinDateSpan = " + Global.rr.timeCptGetMinDateSpan/1000 + " " + 
+//					"timeCptGetSemanticTree = " + Global.rr.timeCptGetSemanticTree/1000);
+			System.out.println(
+					"timeCptQueuePut timeCptQueueRemove timeCptPid2Wids timeCptGetMinDateSpan timeCptGetSemanticTree\n"
+					+ Global.rr.timeCptQueuePut/1000 + " " + 
+					Global.rr.timeCptQueueRemove/1000 + " " + 
+					Global.rr.timeCptPid2Wids/1000 + " " + 
+					Global.rr.timeCptGetMinDateSpan/1000 + " " + 
+					Global.rr.timeCptGetSemanticTree/1000);
 		}
 	}
 
@@ -329,7 +330,6 @@ public class kSP {
 		 * we prioritize them when issuing reachability queries.
 		 * Furthermore, the least Frequent query keyword is powerful enough for pruning.
 		 * */
-		Global.count[4]++;
 		for(Integer in : qwords) {
 //			if(Global.recReach.contains(in)) {
 //				isPruned = true;
@@ -360,7 +360,12 @@ public class kSP {
 		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
 		HashSet<Integer> rec = new HashSet<>();
 		for(int wid : qwords) {
-			if(testReachable)	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(rec, date, id, reachableQuerySer));
+			if(testReachable)	{
+				if(Global.isTest) {
+					Global.rr.numCptGetMinDateSpan++;
+				}
+				widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(rec, date, id, reachableQuerySer));
+			}
 			else 	widMinDateSpan.put(wid, widDatesMap.get(wid).getMinDateSpan(date));
 		}
 		rec.clear();

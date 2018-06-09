@@ -27,6 +27,7 @@ import entity.sp.NidToDateWidIndex;
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.RTreeWithGI;
+import entity.sp.RunRecord;
 import entity.sp.SortedDateWid;
 import kSP.kSP;
 import kSP.candidate.KSPCandidate;
@@ -74,11 +75,6 @@ public class SPCompleteDisk {
 			System.out.println("> 开始打开各个lucen索引 . . . ");
 		}
 		
-		if(Global.isTest) {
-			Global.tempTime = System.currentTimeMillis();
-			Global.frontTime = System.currentTimeMillis();
-		}
-		
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 		String sccPath = Global.outputDirectoryPath + Global.sccFile;
@@ -91,20 +87,14 @@ public class SPCompleteDisk {
 		wIdPnSer.openIndexReader();
 		
 		if(Global.isTest) {
-			Global.timeOpenLuceneIndex = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.frontTime = System.currentTimeMillis();
 		}
 		
 		reachableQuerySer = new ReachableQueryService(sccPath, tfLabelIndex);
 		
 		if(Global.isTest) {
-			Global.timeLoadTFLable = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
-			Global.frontTime = System.currentTimeMillis();
-		}
-		
-		if(Global.isDebug) {
-			Global.frontTime = System.currentTimeMillis();
-			System.out.println("> 完全打开各个lucen索引，用时" + TimeUtility.getSpendTimeStr(Global.startTime, Global.frontTime));
+			Global.rr.timeLoadTFLable = Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
 		
 		if(Global.isDebug) {
@@ -146,16 +136,16 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBuildRGI = TimeUtility.getSpanSecondStr(Global.frontTime, System.currentTimeMillis());
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.timeBuildRGI = Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
 		
 		// 添加点对可达时间记录
 		Global.recReachBW = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(Global.fileReachGZip)))));
 		
 		if(Global.isTest) {
-			Global.timeBuildSPCompleteDisk = TimeUtility.getSpanSecondStr(Global.tempTime, System.currentTimeMillis());
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.timeBuildSPCompleteDisk = System.currentTimeMillis() - Global.rr.startTime;
+			Global.rr.setFrontTime();
 		}
 	}
 	
@@ -179,11 +169,10 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.bspStartTime = System.currentTimeMillis();
-			Global.frontTime = Global.bspStartTime;
+			Global.rr.timeBspStart = System.currentTimeMillis();
+			Global.rr.setFrontTime();
 		}
 		
-		long start = System.currentTimeMillis();
 		Boolean isOver = Boolean.FALSE;
 		
 		Point qpoint = new Point(pCoords);
@@ -198,19 +187,19 @@ public class SPCompleteDisk {
 		HashMap<Integer, SortedDateWid> widDatesMap = new HashMap<>();
 		for(int in : sortedQwordsList) {
 			if(Global.isTest) {
-				Global.frontTime = System.currentTimeMillis();
+				Global.rr.setFrontTime();
 			}
 			Map<Integer, String> tempMap = nIdWIdDateSer.searchNIDKeyListDate(in);
 			if(Global.isTest) {
-				Global.timeBsp[0] += System.currentTimeMillis() - Global.frontTime;
-				Global.frontTime = System.currentTimeMillis();
+				Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+				Global.rr.setFrontTime();
 			}
 			DatesWIds dws = null;
 			SortedDateWid sdw = null;
 			int tt = 0;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if((++tt)%1000 == 0 && Global.isTest) {
-					if(System.currentTimeMillis() - Global.frontTime > Global.limitTime0) {
+					if(Global.rr.getTimeSpan()> Global.rr.limitBuidingWid2DateNid) {
 						isOver = Boolean.TRUE;
 						break;
 					}
@@ -228,36 +217,22 @@ public class SPCompleteDisk {
 				}
 				int t0 = -1;
 				for(int din : dws.getDateList()) {
-					Global.recCount[0]++;
+					Global.rr.numBspWid2DateWid++;
 					if(-1 == t0)	t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()));
 					else t0 = sdw.addDateWid(new DateNidNode(din, en.getKey()), t0);
 				}
 			}
 			if(Global.isTest) {
-				Global.timeBsp[1] += System.currentTimeMillis() - Global.frontTime;
+				Global.rr.timeBspBuidingWid2DateNid += Global.rr.getTimeSpan();
 				if(isOver)	break;
 			}
 		}
-//		Global.minDateSpan = new HashMap<>();
-//		for(int in : sortedQwordsList) {
-//			Global.minDateSpan.put(in, widDatesMap.get(in).getMinDateSpan(TimeUtility.getIntDate(searchDate)));
-//		}
 		
 		if(Global.isTest) {
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.setFrontTime();
 		}
 		if(Global.isDebug) {
 			System.out.println("> 完成计算nIdDateWidMap和widDatesMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
-			Global.frontTime = System.currentTimeMillis();
-		}
-		
-		if(Global.isTest) {
-			Global.timeBsp[1] += System.currentTimeMillis() - Global.frontTime;
-			Global.timeBsp[2] = Global.timeBsp[0] + Global.timeBsp[1];
-			
-			Global.timeBsp[0] /= 1000;
-			Global.timeBsp[1] /= 1000;
-			Global.timeBsp[2] /= 1000;
 			Global.frontTime = System.currentTimeMillis();
 		}
 		
@@ -315,8 +290,8 @@ public class SPCompleteDisk {
 		}
 		
 		if(Global.isTest) {
-			Global.timeBsp[3] = (System.currentTimeMillis() - Global.frontTime) / 1000;
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.timeBspGetPN = Global.rr.getTimeSpan();
+			Global.rr.timeEnterkSPComputation = System.currentTimeMillis();
 		}
 		
 		IVisitor v = new KSPCandidateVisitor(k);
@@ -327,9 +302,9 @@ public class SPCompleteDisk {
 		if(!isOver)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, TimeUtility.getIntDate(searchDate), v);
 		
 		if(Global.isTest) {
-			Global.timeBsp[4] = (System.currentTimeMillis() - Global.frontTime) / 1000;
-			Global.timeBsp[6] = ((KSPCandidateVisitor)v).size();
-			Global.frontTime = System.currentTimeMillis();
+			Global.rr.setTimeKSPComputation();
+			Global.rr.setFrontTime();
+			Global.rr.resultSize = ((KSPCandidateVisitor) v).size();
 		}
 		
 		// ATTENTION: MUST reset graph after each query
@@ -362,11 +337,10 @@ public class SPCompleteDisk {
 		
 		if(Global.isTest) {
 			Global.curRecIndex++;
-			Global.timeBsp[5] = (System.currentTimeMillis() - Global.bspStartTime) / 1000;
+			Global.rr.timeBspClearJob = Global.rr.getTimeSpan();
+			Global.rr.setTimeBsp();
 			System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
 		}
-		
-		
 		return (KSPCandidateVisitor)v;
 	}
 	
@@ -437,60 +411,59 @@ public class SPCompleteDisk {
 				
 				// 写数据
 				if(Global.curRecIndex == 1) {
-					bw.write(String.valueOf(samNumCopy) + "#\n");
-					bw.write("timeOpenLuceneIndex : " + Global.timeOpenLuceneIndex + "\n");
-					bw.write("timeLoadTFLable : " + Global.timeLoadTFLable + "\n");
-					bw.write("timeBuildRGI : " + Global.timeBuildRGI + "\n");
-					bw.write("timeBuildSPCompleteDisk : " + Global.timeBuildSPCompleteDisk + "\n\n");
-					bw.write("num couConsMinMap couReach couGetMinDate ReachTime FindMinDateSpan InsertHeap GetSemTree removeTime queueSize nIdDateWidMap_widDatesMapLuceneTime convertTime totTime wordPNMap treeTime bspTime resultNum first.m_minDist kthScore\n");
+					System.out.println(Global.rr.getInitInfo());
+					bw.write(Global.rr.getHeader());
 				}
 				
-				bw.write(String.valueOf(Global.curRecIndex) + " ");
+				bw.write(Global.rr.getBspInfo(Global.curRecIndex, 1000));
+				Global.rr = new RunRecord();
+				
+//				bw.write(String.valueOf(Global.curRecIndex) + " ");
+////				for(int j=0; j<3; j++) {
+////					bw.write(String.valueOf(Global.timePn[j] + " "));
+////					Global.timePn[j] = 0;
+////				}
+//				bw.write("| ");
+//				bw.write(String.valueOf(Global.leftMaxSpan) + " ");
+//				bw.write(String.valueOf(Global.rightMaxSpan) + " ");
+//				bw.write(String.valueOf(Global.timeGetMinDateSpan) + " ");
+//				Global.leftMaxSpan = 0;
+//				Global.rightMaxSpan = 0;
+//				Global.timeGetMinDateSpan = 0;
+//				bw.write("| ");
+//				
 //				for(int j=0; j<3; j++) {
-//					bw.write(String.valueOf(Global.timePn[j] + " "));
-//					Global.timePn[j] = 0;
+//					bw.write(String.valueOf(Global.recCount[j] + " "));
+//					Global.recCount[j] = 0;
 //				}
-				bw.write("| ");
-				bw.write(String.valueOf(Global.leftMaxSpan) + " ");
-				bw.write(String.valueOf(Global.rightMaxSpan) + " ");
-				bw.write(String.valueOf(Global.timeGetMinDateSpan) + " ");
-				Global.leftMaxSpan = 0;
-				Global.rightMaxSpan = 0;
-				Global.timeGetMinDateSpan = 0;
-				bw.write("| ");
-				
-				for(int j=0; j<3; j++) {
-					bw.write(String.valueOf(Global.recCount[j] + " "));
-					Global.recCount[j] = 0;
-				}
-				bw.write("| ");
-				
-				for(int j=0; j<5; j++) {
-					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
-					Global.timePTree[j] = 0;
-				}
-				bw.write("| ");
-				
-				bw.write(String.valueOf(Global.queueSize) + " ");
-				bw.write("| ");
-				
-				for(int j=0; j<7; j++) {
-					if(j==1) {
-						Global.timeBsp[5] -= Global.timeBsp[1];
-						Global.timeBsp[5] -= (Global.timeRecReachable / 1000);
-						Global.timeRecReachable = 0;
-					}
-					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
-					Global.timeBsp[j] = 0;
-				}
-				bw.write("| ");
-				
-				for(int j=0; j<2; j++) {
-					bw.write(Global.bspRes[j] + " ");
-					Global.bspRes[j] = null;
-				}
-				bw.write("| ");
-				bw.write('\n');
+//				bw.write("| ");
+//				
+//				for(int j=0; j<5; j++) {
+//					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
+//					Global.timePTree[j] = 0;
+//				}
+//				bw.write("| ");
+//				
+//				bw.write(String.valueOf(Global.queueSize) + " ");
+//				bw.write("| ");
+//				
+//				for(int j=0; j<7; j++) {
+//					if(j==1) {
+//						Global.timeBsp[5] -= Global.timeBsp[1];
+//						Global.timeBsp[5] -= (Global.timeRecReachable / 1000);
+//						Global.timeRecReachable = 0;
+//					}
+//					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
+//					Global.timeBsp[j] = 0;
+//				}
+//				bw.write("| ");
+//				
+//				for(int j=0; j<2; j++) {
+//					bw.write(Global.bspRes[j] + " ");
+//					Global.bspRes[j] = null;
+//				}
+//				bw.write("| ");
+//				bw.write('\n');
 				bw.flush();
 			}
 			br.close();
@@ -511,14 +484,8 @@ public class SPCompleteDisk {
 		}
 		spc.free();
 		if(Global.isTest) {
-			Global.timeTotal = TimeUtility.getSpanSecondStr(Global.startTime, System.currentTimeMillis());
-			
-			bw.write("\ntimeReadLuceneMax : " + Global.timeReadLuceneMax);
-			
-			bw.write("\n" + "timeTotal : " + Global.timeTotal);
-			bw.flush();
 			bw.close();
-			System.out.println("> 完成测试样本，用时" + TimeUtility.getSpanSecondStr(Global.startTime, System.currentTimeMillis()));
+			System.out.println("> 完成测试样本，用时" + TimeUtility.getTailTime());
 		}
 	}
 }
