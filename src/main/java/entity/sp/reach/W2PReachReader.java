@@ -23,8 +23,22 @@ public class W2PReachReader extends Thread{
 	private int start = 0;
 	private int end = 0;
 	private int[] wids = null;
-	private static List<Integer> signNoList = null;
-	private static List<Integer> signReadOver = null;
+	public static List<Integer> signNoList = null;
+	public static List<Integer> signReadOver = null;
+	private String fp = null;
+	
+	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<List<Integer>> pidsQueue, String fp) {
+		this.widQueue = widQueue;
+		this.pidsQueue = pidsQueue;
+		this.fp = fp;
+		
+		if(signNoList==null) {
+			signNoList = new ArrayList<>();
+			signNoList.add(Integer.MIN_VALUE + 1);
+			signReadOver = new ArrayList<>();
+			signReadOver.add(Integer.MIN_VALUE);
+		}
+	}
 	
 	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<List<Integer>> pidsQueue, int start, int end) {
 		this.widQueue = widQueue;
@@ -34,15 +48,15 @@ public class W2PReachReader extends Thread{
 		
 		if(signNoList==null) {
 			signNoList = new ArrayList<>();
-			signNoList.add(-1);
+			signNoList.add(Integer.MIN_VALUE + 1);
 			signReadOver = new ArrayList<>();
-			signReadOver.add(-2);
+			signReadOver.add(Integer.MIN_VALUE);
 		}
 	}
 	
 	public void run() {
 		DataInputStream dis = null;
-		String fp =Global.recWidPidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+		if(null==fp)	fp =Global.recWidPidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
 		System.out.println("> 开始读文件" + fp + ". . . " + TimeUtility.getTime());
 		int nWid = 0;
 		try {

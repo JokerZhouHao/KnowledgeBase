@@ -27,6 +27,9 @@ import java.util.TreeSet;
 import entity.Index;
 import entity.sp.AllDateWidNodes;
 import entity.sp.AllDateWidNodes.DWid;
+import entity.sp.DateNidNode;
+import entity.sp.SortedDateWidCReach;
+import entity.sp.SortedDateWidIndex;
 import utility.Global;
 import utility.IOUtility;
 import utility.TimeUtility;
@@ -148,25 +151,22 @@ public class Wid2DateNidPairIndex extends Index{
 		System.out.println("> 结束创建索引 ！！！" + TimeUtility.getTailTime());
 	}
 	
-	private int[][] bytesToIntArr(byte[] bytes){
+	private SortedDateWidIndex bytesToSortedDateWid(byte[] bytes){
+		SortedDateWidIndex sdw = new SortedDateWidIndex();
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
 		int size = bb.getInt();
-		int res[][] = new int[size][];
-		int ia[] = null;
 		for(int i=0; i<size; i++) {
-			res[i] = ia = new int[2];
-			ia[0] = bb.getInt();
-			ia[1] = bb.getInt();
+			sdw.addLast(new DateNidNode(bb.getInt(), bb.getInt()));
 		}
-		return res;
+		return sdw;
 	}
 	
-	public int[][] getDateNids(int wid){
+	public SortedDateWidIndex getDateNids(int wid){
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wid", wid), 1);
 			ScoreDoc[] hits = results.scoreDocs;
 			if(hits.length == 0)	return null;
-			return bytesToIntArr((indexSearcher.doc(hits[0].doc).getBinaryValue("dateNidPair").bytes));
+			return bytesToSortedDateWid((indexSearcher.doc(hits[0].doc).getBinaryValue("dateNidPair").bytes));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("检索wid：" + wid + "失败而退出！！！");
@@ -182,7 +182,7 @@ public class Wid2DateNidPairIndex extends Index{
 		Wid2DateNidPairIndex index = new Wid2DateNidPairIndex(indexPath);
 //		index.createIndex(filePath);
 		index.openIndexReader();
-		int[][] res = index.getDateNids(8526716);
+		SortedDateWidIndex sdw = index.getDateNids(8526716);
 		index.closeIndexReader();
 	}
 }

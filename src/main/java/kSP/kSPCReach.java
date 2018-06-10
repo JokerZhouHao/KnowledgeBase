@@ -18,7 +18,7 @@ import entity.sp.DatesWIds;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.RTreeWithGI;
-import entity.sp.SortedDateWid;
+import entity.sp.SortedDateWidCReach;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
 import precomputation.rechable.ReachableQueryService;
@@ -41,17 +41,17 @@ import utility.TimeUtility;
  * @author jmshi
  *
  */
-public class kSP {
+public class kSPCReach {
 	protected RTreeWithGI rgi;
 	Map<Integer, DatesWIds> nIdDateWidMap = null;
-	HashMap<Integer, SortedDateWid> widDatesMap = null;
+	HashMap<Integer, SortedDateWidCReach> widDatesMap = null;
 	HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	ReachableQueryService reachableQuerySer = null;
 //	private static CReach reachableQuerySer = null;
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
-	public kSP(RTreeWithGI rgi, Map<Integer, DatesWIds> nIdDateWidMap, HashMap<Integer, SortedDateWid> widDatesMap,
+	public kSPCReach(RTreeWithGI rgi, Map<Integer, DatesWIds> nIdDateWidMap, HashMap<Integer, SortedDateWidCReach> widDatesMap,
 			HashMap<Integer, WordRadiusNeighborhood> wordPNMap, ReachableQueryService reachableQuerySer) {
 		super();
 		this.rgi = rgi;

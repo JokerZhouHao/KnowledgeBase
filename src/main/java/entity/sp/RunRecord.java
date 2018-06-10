@@ -90,6 +90,8 @@ public class RunRecord {
 	public double kthScore = 0;
 	public int resultSize = 0;
 	
+	public long timeBspGetW2PReach = 0;
+	
 	public String getHeader() {
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,"
 				+ "numCptQueueRemove,timeCptQueueRemove,"

@@ -30,7 +30,7 @@ import entity.sp.AllPidWid;
 import entity.sp.DateNidNode;
 import entity.sp.DatesWIds;
 import entity.sp.GraphByArray;
-import entity.sp.SortedDateWid;
+import entity.sp.SortedDateWidCReach;
 import precomputation.rechable.ReachableQueryService;
 import precomputation.sp.IndexNidKeywordsListService;
 import utility.Global;
@@ -225,7 +225,7 @@ public class PWReachDate extends ReachDate implements Runnable{
 			curWidIndex = i;
 			
 			// 建立dealWidSpan个SortedDateWid
-			List<SortedDateWid> wTimesList = new ArrayList<>();
+			List<SortedDateWidCReach> wTimesList = new ArrayList<>();
 			for(; i<curWidIndex+dealWidSpan; i++) {
 				if(i == numWid) {
 					noDealWidOver = Boolean.FALSE;
@@ -234,7 +234,7 @@ public class PWReachDate extends ReachDate implements Runnable{
 				wid = allWid.get(i);
 				Map<Integer, String> tempMap = nIdWIdDateSer.searchNIDKeyListDate(wid);
 				System.out.println("> tempMap.size = " + tempMap.size());
-				SortedDateWid sdw = new SortedDateWid();
+				SortedDateWidCReach sdw = new SortedDateWidCReach();
 				List<Integer> dateList = new ArrayList<>();
 				String tempArr[] = null;
 				for(Entry<Integer, String> en : tempMap.entrySet()) {
@@ -263,7 +263,7 @@ public class PWReachDate extends ReachDate implements Runnable{
 				HashMap<Long, Boolean> recReach = new HashMap<>();
 				end = curWidIndex;
 				wTimes = null;
-				for(SortedDateWid sdw : wTimesList) {
+				for(SortedDateWidCReach sdw : wTimesList) {
 					List<Integer> dateList = new ArrayList<>();
 					frontDate = Integer.MAX_VALUE;
 					sign = Boolean.FALSE;
@@ -305,7 +305,7 @@ public class PWReachDate extends ReachDate implements Runnable{
 			
 			dealedWordNum += wTimesList.size();
 			
-			for(SortedDateWid sdw : wTimesList) {
+			for(SortedDateWidCReach sdw : wTimesList) {
 				sdw.clear();
 			}
 			wTimesList.clear();

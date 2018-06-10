@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import entity.sp.reach.P2WReach.TempClass;
-
 import java.util.Map.Entry;
 
 import utility.Global;
@@ -29,11 +27,17 @@ public class W2PReachWriter extends Thread{
 	private ArrayBlockingQueue<Object> signQueue = null;
 	public int start = 0;
 	public int end = 0;
+	private String pTwFile  = null;
 	
 	public W2PReachWriter(ArrayBlockingQueue<Object> qu, int s, int e) {
 		this.signQueue = qu;
 		this.start = s;
 		this.end = e;
+	}
+	
+	public W2PReachWriter(ArrayBlockingQueue<Object> qu, String fp) {
+		this.signQueue = qu;
+		this.pTwFile = fp;
 	}
 	
 	public void run() {
@@ -46,13 +50,12 @@ public class W2PReachWriter extends Thread{
 	}
 	
 	public void writeWidToPidFile() throws Exception{
-		String pTwFile = null;
 		DataInputStream dis = null;
 		Map<Integer, Set<Integer>> rec = new TreeMap<>();
 		Set<Integer> pids = null;
 		int pid, wid, wid_num, i;
 		try {
-			pTwFile = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+			if(pTwFile == null)	pTwFile = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
 			System.out.println("> 开始读取文件" + pTwFile + " . . . " + TimeUtility.getTime());
 			dis = IOUtility.getDis(pTwFile);
 			while(true) {
@@ -81,7 +84,10 @@ public class W2PReachWriter extends Thread{
 		}
 		
 		// 写文件
-		pTwFile = Global.recWidPidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+		if(!pTwFile.contains("rtree")) pTwFile = Global.recWidPidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+		else {
+			pTwFile = Global.recWidPidReachPath + ".rtree";
+		}
 		System.out.println("> 开始写文件" + pTwFile + " . . . " + TimeUtility.getTime());
 		DataOutputStream dos = IOUtility.getDos(pTwFile);
 		
@@ -110,12 +116,11 @@ public class W2PReachWriter extends Thread{
 	}
 
 	public static void buildingWPReach() throws Exception{
-		System.out.println("> 开始反转recPidToWidReach.gz . . . " + TimeUtility.getTime());
+		System.out.println("> 开始反转recPidToWidReach.bin . . . " + TimeUtility.getTime());
+		System.out.println("> 开始反转pid . . . " + TimeUtility.getTime());
 		int start = 0, end = 0;
 		int span = P2WReach.zipContianNodeNum;
-		int zipNum = 0;
-		if(Global.numPid%span !=0) zipNum = Global.numPid/span + 1;
-		else zipNum = Global.numPid/span;
+		int zipNum = P2WReach.zipNum;
 		ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(20);
 		int i = 0;
 		for(i=0; i<20; i++) {
@@ -136,10 +141,57 @@ public class W2PReachWriter extends Thread{
 				new W2PReachWriter(queue, start, end).start();
 			}
 		}
-		System.out.println("> 成功反转recPidToWidReach.gz ！ ！！ " + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + "。 " + TimeUtility.getTime());
+		System.out.println("\n\n> 成功反转所有的pid !!! " + TimeUtility.getTailTime() + "\n");
+		System.out.println("> 开始反转rtree node . . . ");
+		new W2PReachWriter(queue, Global.recPidWidReachPath + ".rtree").start();
+		queue.take();
+		System.out.println("> 成功反转rtree node ！！！ " + TimeUtility.getTailTime());
+		System.out.println("> 成功反转recPidToWidReach.bin ！ ！！ " + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + "。 " + TimeUtility.getTime());
 	}
 	
 	public static void main(String[] args) throws Exception{
-		W2PReachWriter.buildingWPReach();
+//		W2PReachWriter.buildingWPReach();
+		
+		DataInputStream dis = IOUtility.getDis(Global.recWidPidReachPath + ".rtree");
+		int nid = 0;
+		int size = 0, wid = 0;
+		int k = 10, k0 = 5;
+		int num1, num2;
+		num1 = dis.readInt();
+		for(int i=0; i<num1; i++) {
+			if(0!=k)	{
+				System.out.print(dis.readInt() + " ");
+				k--;
+			} else {
+				dis.readInt();
+			}
+		}
+		System.out.println();
+		k = 10;
+		while(k != 0) {
+			k--;
+			size = dis.readInt();
+			num1 = 1;
+			for(int i=0; i<size; i++) {
+				if(num1==1) {
+					num1 = 2; 
+					System.out.println(dis.readInt());
+				}
+				else dis.readInt();
+			}
+//			wid = dis.readInt();
+//			System.out.print(wid + " : ");
+//			size = dis.readInt();
+//			k0 = 5;
+//			for(int i=0; i<size; i++) {
+//				nid = dis.readInt();
+//				if(k0 != 0) {
+//					k0--;
+//					System.out.print(nid + " ");
+//				}
+//			}
+//			System.out.println();
+		}
+		dis.close();
 	}
 }

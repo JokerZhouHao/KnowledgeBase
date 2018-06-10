@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import entity.sp.RTreeWithGI;
 import spatialindex.rtree.Node;
@@ -27,17 +28,20 @@ import utility.TimeUtility;
  * @author Monica
  *
  */
-public class RTreeReach extends RTree{
+public class P2NRTreeReach extends RTree {
 	
 	private DataOutputStream dos = null;
 	private int count = 0;
 	private final static int numRTreeNode = 17482;
+	public static Set<Integer>[] pid2Nids = null;
+	private ArrayBlockingQueue<TempClass> queue;
 	
-	public RTreeReach(PropertySet psRTree, IStorageManager sm) throws Exception {
+	public P2NRTreeReach(PropertySet psRTree, IStorageManager sm, ArrayBlockingQueue<TempClass> queue) throws Exception {
 		super(psRTree, sm);
+		this.queue = queue;
 	}
 	
-	public static RTreeReach getInstance(String treePath) throws Exception{
+	public static P2NRTreeReach getInstance(String treePath, ArrayBlockingQueue<TempClass> queue) throws Exception{
 		PropertySet psRTree = new PropertySet();
 		psRTree.setProperty("FileName", treePath);
 		psRTree.setProperty("PageSize", Global.rtreePageSize);
@@ -49,51 +53,59 @@ public class RTreeReach extends RTree{
 		
 		Integer i = new Integer(1); 
 		psRTree.setProperty("IndexIdentifier", i);
-		return new RTreeReach(psRTree, file);
+		return new P2NRTreeReach(psRTree, file, queue);
 	}
 	
-	private void write(int nid, List<Integer> nids) throws Exception{
+	private void write(int nid, Set<Integer> wids) throws Exception{
 		dos.writeInt(nid);
-		dos.writeInt(nids.size());
-		for(int in : nids) {
+		dos.writeInt(wids.size());
+		for(int in : wids) {
 			dos.writeInt(in);
 		}
 	}
 	
-	private List<Integer> writeRTreeNode(int nid) throws Exception{
+	private Set<Integer> writeRTreeNode(int nid) throws Exception{
 //		if(maxNid < nid) maxNid = nid;
 		Node node = readNode(nid);
-		List<Integer> nids = new ArrayList<>();
+		Set<Integer> pids = new HashSet<>();
+		Set<Integer> tSet = null;
 		if(node.isLeaf()) {
 			for(int child = 0; child < node.m_children; child++) {
-				nids.add(node.m_pIdentifier[child]);
+				tSet = pid2Nids[node.m_pIdentifier[child]];
+				if(null != tSet) {
+					pids.addAll(tSet);
+					tSet.clear();
+					pid2Nids[node.m_pIdentifier[child]] = null;
+				}
 			}
 		} else {
-			List<Integer> tList = null;
 			for(int child = 0; child < node.m_children; child++) {
-				tList = writeRTreeNode(node.m_pIdentifier[child]);
-				if(!tList.isEmpty()) {
-					nids.addAll(tList);
+				tSet = writeRTreeNode(node.m_pIdentifier[child]);
+				if(!tSet.isEmpty()) {
+					pids.addAll(tSet);
 				}
-				tList.clear();
 			}
 		}
-		if(!nids.isEmpty())	write(nid, nids);
+		if(!pids.isEmpty()) {
+//			write(nid, pids);
+			queue.put(new TempClass(nid, pids));
+		}
 		if((++count)%1000 == 0) {
 			System.out.println("> 已处理" + count + "个rtree node，用时：" + TimeUtility.getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()));
 		}
-		return nids;
+		return pids;
 	}
 	
 	public void writeRTreeNode2Nids(String filePath) throws Exception{
-		System.out.println("> 开始输出writeRTreeNode2Nids . . . " + TimeUtility.getTime());
-		this.dos = IOUtility.getDos(filePath);
+		System.out.println("> 开始输出recRTreeNode2NidReach.bin . . . " + TimeUtility.getTime());
+//		this.dos = IOUtility.getDos(filePath);
 		Node node = readNode(m_rootID);
 		for(int child = 0; child < node.m_children; child++) {
 			writeRTreeNode(node.m_pIdentifier[child]);
 		}
-		dos.close();
-		System.out.println("> Over输出writeRTreeNode2Nids, 共处理" + count + "个rTree节点（除掉了root节点） ！！！ " + TimeUtility.getTailTime());
+//		dos.close();
+		queue.put(new TempClass(Integer.MIN_VALUE, null));
+		System.out.println("> Over输出recRTreeNode2NidReach.bin, 共处理" + count + "个rTree节点（除掉了root节点） ！！！ " + TimeUtility.getTailTime());
 	}
 	
 	public static Set<Integer>[] loadRTreeNode2Pids(String filePath){
@@ -126,20 +138,36 @@ public class RTreeReach extends RTree{
 		return rtreeNode2Pids;
 	}
 	
+	public static void building() throws Exception{
+		System.out.println("> 开始读取pid . . . " + TimeUtility.getTime());
+		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2NReach.zipNum);
+		P2NReach.buidingP2NReachFile(endSignQueue);
+		int i = 0;
+		for(i=0; i<P2NReach.zipNum; i++) {
+			endSignQueue.take();
+		}
+		System.out.println("\n\n> 已读取完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
+		
+		
+		P2NRTreeReach.pid2Nids = P2NReach.pid2Nids;
+		ArrayBlockingQueue<TempClass> queue = new ArrayBlockingQueue(4);
+		new TempClassWriteThread(queue, Global.recRTreeNode2NidReachPath + ".rtree").start();
+		P2NRTreeReach rtree = P2NRTreeReach.getInstance(Global.indexRTree, queue);
+		rtree.writeRTreeNode2Nids(Global.recRTreeNode2NidReachPath + ".rtree");
+		System.out.println("> 已处理完所有RTree节点，用时：" + TimeUtility.getTailTime());
+	}
+	
 	public static void test() throws Exception{
-		RTreeReach rtree = RTreeReach.getInstance(Global.indexRTree);
+		P2NRTreeReach rtree = P2NRTreeReach.getInstance(Global.indexRTree, null);
 //		System.out.println(rtree.getTreeHeight());
 		System.out.println(rtree.getStatistics().getNumberOfNodes());
 		System.out.println(rtree.m_rootID);
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		test();
-		RTreeReach rtree = RTreeReach.getInstance(Global.indexRTree);
-		rtree.writeRTreeNode2Nids(Global.outputDirectoryPath + Global.rtreeNode2PidsFile);
-//		System.out.println(rtree.maxNid);
-//		Set<Integer>[] map = RTreeReach.loadRTreeNode2Pids(Global.outputDirectoryPath + Global.rtreeNode2PidsFile);
-//		int i = 0;
-//		i++;
+//		P2NRTreeReach.building();
+		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath + ".rtree");
+		int i = 0;
+		i = i+10;
 	}
 }

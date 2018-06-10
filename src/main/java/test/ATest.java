@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
@@ -23,17 +25,38 @@ import utility.TimeUtility;
 
 public class ATest {
 	public static void main(String[] args) throws Exception{
+		
+		List<Integer> li = new ArrayList<>();
+		li.add(-100000000);
+		System.out.println(li.get(0));
+		
 //		System.out.format("> 已处理%d%%，用时%d\n", 1212, TimeUtility.getSpanSecond(23233L, System.currentTimeMillis()));
 		
-		ArrayList<Integer> li = new ArrayList<>();
-		ArrayList<Integer> li1 = new ArrayList<>();
-		li.add(1);
-		li1.add(2);
-		li.addAll(li1);
-		for(int in : li) {
-			System.out.println(in);
-		}
+//		ArrayBlockingQueue<Integer> qu = new ArrayBlockingQueue<>(5);
+//		System.out.println(qu.size());
 		
+//		Set<Integer> set1 = new HashSet<>();
+//		Set<Integer> set2 = new HashSet<>();
+//		set1.add(1);
+//		set1.add(2);
+//		set2.add(2);
+//		set2.add(-1);
+//		set1.addAll(set2);
+//		set2.clear();
+//		for(int in : set1) {
+//			System.out.println(in);
+//		}
+		
+//		ArrayList<Integer> li = new ArrayList<>();
+//		ArrayList<Integer> li1 = new ArrayList<>();
+//		li.add(1);
+//		li1.add(2);
+//		li.addAll(li1);
+//		int[] ins = new int[li.size()];
+//		for(int i=0; i<ins.length; i++) {
+//			ins[i] = li.get(i);
+//			System.out.println(ins[i]);
+//		}
 		
 //		TreeMap<Integer, Integer> tm = new TreeMap<>();
 //		tm.put(3, 3);

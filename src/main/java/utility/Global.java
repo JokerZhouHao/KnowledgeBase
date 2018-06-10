@@ -115,8 +115,10 @@ public class Global {
 	public static String tfindexDirectoryPath = null;
 	public static String pWReachTimesPath = outputDirectoryPath + "pWReachTimes.gz";
 	public static String noRepWReachTimesPath= outputDirectoryPath + "NoRepWReachTimes.bin";
-	public static String recPidWidReachPath = outputDirectoryPath + "recPidToWidReach.gz";
-	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.gz";
+	public static String recPidWidReachPath = outputDirectoryPath + "recPidToWidReach.bin";
+	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.bin";
+	public static String recP2NReachPath = outputDirectoryPath + "recP2NReach.bin";
+	public static String recRTreeNode2NidReachPath = outputDirectoryPath + "recRTreeNode2NidReach.bin";
 	
 	/*	index path	*/
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;

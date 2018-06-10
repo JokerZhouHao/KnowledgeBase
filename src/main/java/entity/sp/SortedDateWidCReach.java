@@ -15,11 +15,15 @@ import utility.MComparator;
  * @author zhou
  * @since 2018/05/12
  */
-public class SortedDateWid {
+public class SortedDateWidCReach {
 	
 	private static MComparator<DateNidNode> comparator = new MComparator<DateNidNode>();
 	
 	private ArrayList<DateNidNode> dateWidList = new ArrayList<>();
+	
+	public void addLast(DateNidNode dw) {
+		dateWidList.add(dw);
+	}
 	
 	private int addDateWid(DateNidNode dw, int start, int end) {
 		if(end < 0) {
@@ -228,6 +232,10 @@ public class SortedDateWid {
 		if(null != dateWidList)	this.dateWidList.clear();
 	}
 	
+	public int size() {
+		return dateWidList.size();
+	}
+	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		for(DateNidNode dn : dateWidList) {
@@ -241,7 +249,7 @@ public class SortedDateWid {
 	}
 
 	public static void main(String[] args) {
-		SortedDateWid sdw = new SortedDateWid();
+		SortedDateWidCReach sdw = new SortedDateWidCReach();
 		sdw.addDateWid(new DateNidNode(1, 1));
 		sdw.addDateWid(new DateNidNode(4, 2));
 		sdw.addDateWid(new DateNidNode(2, 3));

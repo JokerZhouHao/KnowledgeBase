@@ -26,15 +26,25 @@ import utility.TimeUtility;
  * @author Monica
  *
  */
-public class P2WReach implements Runnable{
+public class P2NReach implements Runnable{
+	class TempClass{
+		int pid;
+		Set<Integer> wids = null;
+		public TempClass(int p, Set<Integer> se) {
+			this.pid = p;
+			this.wids = se;
+		}
+	}
+	
 	private static GraphByArray graph = null;
 	private static Map<Integer, DWid> allDW = null;
 	private static List<Integer> allPid = null;
 	private static boolean hasInit = false;
 	private static long startTime = System.currentTimeMillis();
-	public static Set<Integer>[] pid2Wids = null;
-	
 	private String filePath;
+	
+	public static Set<Integer>[] pid2Nids = null;
+	private static ArrayBlockingQueue<Integer> endSignQueue = null; 
 	
 	private int start;
 	private int end;
@@ -45,24 +55,23 @@ public class P2WReach implements Runnable{
 	public static int zipNum = Global.numPid%zipContianNodeNum==0?Global.numPid/zipContianNodeNum:Global.numPid/zipContianNodeNum+1;
 	
 	private ArrayBlockingQueue<TempClass> blockingQueue = null;
-	private static ArrayBlockingQueue<Integer> endSignQueue = null; 
 	
 	private int type = 1;
 	
-	public P2WReach() {
+	public P2NReach() {
 		this.init();
 	}
 	
-	public P2WReach(String fp) {
+	public P2NReach(String fp) {
 		this.filePath = fp;
 	}
 	
-	public P2WReach(int type, ArrayBlockingQueue<TempClass> qu, int start, int end){
+	public P2NReach(int type, ArrayBlockingQueue<TempClass> qu, int start, int end){
 		this.type = type;
 		this.start = start;
 		this.end = end;
 		if(2==type) {
-			this.filePath = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+			this.filePath = Global.recP2NReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
 		}
 		this.blockingQueue = qu;
 		this.init();
@@ -105,7 +114,7 @@ public class P2WReach implements Runnable{
 			HashSet<Integer> rec = new HashSet<Integer>();
 			queue.push(pid);
 			rec.add(pid);
-			HashSet<Integer> wids = new HashSet<>();
+			HashSet<Integer> nids = new HashSet<>();
 			while(null != (nid = queue.poll())) {
 				// bfs
 				if(null != (edges =  graph.getEdge(nid))) {
@@ -122,14 +131,13 @@ public class P2WReach implements Runnable{
 				
 				// 添加date
 				if(null != (tDWid = allDW.get(nid))) {
-					for(int wid : tDWid.wids) {
-						wids.add(wid);
-					}
+					nids.add(nid);
 				}
 			}
 			
-			if(!wids.isEmpty()) {
-				blockingQueue.put(new TempClass(pid, wids));
+			if(!nids.isEmpty()) {
+//				blockingQueue.put(new TempClass(pid, nids));
+				P2NReach.pid2Nids[pid] = nids;
 			}
 			
 			dealedNum++;
@@ -138,7 +146,8 @@ public class P2WReach implements Runnable{
 				System.out.println("> 已处理" + dealedNum + "个pid, 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 			}
 		}
-		blockingQueue.put(new TempClass(-1, null));
+		endSignQueue.put(1);
+//		blockingQueue.put(new TempClass(-1, null));
 		System.out.println("> 结束 . " + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + "   " + TimeUtility.getTime());
 	}
 	
@@ -157,11 +166,10 @@ public class P2WReach implements Runnable{
 				for(int in : tc.wids) {
 					dos.writeInt(in);
 				}
-				pid2Wids[tc.pid] = tc.wids;
+				tc.wids.clear();
 			}
 			dos.flush();
 			dos.close();
-			if(null != P2WReach.endSignQueue)	P2WReach.endSignQueue.put(1);
 		} catch (Exception e) {
 			System.err.println("> 写文件" + Global.pWReachTimesPath + " 失败！！！");
 			e.printStackTrace();
@@ -187,25 +195,25 @@ public class P2WReach implements Runnable{
 	}
 	
 	// 计算出记录pid到wid可达情况的文件
-	public static void buildingPidToWidReachFile(ArrayBlockingQueue<Integer> endSignQueue) throws Exception{
-		P2WReach.endSignQueue = endSignQueue;
-		P2WReach.pid2Wids = new HashSet[Global.numPid];
+	public static void buidingP2NReachFile(ArrayBlockingQueue<Integer> endSignQueue) throws Exception{
+		P2NReach.endSignQueue = endSignQueue;
+		P2NReach.pid2Nids = new HashSet[Global.numPid];
 		int start = 0, end = 0;
 		int span = zipContianNodeNum;
 		while(end < Global.numPid) {
 			start = end;
 			end += span;
 			if(end > Global.numPid)	end = Global.numPid;
-			ArrayBlockingQueue<TempClass> bQueue = new ArrayBlockingQueue<>(1);
-			P2WReach pwd1 = new P2WReach(1, bQueue, start, end);
-			P2WReach pwd2 = new P2WReach(2, bQueue, start, end);
+//			ArrayBlockingQueue<TempClass> bQueue = new ArrayBlockingQueue<>(1);
+			P2NReach pwd1 = new P2NReach(1, null, start, end);
+//			P2NReach pwd2 = new P2NReach(2, bQueue, start, end);
 			new Thread(pwd1).start();
-			new Thread(pwd2).start();
+//			new Thread(pwd2).start();
 		}
 	}
 	
 	public static void main(String[] args) throws Exception{
-		P2WReach.buildingPidToWidReachFile(null);
+//		P2NReach.buidingP2NReachFile();
 //		PWReach.getWidToPidFile();
 	}
 }

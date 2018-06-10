@@ -28,8 +28,8 @@ import entity.sp.WordRadiusNeighborhood;
 import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.RTreeWithGI;
 import entity.sp.RunRecord;
-import entity.sp.SortedDateWid;
-import kSP.kSP;
+import entity.sp.SortedDateWidCReach;
+import kSP.kSPCReach;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
 import neustore.base.LRUBuffer;
@@ -57,7 +57,7 @@ import utility.Utility;
  * @author Monica
  *
  */
-public class SPCompleteDisk {
+public class SPCompleteDiskCReach {
 	
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private ReachableQueryService reachableQuerySer = null;
@@ -65,7 +65,7 @@ public class SPCompleteDisk {
 	private LRUBuffer buffer = null;
 	private RTreeWithGI rgi = null;
 	
-	public SPCompleteDisk() throws Exception{
+	public SPCompleteDiskCReach() throws Exception{
 		if(Global.isDebug) {
 			Global.startTime = System.currentTimeMillis();
 			System.out.println("> 开始构造SPCompleteDisk . . . \n");
@@ -184,7 +184,7 @@ public class SPCompleteDisk {
 		ArrayList<Integer> sortedQwordsList = new ArrayList<>(qwords);
 		sortedQwordsList.sort(new MComparator<Integer>());
 		Map<Integer, DatesWIds> nIdDateWidMap = new HashMap<>();
-		HashMap<Integer, SortedDateWid> widDatesMap = new HashMap<>();
+		HashMap<Integer, SortedDateWidCReach> widDatesMap = new HashMap<>();
 		for(int in : sortedQwordsList) {
 			if(Global.isTest) {
 				Global.rr.setFrontTime();
@@ -195,7 +195,7 @@ public class SPCompleteDisk {
 				Global.rr.setFrontTime();
 			}
 			DatesWIds dws = null;
-			SortedDateWid sdw = null;
+			SortedDateWidCReach sdw = null;
 			int tt = 0;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if((++tt)%1000 == 0 && Global.isTest) {
@@ -212,7 +212,7 @@ public class SPCompleteDisk {
 					dws.addWid(in);
 				}
 				if(null == (sdw = widDatesMap.get(in))) {
-					sdw = new SortedDateWid();
+					sdw = new SortedDateWidCReach();
 					widDatesMap.put(in, sdw);
 				}
 				int t0 = -1;
@@ -298,7 +298,7 @@ public class SPCompleteDisk {
 		
 //		Global.startTime = start;
 		
-		kSP kSPExecutor = new kSP(rgi, nIdDateWidMap, widDatesMap, wordPNMap, reachableQuerySer);
+		kSPCReach kSPExecutor = new kSPCReach(rgi, nIdDateWidMap, widDatesMap, wordPNMap, reachableQuerySer);
 		if(!isOver)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, TimeUtility.getIntDate(searchDate), v);
 		
 		if(Global.isTest) {
@@ -317,7 +317,7 @@ public class SPCompleteDisk {
 			}
 		}
 		nIdDateWidMap.clear();
-		for(Entry<Integer, SortedDateWid> en : widDatesMap.entrySet()) {
+		for(Entry<Integer, SortedDateWidCReach> en : widDatesMap.entrySet()) {
 			en.getValue().clear();
 		}
 		widDatesMap.clear();
@@ -357,7 +357,7 @@ public class SPCompleteDisk {
 		}
 		
 		System.out.println("> 开始初始化SPCompleteDisk . . . ");
-		SPCompleteDisk spc = new SPCompleteDisk();
+		SPCompleteDiskCReach spc = new SPCompleteDiskCReach();
 		System.out.println("> 成功初始化SPCompleteDisk ！ ！ ！ ");
 //		SPCompleteDisk spc = null;
 //		10 35.68275862680435 -85.23272932806015 11691841 11381939 1954-01-09

@@ -154,16 +154,14 @@ public class W2PIndex {
 		System.out.println("> 开始创建W2PIndex . . . " + TimeUtility.getTime());
 		int start = 0, end = 0;
 		int span = P2WReach.zipContianNodeNum;
-		int zipNum = 0;
+		int zipNum = P2WReach.zipNum;
 		
-		if(Global.numPid%span !=0) zipNum = Global.numPid/span + 1;
-		else zipNum = Global.numPid/span;
-		ArrayBlockingQueue<Integer>[] widQueues = new ArrayBlockingQueue[zipNum];
+		ArrayBlockingQueue<Integer>[] widQueues = new ArrayBlockingQueue[zipNum + 1];
 		int i = 0;
-		for(i=0; i<zipNum; i++) {
+		for(i=0; i<widQueues.length; i++) {
 			widQueues[i] = new ArrayBlockingQueue<Integer>(1);
 		}
-		ArrayBlockingQueue<List<Integer>> pidsQueue = new ArrayBlockingQueue<>(zipNum);
+		ArrayBlockingQueue<List<Integer>> pidsQueue = new ArrayBlockingQueue<>(zipNum + 1);
 		
 		for(i=0; i<zipNum; i++) {
 			start = end;
@@ -171,6 +169,7 @@ public class W2PIndex {
 			if(end > Global.numPid)	end = Global.numPid;
 			new W2PReachReader(widQueues[i], pidsQueue, start, end).start();
 		}
+		new W2PReachReader(widQueues[zipNum], pidsQueue, Global.recWidPidReachPath + ".rtree").start();
 		
 		String basePath = Global.indexWid2Pid;
 		if(!new File(basePath).exists()) {
@@ -204,12 +203,17 @@ public class W2PIndex {
 			if(end > allWids.size()) end = allWids.size();
 			for(j=start; j<end; j++) {
 				curWid = allWids.get(j);
-				for(k=0; k<zipNum; k++) {
+				for(k=0; k<widQueues.length; k++) {
 					widQueues[k].put(curWid);
 				}
-				for(k=0; k<zipNum; k++) {
+				for(k=0; k<widQueues.length; k++) {
 					tList = pidsQueue.take();
-					if(tList.get(0) > -1) {
+					if(tList.size()==0) {
+						System.out.println(tList == W2PReachReader.signNoList);
+						System.out.println("退出");
+						System.exit(0);
+					}
+					if(tList.get(0) > Integer.MIN_VALUE + 1) {
 						if(null == pids) {
 							pids = new ArrayList<>();
 						}
@@ -223,21 +227,20 @@ public class W2PIndex {
 					index.addDoc(curWid, pids);
 					pids.clear();
 				}
-				
 			}
 			index.closeIndexWriter();
 			System.out.println("> 已处理" + end + "个wid，共" + widNum + "个wid, 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 		}
 		System.out.println("> 完成索引创建，用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + ". " + TimeUtility.getTime());
 		System.err.println("> 发送结束读信号 . . . ");
-		for(i=0; i<zipNum; i++) {
+		for(i=0; i<widQueues.length; i++) {
 			widQueues[i].put(-1);
 		}
-		for(i=0; i<zipNum; i++) {
+		for(i=0; i<widQueues.length; i++) {
 			tList = pidsQueue.take();
-			if(tList.get(0) != -2) break;
+			if(tList.get(0) != -50000001) break;
 		}
-		if(i != zipNum) {
+		if(i != widQueues.length) {
 			System.err.println("> 发送的结束信号未正常收到");
 		} else {
 			System.err.println("> 发送的结束信号正常收到 ！！！");

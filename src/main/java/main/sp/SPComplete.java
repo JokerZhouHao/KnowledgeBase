@@ -18,7 +18,7 @@ import entity.sp.MinHeap;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.NidToDateWidIndex.DateWid;
-import kSP.kSP;
+import kSP.kSPCReach;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
 import neustore.base.LRUBuffer;
@@ -141,7 +141,7 @@ public class SPComplete {
 		
 		Global.startTime = start;
 		
-		kSP kSPExecutor = new kSP(semanticTreeResult, rgi, nIdDateWidMap, wordMinDateSpanMap, wordPNMap, reachableQuerySer);
+		kSPCReach kSPExecutor = new kSPCReach(semanticTreeResult, rgi, nIdDateWidMap, wordMinDateSpanMap, wordPNMap, reachableQuerySer);
 		kSPExecutor.kSPComputation(k, Global.radius, qpoint, qwords, intSearchDate, v);
 		long end = System.currentTimeMillis();
 		Global.runtime[0] += (end - start);

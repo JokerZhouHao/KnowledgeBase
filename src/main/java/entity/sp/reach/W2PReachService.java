@@ -1,5 +1,6 @@
 package entity.sp.reach;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -26,6 +27,7 @@ public class W2PReachService {
 		int start = 0, end = 0, i =0, j = 0;
 		int span = W2PIndex.widSpan;
 		int blockNum = W2PIndex.W2PIndexNum;
+		widToBlock = new HashMap();
 		String indexPath = null;
 		indexs = new W2PIndex[blockNum];
 		List<Integer> wids = W2PIndex.allWids;
@@ -74,8 +76,15 @@ public class W2PReachService {
 			wid = Integer.parseInt(scan.nextLine());
 			if(-1==wid) break;
 			pids = ser.getPids(wid);
+			int k = 5;
 			for(int in : pids) {
-				System.out.print(in + " ");
+				if(0 != k) {
+					k--;
+					System.out.print(in + " ");
+				}
+				if(in < 0) {
+					System.out.print(in + " ");
+				}
 			}
 			System.out.println();
 		}
