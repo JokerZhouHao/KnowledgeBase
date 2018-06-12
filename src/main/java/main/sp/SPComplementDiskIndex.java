@@ -24,6 +24,7 @@ import entity.sp.MinHeap;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.date.Wid2DateNidPairIndex;
+import entity.sp.reach.CReach;
 import entity.sp.reach.P2WRTreeReach;
 import entity.sp.reach.W2PReachService;
 import entity.sp.NidToDateWidIndex.DateWid;
@@ -60,7 +61,7 @@ import utility.Utility;
  * @author Monica
  *
  */
-public class SPComplementDistIndex {
+public class SPComplementDiskIndex {
 	
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private IndexWordPNService wIdPnSer = null;
@@ -69,8 +70,9 @@ public class SPComplementDistIndex {
 	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
 	private Set<Integer>[] rtreeNode2Pid = null;
 	private W2PReachService w2pReachSer = null;
+	private CReach cReach = null;
 	
-	public SPComplementDistIndex() throws Exception{
+	public SPComplementDiskIndex() throws Exception{
 		if(Global.isDebug) {
 			Global.startTime = System.currentTimeMillis();
 			System.out.println("> 开始构造SPCompleteDisk . . . \n");
@@ -95,10 +97,12 @@ public class SPComplementDistIndex {
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
 		
-		rtreeNode2Pid = P2WRTreeReach.loadRTreeNode2Pids(Global.outputDirectoryPath + Global.rtreeNode2PidsFile);
+		rtreeNode2Pid = P2WRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
 		
 		w2pReachSer = new W2PReachService(Global.indexWid2PidBase);
 		w2pReachSer.openIndexs();
+		
+		cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
 		
 		if(Global.isDebug) {
 			System.out.println("> 初始化RTreeWithGI . . . . ");
@@ -147,7 +151,7 @@ public class SPComplementDistIndex {
 		Global.recReachBW = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(Global.fileReachGZip)))));
 		
 		if(Global.isTest) {
-			Global.rr.timeBuildSPCompleteDisk = System.currentTimeMillis() - Global.rr.startTime;
+			Global.rr.timeBuildSPCompleteDisk = System.nanoTime() - Global.rr.startTime;
 			Global.rr.setFrontTime();
 		}
 	}
@@ -171,7 +175,7 @@ public class SPComplementDistIndex {
 		}
 		
 		if(Global.isTest) {
-			Global.rr.timeBspStart = System.currentTimeMillis();
+			Global.rr.timeBspStart = System.nanoTime();
 			Global.rr.setFrontTime();
 		}
 		
@@ -207,7 +211,6 @@ public class SPComplementDistIndex {
 				Global.rr.setFrontTime();
 			}
 			DatesWIds dws = null;
-			int tt = 0;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if(null == (dws = nIdDateWidMap.get(en.getKey()))) {
 					dws = new DatesWIds(en.getValue());
@@ -225,7 +228,7 @@ public class SPComplementDistIndex {
 		}
 		SortedDateWidIndex[] wid2DateNidPair = new SortedDateWidIndex[sortedQwordsList.size()];
 		for(i=0; i<sortQwords.length; i++) {
-			wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i]);
+			wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i], TimeUtility.getIntDate(searchDate));
 			// 不存在该wid
 			if(null==wid2DateNidPair[i])	return null;
 			Global.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
@@ -244,27 +247,12 @@ public class SPComplementDistIndex {
 		}
 		if(Global.isTest) {
 			Global.rr.timeBspGetW2PReach = Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
-		
-//		if(Global.isDebug) {
-//			System.out.println("> 完成计算nIdDateWidMap和widDatesMap，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
-//			Global.frontTime = System.currentTimeMillis();
-//			System.out.println("> 开始计算wordPNMap . . . ");
-//		}
-		
-		/////////////////////////// 打印测试
-//		System.out.println("searchedNodeListMap : ");
-//		for(Entry<Integer, DateWId> en : nIdDateWidMap.entrySet()) {
-//			System.out.println(en.getKey() + " : " + en.getValue().getStr());
-//		}
-//		System.out.println();
 		
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		for(Integer in : qwords) {
-			if(Global.isTest) {
-				Global.tempTime = System.currentTimeMillis();
-			}
 			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
 			if(null != st1) {
 				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
@@ -278,14 +266,12 @@ public class SPComplementDistIndex {
 		
 		if(Global.isTest) {
 			Global.rr.timeBspGetPN = Global.rr.getTimeSpan();
-			Global.rr.timeEnterkSPComputation = System.currentTimeMillis();
+			Global.rr.timeEnterkSPComputation = System.nanoTime();
 		}
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
-//		Global.startTime = start;
-		
-		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, nIdDateWidMap, wid2DateNidPair, w2pReachable, wordPNMap);
+		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, cReach, nIdDateWidMap, wid2DateNidPair, w2pReachable, wordPNMap);
 		kSPExecutor.kSPComputation(k, Global.radius, qpoint, sortQwords, TimeUtility.getIntDate(searchDate), v);
 		
 		if(Global.isTest) {
@@ -335,6 +321,11 @@ public class SPComplementDistIndex {
 		return (KSPCandidateVisitor)v;
 	}
 	
+	/**
+	 * 主方法
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception{
 		if(Global.isTest) {
 			Global.startTime = System.currentTimeMillis();
@@ -347,11 +338,9 @@ public class SPComplementDistIndex {
 			sampleFileSign = args[0];
 		}
 		
-		System.out.println("> 开始初始化SPCompleteDisk . . . ");
-		SPCompleteDiskCReach spc = new SPCompleteDiskCReach();
-		System.out.println("> 成功初始化SPCompleteDisk ！ ！ ！ ");
-//		SPCompleteDisk spc = null;
-//		10 35.68275862680435 -85.23272932806015 11691841 11381939 1954-01-09
+		System.out.println("> 开始初始化SPComplementDiskIndex . . . ");
+		SPComplementDiskIndex spc = new SPComplementDiskIndex();
+		System.out.println("> 成功初始化SPComplementDiskIndex ！ ！ ！ ");
 		int k = 10;
 		double[] pcoords = new double[2];
 		pcoords[0] = 35.68275862680435;
@@ -406,55 +395,8 @@ public class SPComplementDistIndex {
 					bw.write(Global.rr.getHeader());
 				}
 				
-				bw.write(Global.rr.getBspInfo(Global.curRecIndex, 1000));
+				bw.write(Global.rr.getBspInfo(Global.curRecIndex, 1000000000));
 				Global.rr = new RunRecord();
-				
-//				bw.write(String.valueOf(Global.curRecIndex) + " ");
-////				for(int j=0; j<3; j++) {
-////					bw.write(String.valueOf(Global.timePn[j] + " "));
-////					Global.timePn[j] = 0;
-////				}
-//				bw.write("| ");
-//				bw.write(String.valueOf(Global.leftMaxSpan) + " ");
-//				bw.write(String.valueOf(Global.rightMaxSpan) + " ");
-//				bw.write(String.valueOf(Global.timeGetMinDateSpan) + " ");
-//				Global.leftMaxSpan = 0;
-//				Global.rightMaxSpan = 0;
-//				Global.timeGetMinDateSpan = 0;
-//				bw.write("| ");
-//				
-//				for(int j=0; j<3; j++) {
-//					bw.write(String.valueOf(Global.recCount[j] + " "));
-//					Global.recCount[j] = 0;
-//				}
-//				bw.write("| ");
-//				
-//				for(int j=0; j<5; j++) {
-//					bw.write(String.valueOf(Global.timePTree[j]/1000) + " ");
-//					Global.timePTree[j] = 0;
-//				}
-//				bw.write("| ");
-//				
-//				bw.write(String.valueOf(Global.queueSize) + " ");
-//				bw.write("| ");
-//				
-//				for(int j=0; j<7; j++) {
-//					if(j==1) {
-//						Global.timeBsp[5] -= Global.timeBsp[1];
-//						Global.timeBsp[5] -= (Global.timeRecReachable / 1000);
-//						Global.timeRecReachable = 0;
-//					}
-//					bw.write(String.valueOf(Global.timeBsp[j]) + " ");
-//					Global.timeBsp[j] = 0;
-//				}
-//				bw.write("| ");
-//				
-//				for(int j=0; j<2; j++) {
-//					bw.write(Global.bspRes[j] + " ");
-//					Global.bspRes[j] = null;
-//				}
-//				bw.write("| ");
-//				bw.write('\n');
 				bw.flush();
 			}
 			br.close();

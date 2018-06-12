@@ -199,10 +199,10 @@ public class GraphByArray {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getSemanticPlaceP(int source, ArrayList<Integer> qwords, int date, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
-			HashMap<Integer, Integer> wordMinDateSpanMap, List<List<Integer>> semanticTree) throws Exception {
+	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
+			Map<Integer, Integer> wordMinDateSpanMap, List<List<Integer>> semanticTree) throws Exception {
 
-		if (qwords.size() == 0) {
+		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
 		}
 		
@@ -220,8 +220,12 @@ public class GraphByArray {
 		Map<Integer, Double> recKeyDisMap = new HashMap<>();
 		Map<Integer, Integer> recCandVecticesMap = new HashMap<>();
 		Map<Integer, Double> recCandDisMap = new HashMap<>();
-		ArrayList<Integer> sortedQwordsList = new ArrayList<>(qwords);
-		sortedQwordsList.sort(new MComparator<Integer>());
+		
+		ArrayList<Integer> sortedQwordsList = new ArrayList();
+		for(int in : sortQwords) {
+			sortedQwordsList.add(in);
+		}
+		
 		int qwordsNum = sortedQwordsList.size();
 		List<Integer> tempList = new ArrayList<>();
 		List<Integer> tempList1 = null;

@@ -44,7 +44,7 @@ import utility.TimeUtility;
  * @author Monica
  * @since 2018/6/9
  */
-public class KSPIndex {
+public class KSPIndexMultiThread {
 	protected RTreeWithGI rgi;
 	private Set<Integer>[] rtreeNode2Pid = null;
 	private CReach cReach = null;
@@ -59,7 +59,7 @@ public class KSPIndex {
 	
 	double kthScore = Double.POSITIVE_INFINITY;
 
-	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, CReach cReach,
+	public KSPIndexMultiThread(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, CReach cReach,
 			Map<Integer, DatesWIds> nIdDateWidMap, SortedDateWidIndex[] wid2DateNidPair,
 			Set<Integer>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
 		super();
@@ -86,6 +86,51 @@ public class KSPIndex {
 
 	}
 	
+	// 用多线程计算widsMinDataSpan
+	class KV{
+		int k;
+		double w = 0;
+		double v = 0;
+		Map<Integer, Integer> minDateSpan = null;
+		public KV(int k, double w, double v, Map<Integer, Integer> mds) {
+			this.k = k;
+			this.w = w;
+			this.v = v;
+			this.minDateSpan = mds;
+		}
+	}
+	
+	class ThreadCalMinDateSpan extends Thread{
+		ArrayBlockingQueue<KV> queue = null;
+		ArrayBlockingQueue<KV> resultQueue = null;
+		public ThreadCalMinDateSpan(ArrayBlockingQueue<KV> qu, ArrayBlockingQueue<KV> rq) {
+			this.queue = qu;
+			this.resultQueue = rq;
+		}
+		
+		public void run() {
+			KV tkv = null;
+			Map<Integer, Integer> mds = null;
+			try {
+				while(true) {
+					tkv = queue.take();
+					if(tkv.k == Integer.MIN_VALUE)	break;
+					else if(tkv.k < 0) {
+						mds = getRTreeWidMinDateSpan(-(tkv.k + 1), sortQwords, date);
+					} else {
+						mds = getPidWidMinDateSpan(tkv.k, sortQwords, date);
+					}
+					double alphaRankingScoreBound = tkv.w * getAlphaLoosenessBound(tkv.k, Global.radius, mds, sortQwords, date);
+					resultQueue.put(new KV(tkv.k, tkv.w, alphaRankingScoreBound, mds));
+				}
+			} catch (Exception e) {
+				System.err.println("> ThreadCalMinDateSpan异常而退出！！！");
+				e.printStackTrace();
+				System.exit(0);
+			}
+		}
+	}
+	
 	private void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
 			final IVisitor result, final INearestNeighborComparator nnc) throws Exception {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
@@ -102,6 +147,18 @@ public class KSPIndex {
 		Node n = null;
 		HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
 		
+		// 创建多个线程计算minDateSpan
+		this.sortQwords = sortQwords;
+		this.date = date;
+		int numThread = 20;
+		ArrayBlockingQueue<KV> nidQueue = new ArrayBlockingQueue<>(numThread);
+		ArrayBlockingQueue<KV> resultQueue = new ArrayBlockingQueue<>(numThread);
+		for(int i=0; i<numThread; i++) {
+			new ThreadCalMinDateSpan(nidQueue, resultQueue).start();
+		}
+		int numCurCalThread = 0;
+		KV tkv = null;
+		
 		rgi.readLock();
 
 		try {
@@ -109,6 +166,7 @@ public class KSPIndex {
 		 	   sorting according to distances, it is not assured that all distances will be unique. TreeMap
 			   also sorts unique keys. Thus, I am simulating a priority queue using an ArrayList and binarySearch. */
 //			ArrayList queue = new ArrayList();
+//			NNEntryMapHeap heap = new NNEntryMapHeap();
 			
 			Data nd = new Data(0.0, null, rgi.getRoot(), -1);
 
@@ -133,6 +191,7 @@ public class KSPIndex {
 				if (first.level >= 0) {// node
 					Data firstData = (Data) first.m_pEntry;
 					n = rgi.readNode(firstData.getIdentifier());
+					
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
@@ -188,41 +247,125 @@ public class KSPIndex {
 							}
 							if(Global.isTest) {
 								Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
-								Global.rr.setFrontTime();
+//								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+							nid = -nid -1;
 							
-							if(Global.isTest) {
-								Global.rr.timeCptGetMinDateSpan += Global.rr.getTimeSpan();
-							}
-							
-							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpanMap, sortQwords, date);
+//							minDateSpanMap = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+//							
+//							if(Global.isTest) {
+//								Global.rr.timeCptGetMinDateSpan += Global.rr.getTimeSpan();
+//							}
+//							
+//							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpanMap, sortQwords, date);
 						}
 						
-						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
-						if (alphaRankingScoreBound > kthScore) {
+						if(Global.isTest) {
+							Global.rr.tempT = System.nanoTime();
+						}
+						nidQueue.put(new KV(nid, minSpatialDist, 0, null));
+						numCurCalThread++;
+						if(numCurCalThread == numThread) {
+							while(numCurCalThread != 0) {
+								tkv = resultQueue.take();
+								numCurCalThread--;
+								if (tkv.v > kthScore) {
+									if(n.m_level == 0) {
+										Global.rr.numCptPruneRTreePid++;
+									} else {
+										Global.rr.numCptPruneRTeeNode++;
+									}
+//									continue;
+								} else {
+									if(n.m_level == 0) {
+										recMinDateSpanMap.put(tkv.k, tkv.minDateSpan);
+									}
+									int t = tkv.k;
+									if(t < 0)	t = -(t+1);
+									IEntry eChild = new Data(tkv.w, null,
+											t, -1);
+									NNEntry eChild2 = new NNEntry(eChild, tkv.v, n.m_level - 1);
+									if(Global.isTest) {
+										Global.rr.setFrontTime();
+									}
+//									insertIntoHeapH(queue, eChild2);
+									heap.put(eChild2);
+									
+									if(Global.isTest) {
+										Global.rr.numCptQueuePut++;
+										if(Global.rr.numCptMaxQueueSize < heap.size())	Global.rr.numCptMaxQueueSize = heap.size();
+										Global.rr.timeCptQueuePut += Global.rr.getTimeSpan();
+									}
+								}
+							}
+						}
+//						if(Global.isTest) {
+//							Global.rr.timeCptGetMinDateSpan += System.nanoTime() - Global.rr.tempT;
+//						}
+//						
+//						
+//						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
+//						if (alphaRankingScoreBound > kthScore) {
+//							if(n.m_level == 0) {
+//								Global.rr.numCptPruneRTreePid++;
+//							} else {
+//								Global.rr.numCptPruneRTeeNode++;
+//							}
+//							continue;
+//						}
+//						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
+//								n.m_pIdentifier[cChild], n.m_identifier);
+//						NNEntry eChild2 = new NNEntry(eChild, alphaRankingScoreBound, n.m_level - 1);
+//						if(Global.isTest) {
+//							Global.rr.setFrontTime();
+//						}
+////						insertIntoHeapH(queue, eChild2);
+//						heap.put(eChild2);
+//						
+//						if(Global.isTest) {
+//							Global.rr.numCptQueuePut++;
+//							if(Global.rr.numCptMaxQueueSize < heap.size())	Global.rr.numCptMaxQueueSize = heap.size();
+//							Global.rr.timeCptQueuePut += Global.rr.getTimeSpan();
+//						}
+					}
+					if(Global.isTest) {
+						Global.rr.tempT = System.nanoTime();
+					}
+					while(numCurCalThread != 0) {
+						tkv = resultQueue.take();
+						numCurCalThread--;
+						if (tkv.v > kthScore) {
 							if(n.m_level == 0) {
 								Global.rr.numCptPruneRTreePid++;
 							} else {
 								Global.rr.numCptPruneRTeeNode++;
 							}
-							continue;
+//							continue;
+						} else {
+							if(n.m_level == 0) {
+								recMinDateSpanMap.put(tkv.k, tkv.minDateSpan);
+							}
+							int t = tkv.k;
+							if(t < 0)	t = -(t+1);
+							IEntry eChild = new Data(tkv.w, null,
+									t, -1);
+							NNEntry eChild2 = new NNEntry(eChild, tkv.v, n.m_level - 1);
+							if(Global.isTest) {
+								Global.rr.setFrontTime();
+							}
+//							insertIntoHeapH(queue, eChild2);
+							heap.put(eChild2);
+							
+							if(Global.isTest) {
+								Global.rr.numCptQueuePut++;
+								if(Global.rr.numCptMaxQueueSize < heap.size())	Global.rr.numCptMaxQueueSize = heap.size();
+								Global.rr.timeCptQueuePut += Global.rr.getTimeSpan();
+							}
 						}
-						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
-								n.m_pIdentifier[cChild], n.m_identifier);
-						NNEntry eChild2 = new NNEntry(eChild, alphaRankingScoreBound, n.m_level - 1);
-						if(Global.isTest) {
-							Global.rr.setFrontTime();
-						}
-						
-						heap.put(eChild2);
-						
-						if(Global.isTest) {
-							Global.rr.numCptQueuePut++;
-							if(Global.rr.numCptMaxQueueSize < heap.size())	Global.rr.numCptMaxQueueSize = heap.size();
-							Global.rr.timeCptQueuePut += Global.rr.getTimeSpan();
-						}
+					}
+					if(Global.isTest) {
+						Global.rr.timeCptGetMinDateSpan += System.nanoTime() - Global.rr.tempT;
 					}
 					if(sign)	break;
 				} else {
@@ -254,7 +397,17 @@ public class KSPIndex {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
 					
+//					if(Global.isTest) {
+//						Global.tempTime = System.currentTimeMillis();
+//					}
 //					minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
+//					if(Global.isTest) {
+//						Global.timePTree[1] += System.currentTimeMillis() - Global.tempTime;
+//						Global.tempTime = System.currentTimeMillis();
+//					}
+//					if(kthScore <= this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, qwords, date)) {
+//						continue;
+//					}
 					
 					// compute shortest path between place and qword
 					if(Global.isTest) {
@@ -264,6 +417,8 @@ public class KSPIndex {
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
 							sortQwords, date, loosenessThreshold, nIdDateWidMap, recMinDateSpanMap.get(nid), semanticTree);
+//					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
+//							qwords, date, loosenessThreshold, nIdDateWidMap, minDateSpanMap, semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -298,7 +453,9 @@ public class KSPIndex {
 					}
 				}
 			}
+//			System.out.println(queue.size());
 			if(Global.isTest) {
+//				Global.rr.numLastQueue = queue.size();
 				Global.rr.numLastQueue = heap.size();
 				Global.rr.kthScore = this.kthScore;
 				Global.rr.queueLastValue = first.m_minDist;
@@ -307,9 +464,20 @@ public class KSPIndex {
 			rgi.readUnlock();
 		}
 		
+		// 结束线程
+		for(int i=0; i<numThread; i++) {
+			nidQueue.put(new KV(Integer.MIN_VALUE, 0, 0, null));
+		}
+		
 		recMinDateSpanMap.clear();
 		if(Global.isTest) {
 			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + Global.rr.timeCptGetMinDateSpan/1000);
+//			System.out.println(
+//					"timeCptQueuePut = " + Global.rr.timeCptQueuePut/1000 + " " + 
+//					"timeCptQueueRemove = " + Global.rr.timeCptQueueRemove/1000 + " " + 
+//					"timeCptPid2Wids = " + Global.rr.timeCptPid2Wids/1000 + " " + 
+//					"timeCptGetMinDateSpan = " + Global.rr.timeCptGetMinDateSpan/1000 + " " + 
+//					"timeCptGetSemanticTree = " + Global.rr.timeCptGetSemanticTree/1000);
 			System.out.println(
 					"numCptMaxQueueSize timeCptQueuePut timeCptQueueRemove timeCptPid2Wids timeCptGetMinDateSpan timeCptGetSemanticTree timeKSPComputation\n"+ 
 					Global.rr.numCptMaxQueueSize + " " + 
@@ -369,16 +537,8 @@ public class KSPIndex {
 			Global.rr.numCptGetMinDateSpan += sortQwords.length;
 		}
 		HashSet<Integer> rec = new HashSet<>();
-		int j1, j2;
 		for(i=0; i<sortQwords.length; i++) {
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach));
-			j1= wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach);
-			j2 = wid2DateNidPair[i].getMinDateSpan(date);
-			widMinDateSpan.put(sortQwords[i], j1);
-			if(j1 < j2) {
-				System.out.println("pid dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
-				System.exit(0);
-			}
+			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach));
 		}
 		rec.clear();
 		return widMinDateSpan;
@@ -390,19 +550,12 @@ public class KSPIndex {
 		if(Global.isTest) {
 			Global.rr.numCptGetMinDateSpan += sortQwords.length;
 		}
-		int j1, j2;
+		HashSet<Integer> rec = new HashSet<>();
 		for(i=0; i<sortQwords.length; i++) {
-			j1= wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date);
-			j2 = wid2DateNidPair[i].getMinDateSpan(date);
 //			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id));
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
-			widMinDateSpan.put(sortQwords[i], j1);
-//			widMinDateSpan.put(sortQwords[i], -1);
-			if(j1 < j2) {
-				System.out.println("rtree dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
-				System.exit(0);
-			}
+			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
 		}
+		rec.clear();
 		return widMinDateSpan;
 	}
 	
@@ -421,10 +574,10 @@ public class KSPIndex {
 		double tempd1 = 0;
 		double tempd2 = 0;
 		for(int wid : sortQwords) {
+			tempd1 = (alphaRadius + 2) * widMinDateSpanMap.get(wid);
 			if(null == wordPNMap.get(wid)) {
-				alphaLoosenessBound += widMinDateSpanMap.get(wid);
+				alphaLoosenessBound += tempd1;
 			} else {
-				tempd1 = (alphaRadius + 2) * widMinDateSpanMap.get(wid);
 				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}

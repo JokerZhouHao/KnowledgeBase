@@ -238,7 +238,7 @@ public class W2PIndex {
 		}
 		for(i=0; i<widQueues.length; i++) {
 			tList = pidsQueue.take();
-			if(tList.get(0) != -50000001) break;
+			if(tList.get(0) != Integer.MIN_VALUE) break;
 		}
 		if(i != widQueues.length) {
 			System.err.println("> 发送的结束信号未正常收到");

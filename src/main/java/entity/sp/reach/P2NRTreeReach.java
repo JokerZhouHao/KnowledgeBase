@@ -151,9 +151,9 @@ public class P2NRTreeReach extends RTree {
 		
 		P2NRTreeReach.pid2Nids = P2NReach.pid2Nids;
 		ArrayBlockingQueue<TempClass> queue = new ArrayBlockingQueue(4);
-		new TempClassWriteThread(queue, Global.recRTreeNode2NidReachPath + ".rtree").start();
+		new TempClassWriteThread(queue, Global.recRTreeNode2NidReachPath).start();
 		P2NRTreeReach rtree = P2NRTreeReach.getInstance(Global.indexRTree, queue);
-		rtree.writeRTreeNode2Nids(Global.recRTreeNode2NidReachPath + ".rtree");
+		rtree.writeRTreeNode2Nids(Global.recRTreeNode2NidReachPath);
 		System.out.println("> 已处理完所有RTree节点，用时：" + TimeUtility.getTailTime());
 	}
 	
@@ -166,7 +166,7 @@ public class P2NRTreeReach extends RTree {
 	
 	public static void main(String[] args) throws Exception{
 //		P2NRTreeReach.building();
-		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath + ".rtree");
+		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
 		int i = 0;
 		i = i+10;
 	}

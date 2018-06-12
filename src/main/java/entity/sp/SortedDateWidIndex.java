@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+
+import org.tukaani.xz.lz.Matches;
 
 import entity.sp.reach.CReach;
 import precomputation.rechable.ReachableQueryService;
@@ -90,13 +93,12 @@ public class SortedDateWidIndex {
 		}
 	}
 	
-	public int getMinDateSpan(int sDate, int p, ReachableQueryService rsSer) {
+	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer) {
 		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
 		int i = mid;
 		DateNidNode tempNode = null;
-		long tempL = p * Global.numSCCs0;
 		if(i >= 0) {
 			tempNode = dateWidList.get(i);
 			if(!rec.contains(tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
@@ -115,15 +117,28 @@ public class SortedDateWidIndex {
 			right = (-i) - 1;
 		}
 		
+//		int leftMinIndex = 0;
+//		int rightMaxIndex = 0;
+		
 		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
-		if(left + 1 <= (dateWidList.size() - right)) {
+		DateNidNode dnn = null;
+		int size = dateWidList.size();
+		if(left + 1 <= (size - right)) {
 			i = -1;
+//			leftMinIndex = left - Global.leftMaxIndexSpan;
+//			if(leftMinIndex<0)	leftMinIndex = 0;
+			
 			while(left >= 0) {
-				if(i == dateWidList.get(left).getNid()) {
+				dnn = dateWidList.get(left);
+				if(dnn.isMax) {
+					leftSpan = Global.maxDateSpan;
+					break;
+				}
+				if(i == dnn.getNid()) {
 					left--;
 					continue;
 				} else {
-					i = dateWidList.get(left).getNid();
+					i = dnn.getNid();
 				}
 				if(rec.contains(i)) {
 //				if(rec.contains(tempL + i)) {
@@ -139,17 +154,25 @@ public class SortedDateWidIndex {
 				}
 			}
 			
-			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
+//			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
 			
 			i = -1;
-			while(right < dateWidList.size()) {
-				tempSpan = Math.abs(sDate - dateWidList.get(right).getDate()) + 1;
+//			rightMaxIndex = right + Global.rightMaxIndexSpan;
+//			if(rightMaxIndex >= dateWidList.size()) rightMaxIndex = dateWidList.size();
+			
+			while(right < size) {
+				dnn = dateWidList.get(right);
+				if(dnn.isMax) {
+					rightSpan = Global.maxDateSpan;
+					break;
+				}
+				tempSpan = Math.abs(sDate - dnn.getDate()) + 1;
 				if(tempSpan >= leftSpan)	break;
-				if(i == dateWidList.get(right).getNid()) {
+				if(i == dnn.getNid()) {
 					right++;
 					continue;
 				} else {
-					i = dateWidList.get(right).getNid();
+					i = dnn.getNid();
 				}
 				if(rec.contains(i)) {
 //				if(rec.contains(tempL + i)) {
@@ -165,16 +188,25 @@ public class SortedDateWidIndex {
 				}
 			}
 			
-			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+//			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
 			
 		} else {
 			i = -1;
-			while(right < dateWidList.size()) {
-				if(i == dateWidList.get(right).getNid()) {
+			
+//			rightMaxIndex = right + Global.rightMaxIndexSpan;
+//			if(rightMaxIndex >= dateWidList.size()) rightMaxIndex = dateWidList.size();
+			
+			while(right < size) {
+				dnn = dateWidList.get(right);
+				if(dnn.isMax) {
+					rightSpan = Global.maxDateSpan;
+					break;
+				}
+				if(i == dnn.getNid()) {
 					right++;
 					continue;
 				} else {
-					i = dateWidList.get(right).getNid();
+					i = dnn.getNid();
 				}
 				if(rec.contains(i)) {
 //				if(rec.contains(tempL + i)) {
@@ -189,17 +221,26 @@ public class SortedDateWidIndex {
 					}
 				}
 			}
-			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+//			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
 			
 			i = -1;
+			
+//			leftMinIndex = left - Global.leftMaxIndexSpan;
+//			if(leftMinIndex<0)	leftMinIndex = 0;
+			
 			while(left >= 0) {
+				dnn = dateWidList.get(left);
+				if(dnn.isMax) {
+					leftSpan = Global.maxDateSpan;
+					break;
+				}
 				tempSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
 				if(tempSpan >= rightSpan)	break;
-				if(i == dateWidList.get(left).getNid()) {
+				if(i == dnn.getNid()) {
 					left--;
 					continue;
 				} else {
-					i = dateWidList.get(left).getNid();
+					i = dnn.getNid();
 				}
 				if(rec.contains(i)) {
 //				if(rec.contains(tempL + i)) {
@@ -215,6 +256,112 @@ public class SortedDateWidIndex {
 				}
 			}
 			
+//			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
+			
+		}
+		if(leftSpan == Integer.MAX_VALUE) {
+			if(rightSpan == Integer.MAX_VALUE)	return -1;
+			else return rightSpan;
+		} else {
+			if(rightSpan == Integer.MAX_VALUE)	return leftSpan;
+			else return leftSpan<=rightSpan?leftSpan:rightSpan;
+		}
+	}
+	
+	public int getMinDateSpan(Set<Integer> rec, int sDate) {
+		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
+		int left = 0;
+		int right = 0;
+		int i = mid;
+		DateNidNode tempNode = null;
+		if(i >= 0) {
+			tempNode = dateWidList.get(i);
+			if(rec.contains(tempNode.getNid())) {
+				return 1;
+			}
+			mid = i;
+			left = i - 1;
+			right = i + 1;
+		} else {
+			left = (-i) - 2;
+			mid = left;
+			right = (-i) - 1;
+		}
+		
+		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
+		DateNidNode dnn;
+		int size = dateWidList.size();
+		if(left + 1 <= (size - right)) {
+			i = -1;
+			while(left >= 0) {
+				dnn = dateWidList.get(left);
+				if(i == dnn.getNid()) {
+					left--;
+					continue;
+				} else {
+					i = dnn.getNid();
+				}
+				if(rec.contains(i)) {
+					leftSpan = Math.abs(dnn.getDate() - sDate) + 1;
+					break;
+				}
+			}
+			
+			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
+			
+			i = -1;
+			while(right < size) {
+				dnn = dateWidList.get(right);
+				tempSpan = Math.abs(sDate - dnn.getDate()) + 1;
+				if(tempSpan >= leftSpan)	break;
+				if(i == dnn.getNid()) {
+					right++;
+					continue;
+				} else {
+					i = dnn.getNid();
+				}
+				if(rec.contains(i)) {
+					rightSpan = Math.abs(dnn.getDate() - sDate) + 1;
+					break;
+				}
+			}
+			
+			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+			
+		} else {
+			i = -1;
+			while(right < size) {
+				dnn = dateWidList.get(right);
+				if(i == dnn.getNid()) {
+					right++;
+					continue;
+				} else {
+					i = dnn.getNid();
+				}
+				if(rec.contains(i)) {
+					rightSpan = Math.abs(dnn.getDate() - sDate) + 1;
+					break;
+				}
+			}
+			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+			
+			i = -1;
+			while(left >= 0) {
+				dnn = dateWidList.get(left);
+				tempSpan = Math.abs(sDate - dnn.getDate()) + 1;
+				if(tempSpan >= rightSpan)	break;
+				if(i == dnn.getNid()) {
+					left--;
+					continue;
+				} else {
+					i = dnn.getNid();
+				}
+				if(rec.contains(i)) {
+					leftSpan = Math.abs(dnn.getDate() - sDate) + 1;
+					break;
+				}
+			}
+			
 			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
 			
 		}
@@ -226,6 +373,7 @@ public class SortedDateWidIndex {
 			else return leftSpan<=rightSpan?leftSpan:rightSpan;
 		}
 	}
+	
 	
 	public void clear() {
 		if(null != dateWidList)	this.dateWidList.clear();

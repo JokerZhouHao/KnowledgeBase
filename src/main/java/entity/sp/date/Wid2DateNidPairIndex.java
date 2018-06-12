@@ -28,6 +28,7 @@ import entity.Index;
 import entity.sp.AllDateWidNodes;
 import entity.sp.AllDateWidNodes.DWid;
 import entity.sp.DateNidNode;
+import entity.sp.RunRecord;
 import entity.sp.SortedDateWidCReach;
 import entity.sp.SortedDateWidIndex;
 import utility.Global;
@@ -42,6 +43,7 @@ import utility.TimeUtility;
 public class Wid2DateNidPairIndex extends Index{
 	
 	private static long startTime = System.currentTimeMillis();
+	private static int maxDateSpan = Global.maxDateSpan  - 1;
 	
 	public Wid2DateNidPairIndex(String indexPath) {
 		super(indexPath);
@@ -151,22 +153,28 @@ public class Wid2DateNidPairIndex extends Index{
 		System.out.println("> 结束创建索引 ！！！" + TimeUtility.getTailTime());
 	}
 	
-	private SortedDateWidIndex bytesToSortedDateWid(byte[] bytes){
+	private SortedDateWidIndex bytesToSortedDateWid(byte[] bytes, int sDate){
 		SortedDateWidIndex sdw = new SortedDateWidIndex();
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
 		int size = bb.getInt();
+		int date = 0;
 		for(int i=0; i<size; i++) {
-			sdw.addLast(new DateNidNode(bb.getInt(), bb.getInt()));
+			date = bb.getInt();
+			if(Math.abs(date - sDate) >= maxDateSpan) {
+				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
+			} else {
+				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+			}
 		}
 		return sdw;
 	}
 	
-	public SortedDateWidIndex getDateNids(int wid){
+	public SortedDateWidIndex getDateNids(int wid, int sDate){
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wid", wid), 1);
 			ScoreDoc[] hits = results.scoreDocs;
 			if(hits.length == 0)	return null;
-			return bytesToSortedDateWid((indexSearcher.doc(hits[0].doc).getBinaryValue("dateNidPair").bytes));
+			return bytesToSortedDateWid((indexSearcher.doc(hits[0].doc).getBinaryValue("dateNidPair").bytes), sDate);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("检索wid：" + wid + "失败而退出！！！");
@@ -180,10 +188,10 @@ public class Wid2DateNidPairIndex extends Index{
 		String filePath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 //		String writeToPath = Global.outputDirectoryPath + Global.wid2DateNidPairFile;
 		Wid2DateNidPairIndex index = new Wid2DateNidPairIndex(indexPath);
-//		index.createIndex(filePath);
-		index.openIndexReader();
-		SortedDateWidIndex sdw = index.getDateNids(8526716);
-		index.closeIndexReader();
+		index.createIndex(filePath);
+//		index.openIndexReader();
+//		SortedDateWidIndex sdw = index.getDateNids(8526716);
+//		index.closeIndexReader();
 	}
 }
 

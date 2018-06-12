@@ -141,6 +141,36 @@ public class CReach {
 			int[] st1 = TLs[p];
 			int[] st2 = TLs[q + sccNum];
 			int i=0, j=0;
+//			if(st1.length > 500 || st2.length > 500) {
+//				int j1, mid, k1, k2 = 3;
+//				if(st1[0] > st2[0]) {
+//					j++;
+//					j1 = st2.length - 1;
+//					mid = (j+j1)/2;
+//					for(k1=0; k1<k2; k1++) {
+//						if(st1[0] > st2[mid]) {
+//							j = mid + 1;
+//						} else if(st1[0] < st2[mid]) {
+//							j1 = mid - 1;
+//						} else return Boolean.TRUE;
+//						mid = (j+j1)/2;
+//						if(j >= j1)	break;
+//					}
+//				} else if(st1[0] < st2[0]) {
+//					i++;
+//					j1 = st1.length - 1;
+//					mid = (i+j1)/2;
+//					for(k1=0; k1<k2; k1++) {
+//						if(st1[mid] < st2[0]) {
+//							i = mid + 1;
+//						} else if(st1[mid] > st2[0]) {
+//							j1 = mid - 1;
+//						} else return Boolean.TRUE;
+//						mid = (i+j1)/2;
+//						if(i >= j1)	break;
+//					}
+//				} else 	return Boolean.TRUE;
+//			}
 			while((i < st1.length) && (j<st2.length)) {
 				if(st1[i] < st2[j]) {
 					i++;

@@ -13,12 +13,19 @@ import utility.MComparator;
 public class DateNidNode {
 	private int date = 0;
 	private int nid = 0;
+	public Boolean isMax = Boolean.FALSE;
 	
 	public DateNidNode() {}
 	
 	public DateNidNode(int date, int nid) {
 		this.date = date;
 		this.nid = nid;
+	}
+	
+	public DateNidNode(int date, int nid, Boolean isMax) {
+		this.date = date;
+		this.nid = nid;
+		this.isMax = isMax;
 	}
 	
 	public int compareDate(DateNidNode dn) {
@@ -44,11 +51,11 @@ public class DateNidNode {
 	}
 	
 	public static void main(String args[]) {
-		ArrayList<DateNidNode> dateWidList = new ArrayList<>();
-		dateWidList.add(new DateNidNode(1, -1));
-		dateWidList.add(new DateNidNode(3, -1));
-		dateWidList.add(new DateNidNode(5, -1));
-		System.out.println(Collections.binarySearch(dateWidList, new DateNidNode(-9, -1), new MComparator<DateNidNode>()));
+//		ArrayList<DateNidNode> dateWidList = new ArrayList<>();
+//		dateWidList.add(new DateNidNode(1, -1));
+//		dateWidList.add(new DateNidNode(3, -1));
+//		dateWidList.add(new DateNidNode(5, -1));
+//		System.out.println(Collections.binarySearch(dateWidList, new DateNidNode(-9, -1), new MComparator<DateNidNode>()));
 	}
 
 }

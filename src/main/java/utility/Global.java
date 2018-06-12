@@ -184,4 +184,8 @@ public class Global {
 //	public static long timeRecTemp1 = 0;
 	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
 	public static RunRecord rr = new RunRecord();
+	
+	public static int leftMaxIndexSpan = 50;
+	public static int rightMaxIndexSpan = 50;
+	public static int maxDateSpan = 1000;
 }
