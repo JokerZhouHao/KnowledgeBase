@@ -10,12 +10,15 @@ public class DatesWIds {
 	private List<Integer> wIdList = null;
 	private String datesStr = null;
 	
+	public DatesWIds() {}
+	
 	public DatesWIds(String datesStr) {
 		this.datesStr = datesStr;
 		formatDatesStr();
 	}
 	
 	private void formatDatesStr() {
+		if(datesStr == null)	return;
 		String tempArr[] = this.datesStr.split(Global.delimiterDate);
 		dateList = new ArrayList<>();
 		for(String st : tempArr) {
@@ -26,6 +29,11 @@ public class DatesWIds {
 	public void addWid(int wid) {
 		if(null == wIdList)	wIdList = new ArrayList<>();
 		wIdList.add(wid);
+	}
+	
+	public void addDate(int date) {
+		if(null == dateList)	dateList = new ArrayList<>();
+		dateList.add(date);
 	}
 	
 	public List<Integer> getDateList() {

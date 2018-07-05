@@ -150,48 +150,48 @@ public class W2PReachWriter extends Thread{
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		W2PReachWriter.buildingWPReach();
+		W2PReachWriter.buildingWPReach();
 		
-		DataInputStream dis = IOUtility.getDis(Global.recWidPidReachPath + ".rtree");
-		int nid = 0;
-		int size = 0, wid = 0;
-		int k = 10, k0 = 5;
-		int num1, num2;
-		num1 = dis.readInt();
-		for(int i=0; i<num1; i++) {
-			if(0!=k)	{
-				System.out.print(dis.readInt() + " ");
-				k--;
-			} else {
-				dis.readInt();
-			}
-		}
-		System.out.println();
-		k = 10;
-		while(k != 0) {
-			k--;
-			size = dis.readInt();
-			num1 = 1;
-			for(int i=0; i<size; i++) {
-				if(num1==1) {
-					num1 = 2; 
-					System.out.println(dis.readInt());
-				}
-				else dis.readInt();
-			}
-//			wid = dis.readInt();
-//			System.out.print(wid + " : ");
-//			size = dis.readInt();
-//			k0 = 5;
-//			for(int i=0; i<size; i++) {
-//				nid = dis.readInt();
-//				if(k0 != 0) {
-//					k0--;
-//					System.out.print(nid + " ");
-//				}
+//		DataInputStream dis = IOUtility.getDis(Global.recWidPidReachPath + ".rtree");
+//		int nid = 0;
+//		int size = 0, wid = 0;
+//		int k = 10, k0 = 5;
+//		int num1, num2;
+//		num1 = dis.readInt();
+//		for(int i=0; i<num1; i++) {
+//			if(0!=k)	{
+//				System.out.print(dis.readInt() + " ");
+//				k--;
+//			} else {
+//				dis.readInt();
 //			}
-//			System.out.println();
-		}
-		dis.close();
+//		}
+//		System.out.println();
+//		k = 10;
+//		while(k != 0) {
+//			k--;
+//			size = dis.readInt();
+//			num1 = 1;
+//			for(int i=0; i<size; i++) {
+//				if(num1==1) {
+//					num1 = 2; 
+//					System.out.println(dis.readInt());
+//				}
+//				else dis.readInt();
+//			}
+////			wid = dis.readInt();
+////			System.out.print(wid + " : ");
+////			size = dis.readInt();
+////			k0 = 5;
+////			for(int i=0; i<size; i++) {
+////				nid = dis.readInt();
+////				if(k0 != 0) {
+////					k0--;
+////					System.out.print(nid + " ");
+////				}
+////			}
+////			System.out.println();
+//		}
+//		dis.close();
 	}
 }

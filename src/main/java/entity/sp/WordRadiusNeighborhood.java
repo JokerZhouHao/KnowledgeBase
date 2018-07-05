@@ -2,6 +2,7 @@ package entity.sp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.CharArrayMap.EntrySet;
@@ -80,6 +81,24 @@ public class WordRadiusNeighborhood {
 			}
 		}
 		return minLoose;
+	}
+	
+	/**
+	 * 获得时间范围内的looseness
+	 * @param pid
+	 * @param sDate
+	 * @param eDate
+	 * @return
+	 */
+	public int getLooseness(int pid, int sDate, int eDate) {
+		List<Integer> dates = null;
+		for(int i=0; i < radius + 1; i++) {
+			if(null != eachLayerWN[i] && null != (dates=eachLayerWN[i].get(pid))) {
+				if(dates.get(dates.size()-1)<sDate || dates.get(0)>eDate)	continue;
+				return i+1;
+			}
+		}
+		return radius+2;
 	}
 	
 	/**

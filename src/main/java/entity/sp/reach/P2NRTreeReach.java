@@ -165,7 +165,7 @@ public class P2NRTreeReach extends RTree {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		P2NRTreeReach.building();
+		P2NRTreeReach.building();
 		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
 		int i = 0;
 		i = i+10;

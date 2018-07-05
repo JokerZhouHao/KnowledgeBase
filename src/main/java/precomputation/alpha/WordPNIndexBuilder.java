@@ -49,6 +49,9 @@ public class WordPNIndexBuilder {
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			for(HashMap<Integer, String> pIdToDateMap : eachLayerWN) {
+				if(sb.length() >= Global.MAX_STORED_STRING_LENGTH) {
+					return null;
+				}
 				if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
 					sb.append(Global.signEmptyLayer + Global.delimiterLayer);
 					continue;
@@ -127,7 +130,7 @@ public class WordPNIndexBuilder {
 				
 				// 解决pIdDates太长，Lucene无法处理
 				String st = radiusPN.toString();
-				if(st.length() < Global.MAX_STORED_STRING_LENGTH) {
+				if(null != st && st.length() < Global.MAX_STORED_STRING_LENGTH) {
 					alphaIndexSer.addDoc(kid, st);
 				}
 //				if(st.length() > IndexWriter.MAX_STORED_STRING_LENGTH) {
@@ -237,11 +240,10 @@ public class WordPNIndexBuilder {
 	 */
 	public static void main(String[] args) throws Exception {
 		ArrayList<Integer> radiusList = new ArrayList<>();
-//		radiusList.add(1);
-//		radiusList.add(2);
-//		radiusList.add(3);
+		radiusList.add(1);
+		radiusList.add(2);
+		radiusList.add(3);
 		radiusList.add(5);
-//		HashMap<Integer, String> rec = new HashMap<>();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt", Boolean.TRUE));
 		for(int radius : radiusList) {
 			Long start = System.currentTimeMillis();
@@ -251,11 +253,10 @@ public class WordPNIndexBuilder {
 				new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
 			}
 			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-//			PlaceWNPrecomputation.BuildingPlaceWN();
+			PlaceWNPrecomputation.BuildingPlaceWN();
 			WordPNIndexBuilder.buildingWordPN();
 			new File(Global.placeWNFile).delete();
 			System.out.println();
-//			rec.put(radius, TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
 			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
 			bw.flush();
 		}

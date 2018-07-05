@@ -444,7 +444,7 @@ public class IndexNidKeywordsListService {
 	 * 文件nodeIdKeywordListOnDateMapYagoVB.txt ： 4: 【2018-3-22#2018-3-23#2018-1-1#27,】转化为下面文件
 	 * nodeIdKeywordListOnIntDateMapYagoVB.txt : 【4: 150#100#200#27】其中100对应的是天数
 	 */
-	public void convertToNodeIdKeywordListOnIntDateTxt(String souPath, String nWIntDatePath) throws Exception{
+	public static void convertToNodeIdKeywordListOnIntDateTxt(String souPath, String nWIntDatePath) throws Exception{
 		BufferedReader sBr = new BufferedReader(new FileReader(new File(souPath)));
 		BufferedWriter nWDBw = new BufferedWriter(new FileWriter(new File(nWIntDatePath)));
 		String lineStr = null;
@@ -629,7 +629,7 @@ public class IndexNidKeywordsListService {
 		
 		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(null);
 		long startTime = System.currentTimeMillis();
-		System.out.println("> 开始创建wid to nid、date、wid index . . . ");
+		System.out.println("> 开始创建wid to nid、dates、wids index . . . ");
 		
 		if(!hasConvert) {
 			System.out.println("> 开始将" + Global.inputDirectoryPath + "下的" + Global.nodeIdKeywordListOnDateFile + "转化为" + Global.nodeIdKeywordListOnIntDateFile + " . . . ");
@@ -641,7 +641,7 @@ public class IndexNidKeywordsListService {
 			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
 		}
 		
-		System.out.println("> 开始创建" +  nWIntDateFile + "的索引wid to nid、date、wid index . . . ");
+		System.out.println("> 开始创建" +  nWIntDateFile + "的索引wid to nid、dates、wids index . . . ");
 		String nWIntDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 		ser = new IndexNidKeywordsListService(nWIntDateIndex);
 		ser.createNIDKeyListDateIndex(nWIntDateFile, null);
@@ -656,7 +656,7 @@ public class IndexNidKeywordsListService {
 	 * @throws Exception
 	 */
 	public static void main(String args[]) throws Exception{
-		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(false);
+		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
 //		String nWIntDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 //		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(nWIntDateIndex);
 //		int wid = 0;

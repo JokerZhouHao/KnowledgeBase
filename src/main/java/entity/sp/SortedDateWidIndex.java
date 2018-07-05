@@ -93,7 +93,7 @@ public class SortedDateWidIndex {
 		}
 	}
 	
-	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer) {
+	public int getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer, int initSpan) {
 		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
 		int left = 0;
 		int right = 0;
@@ -115,6 +115,20 @@ public class SortedDateWidIndex {
 			left = (-i) - 2;
 			mid = left;
 			right = (-i) - 1;
+		}
+		
+		
+		while(left >= 0) {
+			if(sDate - dateWidList.get(left).getDate() >= initSpan)	break;
+			left--;
+		}
+		while(right < dateWidList.size()) {
+			if(dateWidList.get(right).getDate() - sDate >= initSpan)	break;
+			right++;
+		}
+		
+		if(left==-1 && right==dateWidList.size()) {
+			System.out.println("> 异常退出");
 		}
 		
 //		int leftMinIndex = 0;
@@ -145,7 +159,7 @@ public class SortedDateWidIndex {
 					left--;
 				} else {
 					if(rsSer.queryReachable(p, i)){
-						leftSpan = Math.abs(sDate - dateWidList.get(left).getDate()) + 1;
+						leftSpan = Math.abs(sDate - dnn.getDate()) + 1;
 						break;
 					} else {
 						rec.add(i);

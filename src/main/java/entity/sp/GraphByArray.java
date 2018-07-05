@@ -383,7 +383,148 @@ public class GraphByArray {
 		if(looseness <= loosenessThreshold)	return looseness;
 		else return Double.POSITIVE_INFINITY;
 	}
+	
+	/**
+	 * 范围查找计算
+	 * @param source
+	 * @param sortQwords
+	 * @param sDate
+	 * @param eDate
+	 * @param loosenessThreshold
+	 * @param dateWIdMap
+	 * @param wordMinDateSpanMap
+	 * @param semanticTree
+	 * @return
+	 * @throws Exception
+	 */
+	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
+			 List<List<Integer>> semanticTree) throws Exception {
 
+		if (sortQwords.length == 0) {
+			throw new IllegalArgumentException("must provide at least one query keyword");
+		}
+		
+		if (loosenessThreshold < 0) {
+			throw new IllegalArgumentException("radius limitation must be >= 0");
+		}
+
+		if (source < 0 || source >= this.numVertices) {
+			throw new Exception("source id is out of range, " + source + " should be in [0,"
+					+ (this.numVertices - 1) + "]");
+		}
+		
+		double looseness = 0;
+		Map<Integer, Integer> recKeyVecticesMap = new HashMap<>();
+		Map<Integer, Double> recKeyDisMap = new HashMap<>();
+		
+		ArrayList<Integer> sortedQwordsList = new ArrayList();
+		for(int in : sortQwords) {
+			sortedQwordsList.add(in);
+		}
+		
+		int qwordsNum = sortedQwordsList.size();
+		List<Integer> tempList = new ArrayList<>();
+		List<Integer> tempList1 = null;
+		DatesWIds dateWid = null;
+		int i, j, k, t;
+		Double d1 = null;
+		
+		preceder[source] = -1;
+		distance2Source[source] = 1;
+		visitedFlag[source] = source;
+		
+		Queue<Integer> queue = new LinkedList<Integer>();
+		queue.add(source);
+		double preRadius = 0;
+		int candidateNum = 0;
+		int vertex = 0;
+		double currentRadius = 0;
+		Boolean isFound = Boolean.FALSE;
+		
+		while (!queue.isEmpty()) {
+			vertex = queue.poll();
+			currentRadius = distance2Source[vertex];
+			isFound = Boolean.FALSE;
+			if (currentRadius != preRadius) {
+				preRadius = currentRadius;
+				// 计算新层下的looseness
+				if(candidateNum != qwordsNum) {
+					looseness = sortedQwordsList.size() * currentRadius;
+					for(Double doub : recKeyDisMap.values()) {
+						looseness += doub;
+					}
+					if(looseness >= loosenessThreshold) {
+						if(Global.isTest) {
+							Global.rr.numCptPruneInSemanticTree++;
+						}
+						return Double.POSITIVE_INFINITY;
+					}
+				}
+			}
+			
+			if(null != (dateWid = dateWIdMap.get(vertex))) {
+				if(dateWid.getDateList().get(dateWid.getDateList().size()-1)<sDate ||
+				   dateWid.getDateList().get(0)>eDate);
+				else {
+					tempList1 = dateWid.getwIdList();
+					k = Integer.MIN_VALUE;
+					j = 0;
+					for(i=0; i<tempList1.size(); i++) {
+						for(; j<sortedQwordsList.size(); j++) {
+							if(tempList1.get(i) == (t = sortedQwordsList.get(j))) {
+								recKeyVecticesMap.put(t, vertex);
+								recKeyDisMap.put(t, currentRadius);
+								sortedQwordsList.remove((Object)t);
+								j--;
+								if(sortedQwordsList.size()==0) {
+									isFound = Boolean.TRUE;
+									break;
+								}
+							} else if(tempList1.get(i) < t) {
+								break;
+							}
+						}
+						if(isFound || j == sortedQwordsList.size())	break;
+					}
+				}
+			}
+			if(isFound)	break;
+			
+			// add the unvisited adj vertices of vertex into queue
+			int[] adjList = this.adjLists[vertex];
+			if (adjList == null) {
+				// there is no out-going edge from vertex, dead end, continue to next vertex
+				continue;
+			}
+			for (i = 0; i < adjList.length; i++) {
+				int adjVertex = adjList[i];
+				if (visitedFlag[adjVertex] != source) {
+					// not visited yet
+					preceder[adjVertex] = vertex;
+					distance2Source[adjVertex] = 1 + distance2Source[vertex];
+					visitedFlag[adjVertex] = source;
+					queue.add(adjVertex);
+				}
+			}
+		}
+
+		// compute semantic tree paths
+		if(!sortedQwordsList.isEmpty()) {
+			return Double.POSITIVE_INFINITY;
+		}
+		looseness = 0;
+		Set<Integer> keyVertices = new HashSet<Integer>();
+		for(Entry<Integer, Double> en : recKeyDisMap.entrySet()) {
+			keyVertices.add(recKeyVecticesMap.get(en.getKey()));
+			looseness += en.getValue();
+		}
+		for (Integer keyVertex : keyVertices) {
+			semanticTree.add(this.getPath(source, keyVertex));
+		}
+		if(looseness <= loosenessThreshold)	return looseness;
+		else return Double.POSITIVE_INFINITY;
+	}
+	
 	/**
 	 * @param sink
 	 * @throws Exception

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ByteUtiltiy {
+public class ByteUtility {
 	
 	public static byte[] listToBytes(List<Integer> li) {
 		int byteNum = (1 + li.size()) * 4;

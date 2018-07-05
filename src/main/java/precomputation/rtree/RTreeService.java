@@ -38,7 +38,7 @@ public class RTreeService{
 			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
 		}
 		if(!new File(Global.outputDirectoryPath + Global.rTreePath).exists()) {
-			throw new DirectoryNotEmptyException("RTree索引目录" + Global.outputDirectoryPath + Global.rTreePath + "不存在");
+			new File(Global.outputDirectoryPath + Global.rTreePath).mkdir();
 		}
 		long startTime = System.currentTimeMillis();
 		System.out.println("> 开始为" + Global.pidCoordFile + Global.dataVersion + "创建RTree索引 . . . ");

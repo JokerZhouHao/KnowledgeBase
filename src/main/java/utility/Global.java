@@ -100,6 +100,7 @@ public class Global {
 	public static String widMinMaxDateFile = "widMinMaxDate.txt";
 	public static String wid2DateNidPairFile = "wid2DateNidPair.bin";
 	public static String rtreeNode2PidsFile = "rtreeNode2Pids.bin";
+	public static String minMaxDatesFile = "minMaxDates.bin";
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
@@ -119,6 +120,7 @@ public class Global {
 	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.bin";
 	public static String recP2NReachPath = outputDirectoryPath + "recP2NReach.bin";
 	public static String recRTreeNode2NidReachPath = outputDirectoryPath + "recRTreeNode2NidReach.bin";
+	public static String recRTreeLeafNodeContainPidsPath = Global.outputDirectoryPath + "recRtreeLeafNodeContainPids.bin";
 	
 	/*	index path	*/
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
@@ -188,4 +190,6 @@ public class Global {
 	public static int leftMaxIndexSpan = 50;
 	public static int rightMaxIndexSpan = 50;
 	public static int maxDateSpan = 1000;
+	
+	public static Boolean isTestRangeDate = Boolean.FALSE;
 }
