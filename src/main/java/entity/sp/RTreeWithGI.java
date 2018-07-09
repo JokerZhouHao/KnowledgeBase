@@ -3,6 +3,7 @@
  */
 package entity.sp;
 
+import java.io.DataOutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,6 +20,7 @@ import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.PropertySet;
 import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
+import utility.IOUtility;
 
 /**
  * 
@@ -66,24 +68,18 @@ public class RTreeWithGI extends RTree {
 		 * Rtree from graph
 		 */
 		PrintWriter writer = new PrintWriter(Global.placeWNFile);
-		PrintWriter writerrt = new PrintWriter(Global.outputDirectoryPath + "alphaDocCompTime"
-				+ Global.rtreeFlag + Global.rtreeFanout + "." + radius + Global.rtreeFanout
-				+ Global.dataVersion);
+//		DataOutputStream dos = IOUtility.getDos(Global.placeWNFile);
 
 		int[] count = new int[3];// numNodes and sumDocLength
 
-		long starttime = System.currentTimeMillis();
 		precomputeAlphaWN(this.m_rootID, nidToDateWidIndex, radius, writer, count);
-		long endtime = System.currentTimeMillis();
 
 		writer.close();
-
-		writerrt.println((endtime - starttime) + Global.delimiterPound + count[0] + Global.delimiterPound
-				+ count[1] + Global.delimiterPound + count[2] + Global.delimiterPound);
-		writerrt.close();
+//		dos.close();
 	}
 
 	/**
+	 * 以字符串形式输出
 	 * @param vidDocMap
 	 * @param writer
 	 * @param sumDocLength
@@ -132,6 +128,7 @@ public class RTreeWithGI extends RTree {
 	}
 
 	/**
+	 * 以字符串格式输出PN
 	 * @param writer
 	 * @param n
 	 * @param alphaDocOfN
@@ -157,6 +154,88 @@ public class RTreeWithGI extends RTree {
 		}
 		writer.println();
 		writer.flush();
+	}
+	
+	/**
+	 * 以二进制形式输出
+	 * @param nodeid
+	 * @param nidToDateWidIndex
+	 * @param radius
+	 * @param dos
+	 * @param count
+	 * @return
+	 * @throws Exception
+	 */
+	private PlaceRadiusNeighborhood precomputeAlphaWN(int nodeid, NidToDateWidIndex nidToDateWidIndex,
+			int radius, DataOutputStream dos, int[] count) throws Exception {
+		Node n = readNode(nodeid);
+//		System.out.println("processing " + count[0] + "th node with id " + n.m_identifier);
+		if (n.isLeaf()) {
+
+			PlaceRadiusNeighborhood leafRadiusWN = new PlaceRadiusNeighborhood(radius);
+			for (int child = 0; child < n.m_children; child++) {
+				// get and output the alpha document of places in the leaf node
+				int pid = n.m_pIdentifier[child];
+				count[2]++;
+				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
+				this.outputAlphaWN(dos, radius, pid, radiusWN, count);
+
+				// merge the alpha document of places to get the alpha document of the leaf node
+				leafRadiusWN.merge(radiusWN);
+				radiusWN.clear();
+			}
+			this.outputAlphaWN(dos, radius, (-n.getIdentifier() - 1), leafRadiusWN, count);
+			count[0]++;
+			return leafRadiusWN;
+
+		} else {
+			PlaceRadiusNeighborhood nodeAlphaWN = new PlaceRadiusNeighborhood(radius);
+			int child;
+			for (child = 0; child < n.m_children; child++) {
+				PlaceRadiusNeighborhood childAlphaWN = precomputeAlphaWN(n.m_pIdentifier[child],
+						nidToDateWidIndex, radius, dos, count);
+				if(this.m_rootID != n.getIdentifier())	nodeAlphaWN.merge(childAlphaWN);
+				childAlphaWN.clear();
+//				nodeAlphaWN.merge(childAlphaWN);
+			}
+			if(this.m_rootID != n.getIdentifier()) {
+				this.outputAlphaWN(dos, radius, (-n.getIdentifier() - 1), nodeAlphaWN, count);
+			}
+//			this.outputAlphaWN(writer, radius, (-n.getIdentifier() - 1), nodeAlphaWN, count);
+			count[0]++;
+			return nodeAlphaWN;
+		}
+	}
+	
+	/**
+	 * 以二进制形式写PN
+	 * @param dos
+	 * @param radius
+	 * @param vid
+	 * @param radiusWN
+	 * @param count
+	 * @throws Exception
+	 */
+	private void outputAlphaWN(DataOutputStream dos, int radius, int vid, PlaceRadiusNeighborhood radiusWN, int[] count) throws Exception{
+		dos.writeInt(vid);
+		SortedListNode p = null;
+		for(HashMap<Integer, SortedList> widToDateMap : radiusWN.getEachLayerWN()) {
+			if(null == widToDateMap || widToDateMap.isEmpty()) {
+				dos.writeInt(0);
+				continue;
+			}
+			dos.writeInt(widToDateMap.size());
+			for(Entry<Integer, SortedList> en : widToDateMap.entrySet()) {
+				dos.writeInt(en.getKey());
+				dos.writeInt(en.getValue().getSize());
+				p = en.getValue().getHead();
+				while(null != p) {
+					dos.writeInt(p.getValue());
+					p = p.getNext();
+				}
+			}
+		}
+		dos.flush();
 	}
 	
 	public void showRTreeStruct() {

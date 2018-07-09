@@ -1,5 +1,6 @@
 package entity.sp;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,13 @@ public class WordRadiusNeighborhood {
 		eachLayerWN = new HashMap[this.radius  + 1];
 		this.formate(placeNeigh);
 	}
+	
+	public WordRadiusNeighborhood(int radius, byte[] binPlaceNeigh) {
+		this.radius = radius;
+		eachLayerWN = new HashMap[this.radius  + 1];
+		this.formateBin(binPlaceNeigh);
+	}
+	
 	
 	/**
 	 * 格式化
@@ -62,6 +70,33 @@ public class WordRadiusNeighborhood {
 					}
 					eachLayerWN[i].put(pid, tempList);
 				}
+			}
+		}
+	}
+	
+	/**
+	 * 格式化二进制格式的PN
+	 * @param binPlaceNeigh
+	 */
+	private void formateBin(byte[] binPlaceNeigh) {
+		ArrayList<Integer> tempList = null;
+		int numWD = 0;
+		int i, j, pid, k;
+		int numDates = 0;
+		ByteBuffer bb = ByteBuffer.wrap(binPlaceNeigh);
+		bb.rewind();
+		for(i=0; i<this.radius+1; i++) {
+			numWD = bb.getInt();
+			if(0==numWD) 	continue;
+			eachLayerWN[i] = new HashMap<>();
+			for(j=0; j<numWD; j++) {
+				pid = bb.getInt();
+				numDates = bb.getInt();
+				tempList = new ArrayList<>();
+				for(k=0; k<numDates; k++) {
+					tempList.add(bb.getInt());
+				}
+				eachLayerWN[i].put(pid, tempList);
 			}
 		}
 	}

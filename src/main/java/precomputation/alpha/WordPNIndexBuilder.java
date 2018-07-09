@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 import java.nio.file.DirectoryNotEmptyException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +63,45 @@ public class WordPNIndexBuilder {
 				sb.append(Global.delimiterLayer);
 			}
 			return sb.toString();
+		}
+		
+		public byte[] toBytes() {
+			int len = 0;
+			
+			// 计算要转化为bytes的长度
+			for(HashMap<Integer, String> pIdToDateMap : eachLayerWN) {
+				len++;
+				if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
+					continue;
+				}
+				for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
+					len++;
+					len++;
+					len += en.getValue().split(Global.delimiterDate).length;
+					if(len*2 >= Global.MAX_STORED_STRING_LENGTH)	return null;
+				}
+			}
+			
+			// 转化为bytes
+			String strArr[] = null;
+			ByteBuffer bb = ByteBuffer.allocate(len * 4);
+			bb.rewind();
+			for(HashMap<Integer, String> pIdToDateMap : eachLayerWN) {
+				if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
+					bb.putInt(0);
+					continue;
+				}
+				bb.putInt(pIdToDateMap.size());
+				for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
+					bb.putInt(en.getKey());
+					strArr = en.getValue().split(Global.delimiterDate);
+					bb.putInt(strArr.length);
+					for(String st : strArr) {
+						bb.putInt(Integer.parseInt(st));
+					}
+				}
+			}
+			return bb.array();
 		}
 	}
 	
@@ -128,34 +168,18 @@ public class WordPNIndexBuilder {
 				iindexTotalLength += 1;
 				if(isOutput)	alphaPNBuilder.outputAlphaPN(writer, Global.radius, kid, radiusPN);
 				
-				// 解决pIdDates太长，Lucene无法处理
-				String st = radiusPN.toString();
-				if(null != st && st.length() < Global.MAX_STORED_STRING_LENGTH) {
-					alphaIndexSer.addDoc(kid, st);
-				}
-//				if(st.length() > IndexWriter.MAX_STORED_STRING_LENGTH) {
-//					int stSplitNum = st.length()%IndexWriter.MAX_STORED_STRING_LENGTH;
-//					if(stSplitNum == 0 ) {
-//						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH;
-//					} else {
-//						stSplitNum = st.length()/IndexWriter.MAX_STORED_STRING_LENGTH + 1;
-//					}
-//					alphaIndexSer.addDoc(kid, Global.delimiterPound + String.valueOf(offsetStart) + Global.delimiterPound + String.valueOf(offsetStart + stSplitNum));
-//					int strStart = 0;
-//					int strEnd = 0;
-//					for(int i=0; i<stSplitNum; i++) {
-//						strStart = strEnd;
-//						strEnd = strStart + IndexWriter.MAX_STORED_STRING_LENGTH;
-//						if(strEnd <= st.length()) {
-//							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, strEnd));
-//						} else {
-//							alphaIndexSer.addDoc(offsetStart + i, st.substring(strStart, st.length()));
-//						}
-//					}
-//					offsetStart += stSplitNum;
-//				} else {
+				// 解决pIdDates太长，Lucene无法处理，以字符串建索引
+//				String st = radiusPN.toString();
+//				if(null != st && st.length() < Global.MAX_STORED_STRING_LENGTH) {
 //					alphaIndexSer.addDoc(kid, st);
 //				}
+				
+				// 以二进制建索引
+				byte[] bs = radiusPN.toBytes();
+				if(null != bs) {
+					alphaIndexSer.addBinDoc(kid, bs);
+				}
+				
 				radiusPN.clear();
 			}
 			// clear and go to next batch
@@ -180,8 +204,6 @@ public class WordPNIndexBuilder {
 	private void buildAlphaPN(int startKeyword,
 			int endKeyword, String inputDocFile, HashMap<Integer, TempAlphaPN> alphaPNMap) throws Exception {
 		
-		// Map<Integer, Set<String>> invertedIndex = new HashMap<Integer,
-		// Set<String>>();
 		// read nidKeywordListMap line by line to build inverted index
 		BufferedReader reader = Utility.getBufferedReader(inputDocFile);
 		String line;
@@ -194,14 +216,6 @@ public class WordPNIndexBuilder {
 		TempAlphaPN alphaPN = null;
 		HashMap<Integer, String> tempMap = null;
 		while ((line = reader.readLine()) != null) {
-//			cntlines++;
-//			if (line.contains(Global.delimiterPound)) {
-//				continue;
-//			}
-
-//			if (cntlines % 10000 == 0) {
-//				System.out.println("> 已处理" + cntlines + "个placeWN");
-//			}
 			i = line.indexOf(Global.delimiterLevel1);
 			pid = Integer.parseInt(line.substring(0, i));
 			layers = line.substring(i + Global.delimiterLevel1.length()).split(Global.delimiterLayer);
@@ -233,12 +247,8 @@ public class WordPNIndexBuilder {
 		reader.close();
 	}
 	
-	/**
-	 * 主函数
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
+	// 批量创建WN
+	public static void batchBuildingWN() throws Exception{
 		ArrayList<Integer> radiusList = new ArrayList<>();
 		radiusList.add(1);
 		radiusList.add(2);
@@ -260,13 +270,38 @@ public class WordPNIndexBuilder {
 			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 			PlaceWNPrecomputation.BuildingPlaceWN();
 			WordPNIndexBuilder.buildingWordPN();
-			new File(Global.placeWNFile).delete();
-			System.out.println();
+//			new File(Global.placeWNFile).delete();
 			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
 			bw.flush();
 			System.out.println("> 已处理完radius=" + radius + "的wordPN，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
+			System.out.println();
 		}
 		bw.close();
 		System.out.println("> Over创建radius=1,2,3,5的WordPN，共用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
+	}
+	
+	/**
+	 * 主函数
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		WordPNIndexBuilder.batchBuildingWN();
+		
+//		int radius = 1;
+//		Global.radius = radius;
+//		System.out.println("> 开始创建radius=" + String.valueOf(radius) + "的WordPN . . . ");
+//		
+//		Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+//		if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
+//			new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
+//		}
+//		
+//		Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion + ".str";
+//		PlaceWNPrecomputation.BuildingPlaceWN();
+//		WordPNIndexBuilder.buildingWordPN();
+//		System.out.println("> Over创建radius=" + String.valueOf(radius) + "的WordPN, 用时：" + TimeUtility.getTailTime());
+		
 	}
 }

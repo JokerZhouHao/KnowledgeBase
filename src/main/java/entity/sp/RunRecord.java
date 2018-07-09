@@ -107,7 +107,7 @@ public class RunRecord {
 	public long timeBspGetW2PReach = 0;
 	
 	public String getHeader() {
-		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,"
+		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,timeBspGetW2PReach,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
 				+ "numCptQueuePut,timeCptQueuePut,numLastQueue,"
 				+ "numCptTotalReach2Wids,numCptPrunePid2Wids,timeCptPid2Wids,"
@@ -125,7 +125,7 @@ public class RunRecord {
 	}
 	
 	public String getBspInfo(int id, long base) {
-		return  String.valueOf(id) + "," + String.valueOf(timeBspSearchWid2DateNid/base) + "," + String.valueOf(numBspWid2DateWid) + "," + String.valueOf(timeBspBuidingWid2DateNid/base) + "," + String.valueOf(timeBspGetPN/base) + "," + 
+		return  String.valueOf(id) + "," + String.valueOf(timeBspSearchWid2DateNid/base) + "," + String.valueOf(numBspWid2DateWid) + "," + String.valueOf(timeBspBuidingWid2DateNid/base) + "," + String.valueOf(timeBspGetPN/base) + "," + String.valueOf(timeBspGetW2PReach/base) + "," + 
 				String.valueOf(numCptMaxQueueSize) + "," + String.valueOf(numCptQueueRemove) + "," + String.valueOf(timeCptQueueRemove/base) + "," + 
 				String.valueOf(numCptQueuePut) + "," + String.valueOf(timeCptQueuePut/base) + "," + String.valueOf(numLastQueue) + "," +
 				String.valueOf(numCptTotalReach2Wids) + "," + String.valueOf(numCptPrunePid2Wids) + "," + String.valueOf(timeCptPid2Wids/base) + "," +

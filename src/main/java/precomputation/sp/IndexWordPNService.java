@@ -16,7 +16,9 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 
+import entity.sp.WordRadiusNeighborhood;
 import utility.Global;
 import utility.PatternAnalyzer;
 import utility.TimeUtility;
@@ -58,6 +60,18 @@ public class IndexWordPNService {
 		}
 	}
 	
+	public void addBinDoc(int wId, byte[] pIdDates) {
+		Document doc = new Document();
+		doc.add(new IntPoint("wId", wId));
+		doc.add(new StoredField("pIdDates", new BytesRef(pIdDates)));
+		try {
+			indexWriter.addDocument(doc);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
 	public void closeIndexWriter() {
 		try {
 			this.indexWriter.close();
@@ -79,6 +93,11 @@ public class IndexWordPNService {
 		}
 	}
 	
+	/**
+	 * 获得字符串格式的PN
+	 * @param wid
+	 * @return
+	 */
 	public String getPlaceNeighborhoodStr(int wid) {
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
@@ -104,6 +123,36 @@ public class IndexWordPNService {
 		return null;
 	}
 	
+	/**
+	 * 获得二进制格式的PN
+	 * @param wid
+	 * @return
+	 */
+	public byte[] getPlaceNeighborhoodBin(int wid) {
+		try {
+			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
+			if(Global.isTest) {
+				Global.tempTime = System.currentTimeMillis();
+			}
+			ScoreDoc[] hits = results.scoreDocs;
+			if(hits.length == 0)	return null;
+			
+			byte[] bs = indexSearcher.doc(hits[0].doc).getBinaryValue("pIdDates").bytes;
+			if(Global.isTest) {
+				if(Global.isFirstReadPn) {
+					Global.isFirstReadPn = false;
+				}
+				Global.tempTime = System.currentTimeMillis();
+			}
+			return bs;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("检索seachedWId：" + wid + "失败而退出！！！");
+			System.exit(0);
+		}
+		return null;
+	}
+	
 	// 关闭索引读流
 	public void closeIndexReader() {
 		if(indexReader!=null) {
@@ -116,14 +165,18 @@ public class IndexWordPNService {
 	}
 	
 	public static void main(String[] args) {
-		String st = null;
-		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN);
+		byte bs[] = null;
+		int radius = 1;
+		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(radius));
 		ser.openIndexReader();
 		for(int i = Global.numNodes; i < Global.numNodes + Global.numKeywords; i++) {
-			if(null != (st = ser.getPlaceNeighborhoodStr(i))) {
-				System.out.println(i + ": " + st);
+			if(null != (bs = ser.getPlaceNeighborhoodBin(i))) {
+				WordRadiusNeighborhood wrn = new WordRadiusNeighborhood(radius, bs);
+//				System.out.println(i + ": " + wrn);
+//				break;
 			}
 		}
 		ser.closeIndexReader();
+		System.out.println("0ver");
 	}
 }

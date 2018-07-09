@@ -199,9 +199,9 @@ public class SPComplementDiskIndex {
 		Map<Integer, DatesWIds> nIdDateWidMap = new HashMap<>();
 		Set<Integer> tSet = new HashSet<>();
 		for(int in : sortedQwordsList) {
-			if(Global.isTest) {
-				Global.rr.setFrontTime();
-			}
+//			if(Global.isTest) {
+//				Global.rr.setFrontTime();
+//			}
 			Map<Integer, String> tempMap = null;
 			
 			if(null == (tempMap = cacheSeachedWid.get(in))) {
@@ -214,10 +214,10 @@ public class SPComplementDiskIndex {
 				}
 			}
 			
-			if(Global.isTest) {
-				Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
-				Global.rr.setFrontTime();
-			}
+//			if(Global.isTest) {
+//				Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+//				Global.rr.setFrontTime();
+//			}
 			DatesWIds dws = null;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if(eDate != null) {
@@ -248,6 +248,11 @@ public class SPComplementDiskIndex {
 			}
 			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + nIdDateWidMap.size());
 			matchSetNids.clear();
+		}
+		
+		if(Global.isTest) {
+			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
 		
 		// 获得wid2DateNid
@@ -284,9 +289,13 @@ public class SPComplementDiskIndex {
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		for(Integer in : qwords) {
-			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
-			if(null != st1) {
-				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
+//			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
+//			if(null != st1) {
+//				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
+//			}
+			byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
+			if(null != bs) {
+				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
 			}
 		}
 		
@@ -315,43 +324,51 @@ public class SPComplementDiskIndex {
 		// ATTENTION: MUST reset graph after each query
 		rgi.getGraph().reset();
 		
-		// 清空释放内存
-		for(Entry<Integer, DatesWIds> en : nIdDateWidMap.entrySet()) {
-			if(null != en.getValue()) {
-				en.getValue().clear();
-			}
-		}
-		nIdDateWidMap.clear();
-		
-		if(eIntDate==Integer.MIN_VALUE) {
-			for(SortedDateWidIndex sdw : wid2DateNidPair) {
-				sdw.clear();
-			}
-		}
-		
-		for(Set set : w2pReachable) {
-			set.clear();
-		}
-		
-		for(Entry<Integer, WordRadiusNeighborhood> en : wordPNMap.entrySet()) {
-			if(null != en.getValue())	en.getValue().clear();
-		}
-		wordPNMap.clear();
-		
-		if(Global.isDebug) {
-			System.out.print("> 查找词");
-			for(int in : qwords) {
-				System.out.print(in + " ");
-			}
-			System.out.println("，共找到" + ((KSPCandidateVisitor)v).size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
-		}
-		
 		if(Global.isTest) {
 			Global.curRecIndex++;
 			Global.rr.timeBspClearJob = Global.rr.getTimeSpan();
 			Global.rr.setTimeBsp();
 			if(Global.isOutputTestInfo)	System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
 		}
+		
+		// 再此清空会花费大概100ms的时间，还是让JVM自动回收好些
+		// 清空释放内存
+//		for(Entry<Integer, DatesWIds> en : nIdDateWidMap.entrySet()) {
+//			if(null != en.getValue()) {
+//				en.getValue().clear();
+//			}
+//		}
+//		nIdDateWidMap.clear();
+//		
+//		if(eIntDate==Integer.MIN_VALUE) {
+//			for(SortedDateWidIndex sdw : wid2DateNidPair) {
+//				sdw.clear();
+//			}
+//		}
+//		
+//		for(Set set : w2pReachable) {
+//			set.clear();
+//		}
+//		
+//		for(Entry<Integer, WordRadiusNeighborhood> en : wordPNMap.entrySet()) {
+//			if(null != en.getValue())	en.getValue().clear();
+//		}
+//		wordPNMap.clear();
+//		
+//		if(Global.isDebug) {
+//			System.out.print("> 查找词");
+//			for(int in : qwords) {
+//				System.out.print(in + " ");
+//			}
+//			System.out.println("，共找到" + ((KSPCandidateVisitor)v).size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
+//		}
+		
+//		if(Global.isTest) {
+//			Global.curRecIndex++;
+//			Global.rr.timeBspClearJob = Global.rr.getTimeSpan();
+//			Global.rr.setTimeBsp();
+//			if(Global.isOutputTestInfo)	System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
+//		}
 		return (KSPCandidateVisitor)v;
 	}
 	
