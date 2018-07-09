@@ -9,9 +9,9 @@ import java.util.List;
 public class TimeUtility {
 	
 	// 一天的毫秒数
-	public final static int totalMillOfOneDay = 86400000;
+	public final static long totalMillOfOneDay = 86400000;
 	
-	public final static int zoomTimeOffset = 28800000; // 时区差
+	public final static long zoomTimeOffset = 28800000; // 时区差
 	
 	public static String getTime() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
@@ -98,9 +98,37 @@ public class TimeUtility {
 		return getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()) + ".  " + getTime();
 	}
 	
+	public static String getDateByIntDate(int days) {
+		Date date = new Date(days * TimeUtility.totalMillOfOneDay - TimeUtility.zoomTimeOffset);
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+		return df.format(date);
+	}
+	
 	public static void main(String[] args) {
 //		1970, 00:00:00
 //		System.out.println(TimeUtility.getOffsetDate("1991-03-04", 4));
-		System.out.println(TimeUtility.getOffsetDate("1970-06-29", 4));
+//		System.out.println(TimeUtility.getOffsetDate("1970-06-29", 4));
+//		int iDate = TimeUtility.getIntDate(TimeUtility.getDate("2000-10-2"));
+//		Date date = TimeUtility.getDate("2000-10-2");
+//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+//		System.out.println(df.format(date));
+//		System.out.println(iDate);
+//		System.out.println(TimeUtility.getDateByIntDate(iDate));
+//		Date sDate = TimeUtility.getDate("2000-1-14");
+//		Date eDate = TimeUtility.getDate("2000-1-30");
+//		Date mDate = TimeUtility.getDate(TimeUtility.getDateByIntDate((TimeUtility.getIntDate(sDate) + TimeUtility.getIntDate(eDate))/2));
+		
+		Date mDate = new Date();
+		String sDate = "1818-01-01";
+		
+		mDate = TimeUtility.getDate(sDate);
+		int iDate = TimeUtility.getIntDate(mDate);
+		System.out.println(iDate);
+		
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		System.out.println(df.format(mDate));
+		
+		System.out.println(System.getProperty("os.name"));
+		
 	}
 }

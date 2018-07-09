@@ -10,24 +10,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.reach.CReach;
 import entity.sp.DatesWIds;
 import entity.sp.NNEntryMapHeap;
-import entity.sp.NidToDateWidIndex;
-import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.date.MinMaxDateService;
 import entity.sp.RTreeWithGI;
+import entity.sp.RunRecord;
 import entity.sp.SortedDateWidIndex;
 import kSP.candidate.KSPCandidate;
 import kSP.candidate.KSPCandidateVisitor;
-import precomputation.rechable.ReachableQueryService;
-import precomputation.sp.IndexWordPNService;
-import queryindex.VertexQwordsMap;
 import spatialindex.rtree.Data;
 import spatialindex.rtree.NNEntry;
 import spatialindex.rtree.NNEntryComparator;
@@ -132,23 +126,26 @@ public class KSPIndex {
 					break;
 				}
 				if (first.level >= 0) {// node
+					if(Global.isTest) {
+						Global.rr.numCptAccessedRTreeNode++;
+					}
 					Data firstData = (Data) first.m_pEntry;
 					n = rgi.readNode(firstData.getIdentifier());
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
+						if(Global.isTest)	Global.rr.numCptTotalReach2Wids++;
 						if (n.m_level == 0) {
 							//children of n are places
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
-							Global.rr.numCptTotalPid2Wids++;
 							if (this.placeReachablePrune(nid, sortQwords)) {
 								if(Global.isTest) {
 									Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
-									Global.rr.setFrontTime();
 									Global.rr.numCptPrunePid2Wids++;
+									Global.rr.setFrontTime();
 								}
 								if(Global.isDebug) {
 									System.out.println("> 不可达，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()) + "\n");
@@ -168,7 +165,7 @@ public class KSPIndex {
 							minDateSpanMap = this.getPidWidMinDateSpan(nid, sortQwords, date);
 							
 							if(Global.isTest) {
-								Global.rr.timeCptGetMinDateSpan += Global.rr.getTimeSpan();
+								Global.rr.timeCptPidGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, sortQwords, date);
@@ -177,25 +174,23 @@ public class KSPIndex {
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
-							Global.rr.numCptTotalPid2Wids++;
 							if (this.placeReachablePrune(-nid-1, sortQwords)) {
 								if(Global.isTest) {
-									Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
+									Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
+									Global.rr.numCptPruneRTree2Wids++;
 									Global.rr.setFrontTime();
-									Global.rr.numCptPruneRTree2Wid++;
 								}
 								continue;
 							}
 							if(Global.isTest) {
-								Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
+								Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
 								Global.rr.setFrontTime();
 							}
-							
 							
 							minDateSpanMap = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
 							
 							if(Global.isTest) {
-								Global.rr.timeCptGetMinDateSpan += Global.rr.getTimeSpan();
+								Global.rr.timeCptRTreeGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
 							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpanMap, sortQwords, date);
@@ -204,9 +199,9 @@ public class KSPIndex {
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
-								Global.rr.numCptPruneRTreePid++;
+								Global.rr.numCptBoundPidPrune++;
 							} else {
-								Global.rr.numCptPruneRTeeNode++;
+								Global.rr.numCptBoundRTreePrune++;
 							}
 							continue;
 						}
@@ -262,8 +257,6 @@ public class KSPIndex {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
 					
-//					minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
-					
 					// compute shortest path between place and qword
 					if(Global.isTest) {
 						Global.rr.numGetSemanticTree++;
@@ -316,15 +309,15 @@ public class KSPIndex {
 		}
 		
 		recMinDateSpanMap.clear();
-		if(Global.isTest) {
-			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + Global.rr.timeCptGetMinDateSpan/1000);
+		if(Global.isTest && Global.isOutputTestInfo) {
+			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + (Global.rr.timeCptPidGetMinDateSpan + Global.rr.timeCptRTreeGetMinDateSpan)/RunRecord.timeBase);
 			System.out.println(
-					"numCptMaxQueueSize timeCptQueuePut timeCptQueueRemove timeCptPid2Wids timeCptGetMinDateSpan timeCptGetSemanticTree timeKSPComputation\n"+ 
+					"numCptMaxQueueSize timeCptQueuePut timeCptQueueRemove timeCptTotalReach2Wids timeCptTotalGetMinDateSpan timeCptGetSemanticTree timeKSPComputation\n"+ 
 					Global.rr.numCptMaxQueueSize + " " + 
 					Global.rr.timeCptQueuePut/Global.rr.timeBase + " " + 
 					Global.rr.timeCptQueueRemove/Global.rr.timeBase + " " + 
-					Global.rr.timeCptPid2Wids/Global.rr.timeBase + " " + 
-					Global.rr.timeCptGetMinDateSpan/Global.rr.timeBase + " " + 
+					(Global.rr.timeCptPid2Wids+Global.rr.timeCptRTree2Wids)/Global.rr.timeBase + " " + 
+					(Global.rr.timeCptPidGetMinDateSpan + Global.rr.timeCptRTreeGetMinDateSpan)/Global.rr.timeBase + " " + 
 					Global.rr.timeCptGetSemanticTree/Global.rr.timeBase + " " +
 					Global.rr.setTimeKSPComputation()/Global.rr.timeBase);
 		}
@@ -341,7 +334,7 @@ public class KSPIndex {
 	 * @param result
 	 * @throws Exception
 	 */
-	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int sDate, int eDate,
+	public void kSPComputation(int k, int alphaRadius, List<Integer> matchNids, final IShape qpoint, int[] sortQwords, int sDate, int eDate,
 			final IVisitor result) throws Exception {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
 			throw new IllegalArgumentException(
@@ -351,7 +344,7 @@ public class KSPIndex {
 			System.out.println("> 开始进入遍历RTree . . . ");
 			Global.frontTime = System.currentTimeMillis();
 		}
-		kSPComputation(k, alphaRadius, qpoint, sortQwords, sDate, eDate, result, nnc);
+		kSPComputation(k, alphaRadius, matchNids, qpoint, sortQwords, sDate, eDate, result, nnc);
 	}
 	
 	/**
@@ -366,28 +359,11 @@ public class KSPIndex {
 	 * @param nnc
 	 * @throws Exception
 	 */
-	private void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int sDate, int eDate,
+	private void kSPComputation(int k, int alphaRadius, List<Integer> matchNids, final IShape qpoint, int[] sortQwords, int sDate, int eDate,
 			final IVisitor result, final INearestNeighborComparator nnc) throws Exception {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
 			throw new IllegalArgumentException(
 					"kSemanticLocationQuery: Shape has the wrong number of dimensions.");
-		
-		// 计算哪些点不仅与所查时间范围有交集，而且至少包含一个要查的词
-		Set<Integer> matchSetNids = minMaxDateSer.search(sDate, eDate);
-		List<Integer> matchNids = new ArrayList<>();
-		for(int nid : matchSetNids) {
-			if(nIdDateWidMap.containsKey(nid)) {
-				matchNids.add(nid);
-			}
-		}
-		matchSetNids.clear();
-		
-		int i, j;
-		Boolean hasAccess[] = new Boolean[sortQwords.length];
-		List<Integer> wids = null;
-		int numHasAccess = 0;
-		Boolean rSign = Boolean.TRUE;
-		
 		int nid;
 		Boolean sign = Boolean.FALSE;
 		
@@ -427,18 +403,21 @@ public class KSPIndex {
 					break;
 				}
 				if (first.level >= 0) {// node
+					if(Global.isTest) {
+						Global.rr.numCptAccessedRTreeNode++;
+					}
 					Data firstData = (Data) first.m_pEntry;
 					n = rgi.readNode(firstData.getIdentifier());
 					for (int cChild = 0; cChild < n.m_children; cChild++) {
 						double minSpatialDist = qpoint.getMinimumDistance(n.m_pMBR[cChild]) + 1;
 						double alphaLoosenessBound = 0;
 						nid = n.getChildIdentifier(cChild);
+						if(Global.isTest)	Global.rr.numCptTotalReach2Wids++;
 						if (n.m_level == 0) {
 							//children of n are places
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
-							Global.rr.numCptTotalPid2Wids++;
 							if (this.placeReachablePrune(nid, sortQwords)) {
 								if(Global.isTest) {
 									Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
@@ -466,12 +445,11 @@ public class KSPIndex {
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
-							Global.rr.numCptTotalPid2Wids++;
 							if (this.placeReachablePrune(-nid-1, sortQwords)) {
 								if(Global.isTest) {
-									Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
+									Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
+									Global.rr.numCptPruneRTree2Wids++;
 									Global.rr.setFrontTime();
-									Global.rr.numCptPruneRTree2Wid++;
 								}
 								continue;
 							}
@@ -481,38 +459,17 @@ public class KSPIndex {
 							}
 							
 							// 判断RTree节点是否能到达所有matchNids
-							numHasAccess = 0;
-							rSign = Boolean.TRUE;
-							for(i=0; i<sortQwords.length; i++)	hasAccess[i] = Boolean.FALSE;
-							
-							Set<Integer> rNids = rtreeNode2Pid[nid];
-							for(int ni : matchNids) {
-								if(rNids.contains(ni)) {
-									wids = nIdDateWidMap.get(ni).getwIdList();
-									j=0;
-									for(i=0; i<sortQwords.length; i++) {
-										if(hasAccess[i])	continue;
-										for(; j<wids.size(); j++) {
-											if(sortQwords[i]>wids.get(j)) {
-												continue;
-											} else if (sortQwords[i]<wids.get(j)) {
-												break;
-											} else {
-												hasAccess[i] = Boolean.TRUE;
-												if((++numHasAccess)==sortQwords.length) {
-													rSign = Boolean.FALSE;
-													break;
-												}
-											}
-										}
-										if(j==wids.size() || !rSign)	break;
-									}
+							if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
+								if(Global.isTest) {
+									Global.rr.numCptRangeRNodePrune++;
+									Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
+									Global.rr.setFrontTime();
 								}
-								if(!rSign)	break;
-							}
-							if(rSign) {
-								Global.rr.numCptPruneRTeeNode++;
 								continue;
+							}
+							if(Global.isTest) {
+								Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
+								Global.rr.setFrontTime();
 							}
 							
 							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, sortQwords, sDate, eDate);
@@ -521,9 +478,9 @@ public class KSPIndex {
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
-								Global.rr.numCptPruneRTreePid++;
+								Global.rr.numCptBoundPidPrune++;
 							} else {
-								Global.rr.numCptPruneRTeeNode++;
+								Global.rr.numCptBoundRTreePrune++;
 							}
 							continue;
 						}
@@ -572,8 +529,6 @@ public class KSPIndex {
 					if (kthScore != Double.POSITIVE_INFINITY) {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
-					
-//					minDateSpanMap = this.getWidMinDateSpan(Boolean.TRUE, nid, qwords, date);
 					
 					// compute shortest path between place and qword
 					if(Global.isTest) {
@@ -626,15 +581,16 @@ public class KSPIndex {
 			rgi.readUnlock();
 		}
 		
-		if(Global.isTest) {
-			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + Global.rr.timeCptGetMinDateSpan/1000);
+		if(Global.isTest && Global.isOutputTestInfo) {
+			System.out.println(Global.rr.numCptRangeRNodePrune);
+			System.out.println("numCptGetMinDateSpanLeftSpan : " + Global.rr.numCptGetMinDateSpanLeftSpan + " numCptGetMinDateSpanRightSpan : " + Global.rr.numCptGetMinDateSpanRightSpan + " timeCptGetMinDateSpan : " + (Global.rr.timeCptPidGetMinDateSpan + Global.rr.timeCptRTreeGetMinDateSpan)/1000);
 			System.out.println(
 					"numCptMaxQueueSize timeCptQueuePut timeCptQueueRemove timeCptPid2Wids timeCptGetMinDateSpan timeCptGetSemanticTree timeKSPComputation\n"+ 
 					Global.rr.numCptMaxQueueSize + " " + 
 					Global.rr.timeCptQueuePut/Global.rr.timeBase + " " + 
 					Global.rr.timeCptQueueRemove/Global.rr.timeBase + " " + 
-					Global.rr.timeCptPid2Wids/Global.rr.timeBase + " " + 
-					Global.rr.timeCptGetMinDateSpan/Global.rr.timeBase + " " + 
+					(Global.rr.timeCptPid2Wids+Global.rr.timeCptRTree2Wids)/Global.rr.timeBase + " " + 
+					(Global.rr.timeCptPidGetMinDateSpan + Global.rr.timeCptRTreeGetMinDateSpan)/Global.rr.timeBase + " " + 
 					Global.rr.timeCptGetSemanticTree/Global.rr.timeBase + " " +
 					Global.rr.setTimeKSPComputation()/Global.rr.timeBase);
 		}
@@ -685,7 +641,7 @@ public class KSPIndex {
 		widMinDateSpan.putAll(recMinDateSpanMap.get(pid2RtreeLeafNode[id]));
 		int i=0;
 		if(Global.isTest) {
-			Global.rr.numCptGetMinDateSpan += sortQwords.length;
+			Global.rr.numCptPidGetMinDateSpan += sortQwords.length;
 		}
 		HashSet<Integer> rec = new HashSet<>();
 		int j1, j2, k;
@@ -694,12 +650,12 @@ public class KSPIndex {
 			k = widMinDateSpan.get(sortQwords[i]);
 			if(k>=Global.maxDateSpan)	continue;
 			j1= wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, k-1);
-			j2 = wid2DateNidPair[i].getMinDateSpan(date);
+//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
 			widMinDateSpan.put(sortQwords[i], j1);
-			if(j1 < j2) {
-				System.out.println("pid dis less !!! --> " + "k=" + k + " j1=" + j1 + " j2=" + j2);
-				System.exit(0);
-			}
+//			if(j1 < j2) {
+//				System.out.println("pid dis less !!! --> " + "k=" + k + " j1=" + j1 + " j2=" + j2);
+//				System.exit(0);
+//			}
 		}
 		rec.clear();
 		return widMinDateSpan;
@@ -709,20 +665,20 @@ public class KSPIndex {
 		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
 		int i=0;
 		if(Global.isTest) {
-			Global.rr.numCptGetMinDateSpan += sortQwords.length;
+			Global.rr.numCptRTreeGetMinDateSpan += sortQwords.length;
 		}
 		int j1, j2;
 		for(i=0; i<sortQwords.length; i++) {
 			j1= wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date);
-			j2 = wid2DateNidPair[i].getMinDateSpan(date);
+//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
 //			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id));
 //			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
 			widMinDateSpan.put(sortQwords[i], j1);
 //			widMinDateSpan.put(sortQwords[i], -1);
-			if(j1 < j2) {
-				System.out.println("rtree dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
-				System.exit(0);
-			}
+//			if(j1 < j2) {
+//				System.out.println("rtree dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
+//				System.exit(0);
+//			}
 		}
 		return widMinDateSpan;
 	}
@@ -774,5 +730,48 @@ public class KSPIndex {
 			}
 		}
 		return alphaLoosenessBound;
+	}
+	
+	/**
+	 * 判断rtree节点能否到达既在时间范围内，又包含全部查询词的点集
+	 * @param matchNids
+	 * @param rNids
+	 * @param sortQwords
+	 * @return
+	 */
+	public Boolean rTreeNodeReachable(List<Integer> matchNids, Set<Integer> rNids, int[] sortQwords) {
+		int i, j;
+		Boolean rSign = Boolean.TRUE;
+		boolean hasAccess[] = new boolean[sortQwords.length];
+		List<Integer> wids = null;
+		int numHasAccess = 0;
+		for(int ni : matchNids) {
+			if(rNids.contains(ni)) {
+				wids = nIdDateWidMap.get(ni).getwIdList();
+				j=0;
+				for(i=0; i<sortQwords.length; i++) {
+					if(hasAccess[i])	continue;
+					for(; j<wids.size(); j++) {
+						if(sortQwords[i]>wids.get(j)) {
+							continue;
+						} else if (sortQwords[i]<wids.get(j)) {
+							break;
+						} else {
+							hasAccess[i] = Boolean.TRUE;
+							if((++numHasAccess)==sortQwords.length) {
+								rSign = Boolean.FALSE;
+								break;
+							}
+						}
+					}
+					if(j==wids.size() || !rSign)	break;
+				}
+//				rSign = Boolean.FALSE;
+//				break;
+			}
+			if(!rSign)	break;
+		}
+		
+		return rSign;
 	}
 }

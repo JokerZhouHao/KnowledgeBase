@@ -3,6 +3,7 @@ package entity.sp.reach;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -147,6 +148,21 @@ public class W2PReachWriter extends Thread{
 		queue.take();
 		System.out.println("> 成功反转rtree node ！！！ " + TimeUtility.getTailTime());
 		System.out.println("> 成功反转recPidToWidReach.bin ！ ！！ " + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + "。 " + TimeUtility.getTime());
+	}
+	
+	// 删除文件
+	public static void deleteAllFiles() throws Exception{
+		int start = 0, end = 0;
+		int span = P2WReach.zipContianNodeNum;
+		while(end < Global.numPid) {
+			start = end;
+			end += span;
+			if(end > Global.numPid)	end = Global.numPid;
+			String fp = Global.recWidPidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+			new File(fp).delete();
+		}
+		String fp = Global.recWidPidReachPath + ".rtree";
+		new File(fp).delete();
 	}
 	
 	public static void main(String[] args) throws Exception{

@@ -3,6 +3,7 @@ package entity.sp.reach;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -201,6 +202,19 @@ public class P2WReach implements Runnable{
 			P2WReach pwd2 = new P2WReach(2, bQueue, start, end);
 			new Thread(pwd1).start();
 			new Thread(pwd2).start();
+		}
+	}
+	
+	// 删除文件
+	public static void deleteAllFiles() throws Exception{
+		int start = 0, end = 0;
+		int span = zipContianNodeNum;
+		while(end < Global.numPid) {
+			start = end;
+			end += span;
+			if(end > Global.numPid)	end = Global.numPid;
+			String fp = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
+			new File(fp).delete();
 		}
 	}
 	

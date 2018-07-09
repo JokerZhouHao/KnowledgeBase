@@ -244,10 +244,15 @@ public class WordPNIndexBuilder {
 		radiusList.add(2);
 		radiusList.add(3);
 		radiusList.add(5);
+		
+		System.out.println("> 开始创建radius=1,2,3,5的WordPN . . . ");
+		long startTime = System.currentTimeMillis();
+		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt", Boolean.TRUE));
 		for(int radius : radiusList) {
-			Long start = System.currentTimeMillis();
+			long start = System.currentTimeMillis();
 			Global.radius = radius;
+			System.out.println("> 开始处理radius=" + radius + "的wordPN . . . ");
 			Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 			if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
 				new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
@@ -259,7 +264,9 @@ public class WordPNIndexBuilder {
 			System.out.println();
 			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
 			bw.flush();
+			System.out.println("> 已处理完radius=" + radius + "的wordPN，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
 		}
 		bw.close();
+		System.out.println("> Over创建radius=1,2,3,5的WordPN，共用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 	}
 }

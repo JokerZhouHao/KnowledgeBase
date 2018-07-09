@@ -3,6 +3,7 @@ package entity.sp.reach;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -148,7 +149,13 @@ public class P2WRTreeReach extends RTree {
 		P2WRTreeReach rtree = P2WRTreeReach.getInstance(Global.indexRTree);
 		rtree.writeRTreeNode2Nids(Global.recPidWidReachPath + ".rtree");
 		System.out.println("> 已处理完所有RTree节点，用时：" + TimeUtility.getTailTime());
-		
+	}
+	
+	// 删除文件
+	public static void deleteAllFiles() throws Exception{
+		P2WReach.deleteAllFiles();
+		String fp = Global.recPidWidReachPath + ".rtree";
+		new File(fp).delete();
 	}
 	
 	public static void test() throws Exception{

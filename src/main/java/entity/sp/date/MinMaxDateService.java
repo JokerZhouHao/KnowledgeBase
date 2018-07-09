@@ -108,6 +108,13 @@ public class MinMaxDateService {
 		int index = Collections.binarySearch(minList, new NidMDate(0, min), NidMDate.MDATE_ENDPOINT_ORDER);
 		if(index<0) {
 			index = -index-1;
+		} else {
+			while((--index)>=0) {
+				if(minList.get(index).mDate()!=min) {
+					break;
+				}
+			}
+			index++;
 		}
 		for(; index<minList.size(); index++) {
 			if(minList.get(index).mDate() <= max)
@@ -119,6 +126,13 @@ public class MinMaxDateService {
 		index = Collections.binarySearch(maxList, new NidMDate(0, max), NidMDate.MDATE_ENDPOINT_ORDER);
 		if(index<0) {
 			index = -index-2;
+		} else {
+			while((++index)<maxList.size()) {
+				if(maxList.get(index).mDate()!=max) {
+					break;
+				}
+			}
+			index--;
 		}
 		for(; index>=0; index--) {
 			if(maxList.get(index).mDate() >= min)
@@ -133,11 +147,11 @@ public class MinMaxDateService {
 		String souPath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 //		String souPath = Global.inputDirectoryPath + "test.txt";
 		String desPath = Global.outputDirectoryPath + Global.minMaxDatesFile;
-		MinMaxDateService.writeAllMinMax(souPath, desPath);
+//		MinMaxDateService.writeAllMinMax(souPath, desPath);
 		
-//		MinMaxDateService ser = new MinMaxDateService(desPath);
+		MinMaxDateService ser = new MinMaxDateService(desPath);
 //		
-//		Set<Integer> se = ser.search(7, 10);
+		Set<Integer> se = ser.search(-55516, -55516);
 //		se = null;
 	}
 }

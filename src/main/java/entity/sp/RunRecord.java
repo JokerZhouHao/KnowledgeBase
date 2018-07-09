@@ -5,7 +5,7 @@ import utility.Global;
 // 记录运行的相关情况
 public class RunRecord {
 	public static long startTime = System.nanoTime();
-	public static long timeBase = 1000000000;
+	public static long timeBase = 1000000000;	// s
 	
 	public long frontTime = 0;
 	public void setFrontTime() {
@@ -58,13 +58,28 @@ public class RunRecord {
 	
 	public long numCptMaxQueueSize = 0;
 	
-	public long numCptTotalPid2Wids = 0;
+	public long numCptTotalReach2Wids = 0;
+	
 	public long numCptPrunePid2Wids = 0;
 	public long timeCptPid2Wids = 0;
 	
+	public long numCptPruneRTree2Wids = 0;
+	public long timeCptRTree2Wids = 0;
+	
+	public long numCptBoundPidPrune = 0;
+	public long numCptBoundRTreePrune = 0;
+	
+	public long numCptAccessedRTreeNode = 0;
+	
+	public long numCptRangeRNodePrune = 0;
+	public long timeCptRangeRNode = 0;
+	
 	public long tempT = 0;
-	public long timeCptGetMinDateSpan = 0;
-	public long numCptGetMinDateSpan = 0;
+	public long timeCptPidGetMinDateSpan = 0;
+	public long numCptPidGetMinDateSpan = 0;
+	
+	public long timeCptRTreeGetMinDateSpan = 0;
+	public long numCptRTreeGetMinDateSpan = 0;
 	
 	public long limitBsp = 120 * timeBase;
 	
@@ -77,12 +92,7 @@ public class RunRecord {
 	public long timeCptQueuePut = 0;
 	public long numCptQueuePut = 0;
 	
-	public long numCptPruneRTree2Wid = 0;
-	public long numCptPruneRTeeNode = 0;
-	public long numCptPruneRTreePid = 0;
-	
 	public long numGetSemanticTree = 0;
-	
 	public long numCptPruneInSemanticTree = 0;
 	public long timeCptGetSemanticTree = 0;
 	
@@ -99,23 +109,33 @@ public class RunRecord {
 	public String getHeader() {
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
-				+ "numCptTotalPid2Wids,numCptPrunePid2Wids,timeCptPid2Wids,"
-				+ "numCptPruneRTree2Wid,numCptPruneRTeeNode,numCptPruneRTreePid,numCptPruneInSemanticTree,"
-				+ "numCptGetMinDateSpan,timeCptGetMinDateSpan,"
 				+ "numCptQueuePut,timeCptQueuePut,numLastQueue,"
+				+ "numCptTotalReach2Wids,numCptPrunePid2Wids,timeCptPid2Wids,"
+				+ "numCptPruneRTree2Wids,timeCptRTree2Wids,"
+				+ "numCptPidGetMinDateSpan,timeCptPidGetMinDateSpan,"
+				+ "numCptRTreeGetMinDateSpan,timeCptRTreeGetMinDateSpan,"
+				+ "numCptRangeRNodePrune,timeCptRangeRNode,"
+				+ "numCptBoundPidPrune,numCptBoundRTreePrune,"
+				+ "numCptAccessedRTreeNode,"
+				+ "numCptPruneInSemanticTree,"
 				+ "numGetSemanticTree,timeCptGetSemanticTree,"
 				+ "numCptGetMinDateSpanLeftSpan,numCptGetMinDateSpanRightSpan,"
 				+ "timeKSPComputation,timeBsp,"
 				+ "queueLastValue,kthScore,resultSize,\n";
 	}
 	
-	public String getBspInfo(int id, int base) {
+	public String getBspInfo(int id, long base) {
 		return  String.valueOf(id) + "," + String.valueOf(timeBspSearchWid2DateNid/base) + "," + String.valueOf(numBspWid2DateWid) + "," + String.valueOf(timeBspBuidingWid2DateNid/base) + "," + String.valueOf(timeBspGetPN/base) + "," + 
 				String.valueOf(numCptMaxQueueSize) + "," + String.valueOf(numCptQueueRemove) + "," + String.valueOf(timeCptQueueRemove/base) + "," + 
-				String.valueOf(numCptTotalPid2Wids) + "," + String.valueOf(numCptPrunePid2Wids) + "," + String.valueOf(timeCptPid2Wids/base) + "," +
-				String.valueOf(numCptPruneRTree2Wid) + "," + String.valueOf(numCptPruneRTeeNode) + "," + String.valueOf(numCptPruneRTreePid) + "," + String.valueOf(numCptPruneInSemanticTree) + "," +
-				String.valueOf(numCptGetMinDateSpan) + "," + String.valueOf(timeCptGetMinDateSpan/base) + "," + 
 				String.valueOf(numCptQueuePut) + "," + String.valueOf(timeCptQueuePut/base) + "," + String.valueOf(numLastQueue) + "," +
+				String.valueOf(numCptTotalReach2Wids) + "," + String.valueOf(numCptPrunePid2Wids) + "," + String.valueOf(timeCptPid2Wids/base) + "," +
+				String.valueOf(numCptPruneRTree2Wids) + "," + String.valueOf(timeCptRTree2Wids/base) + "," +
+				String.valueOf(numCptPidGetMinDateSpan) + "," + String.valueOf(timeCptPidGetMinDateSpan/base) + "," +
+				String.valueOf(numCptRTreeGetMinDateSpan) + "," + String.valueOf(timeCptRTreeGetMinDateSpan/base) + "," +
+				String.valueOf(numCptRangeRNodePrune) + "," + String.valueOf(timeCptRangeRNode/base) + "," +
+				String.valueOf(numCptBoundPidPrune) + "," + String.valueOf(numCptBoundRTreePrune) + "," +
+				String.valueOf(numCptAccessedRTreeNode) + "," +
+				String.valueOf(numCptPruneInSemanticTree) + "," +
 				String.valueOf(numGetSemanticTree) + "," + String.valueOf(timeCptGetSemanticTree/base) + "," +
 				String.valueOf(numCptGetMinDateSpanLeftSpan) + "," + String.valueOf(numCptGetMinDateSpanRightSpan) + "," + 
 				String.valueOf(timeKSPComputation/base) + "," + String.valueOf(timeBsp/base) + "," +

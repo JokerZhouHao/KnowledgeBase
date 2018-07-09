@@ -69,7 +69,8 @@ public class TFlabelDataFormatter {
 			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
 		}
 		if(!new File(Global.outputDirectoryPath + Global.indexTFLabel).exists()) {
-			throw new DirectoryNotEmptyException("存放TF-label的目录 ： " + Global.outputDirectoryPath + Global.indexTFLabel + "不存在");
+//			throw new DirectoryNotEmptyException("存放TF-label的目录 ： " + Global.outputDirectoryPath + Global.indexTFLabel + "不存在");
+			new File(Global.outputDirectoryPath + Global.indexTFLabel).mkdir();
 		}
 		
 		long startTime = System.currentTimeMillis();
@@ -78,7 +79,7 @@ public class TFlabelDataFormatter {
 		String sccFile = Global.outputDirectoryPath + Global.sccFile;
 		String edgeFile = Global.inputDirectoryPath + Global.edgeFile;
 //		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListFile;
-		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile;
+		String nidDocFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 		
 		System.out.println("> 开始构造创建TF-label索引所需的" + sccFile + "和" + nidDocFile + " . . . ");
 		TFlabelDataFormatter.buildSCC(edgeFile, sccFile);

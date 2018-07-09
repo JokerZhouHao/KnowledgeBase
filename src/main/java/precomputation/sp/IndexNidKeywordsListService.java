@@ -176,6 +176,9 @@ public class IndexNidKeywordsListService {
 			ScoreDoc[] hits = results.scoreDocs;
 			
 			resultMap = new HashMap<>();
+			
+//			System.out.println(hits.length);
+			
 			for(int i=0; i<hits.length; i++) {
 				doc = indexSearcher.doc(hits[i].doc);
 				resultMap.put(Integer.parseInt(doc.get("nid")), doc.get("dates"));
@@ -656,7 +659,17 @@ public class IndexNidKeywordsListService {
 	 * @throws Exception
 	 */
 	public static void main(String args[]) throws Exception{
-		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
+//		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
+		
+		
+//		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
+//		IndexNidKeywordsListService nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
+//		nIdWIdDateSer.openIndexReader();
+//		nIdWIdDateSer.searchNIDKeyListDate(10561590);
+//		10561570 10303558 11381939 10561570
+//		System.out.println(TimeUtility.getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()));
+		
+		
 //		String nWIntDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 //		IndexNidKeywordsListService ser = new IndexNidKeywordsListService(nWIntDateIndex);
 //		int wid = 0;

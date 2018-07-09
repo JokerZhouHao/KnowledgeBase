@@ -45,14 +45,14 @@ public class RTreeLeafNodeContainPids extends RTree{
 	}
 	
 	public void writeRTreeNode2Nids(String filePath) throws Exception{
-		System.out.println("> 开始输出recRTreeNode2NidReach.bin . . . " + TimeUtility.getTime());
+		System.out.println("> 开始输出recRtreeLeafNodeContainPids.bin . . . " + TimeUtility.getTime());
 		this.dos = IOUtility.getDos(filePath);
 		Node node = readNode(m_rootID);
 		for(int child = 0; child < node.m_children; child++) {
 			writeRTreeNode(node.m_pIdentifier[child]);
 		}
 		dos.close();
-		System.out.println("> Over输出recRTreeNode2NidReach.bin, 共处理" + count + "个rTree节点（除掉了root节点） ！！！ " + TimeUtility.getTailTime());
+		System.out.println("> Over输出recRtreeLeafNodeContainPids.bin, 共处理" + count + "个rTree叶子节点 ！！！ " + TimeUtility.getTailTime());
 	}
 	
 	public static RTreeLeafNodeContainPids getInstance(String treePath) throws Exception{

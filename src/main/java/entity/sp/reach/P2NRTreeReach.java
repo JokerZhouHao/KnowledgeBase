@@ -139,6 +139,8 @@ public class P2NRTreeReach extends RTree {
 	}
 	
 	public static void building() throws Exception{
+		System.out.println("> 开始生成文件" + Global.recRTreeNode2NidReachPath + " . . . .");
+		
 		System.out.println("> 开始读取pid . . . " + TimeUtility.getTime());
 		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2NReach.zipNum);
 		P2NReach.buidingP2NReachFile(endSignQueue);
@@ -154,7 +156,13 @@ public class P2NRTreeReach extends RTree {
 		new TempClassWriteThread(queue, Global.recRTreeNode2NidReachPath).start();
 		P2NRTreeReach rtree = P2NRTreeReach.getInstance(Global.indexRTree, queue);
 		rtree.writeRTreeNode2Nids(Global.recRTreeNode2NidReachPath);
+		
+//		System.out.println("> 删除所有" + Global.recP2NReachPath + "文件 . . . ");
+//		P2NReach.deleteAllFiles();
+		
 		System.out.println("> 已处理完所有RTree节点，用时：" + TimeUtility.getTailTime());
+		
+		System.out.println("> Over生成文件" + Global.recRTreeNode2NidReachPath + ", 用时: " + TimeUtility.getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()));
 	}
 	
 	public static void test() throws Exception{
@@ -166,8 +174,8 @@ public class P2NRTreeReach extends RTree {
 	
 	public static void main(String[] args) throws Exception{
 		P2NRTreeReach.building();
-		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
-		int i = 0;
-		i = i+10;
+//		Set<Integer>[] arr = P2NRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
+//		int i = 0;
+//		i = i+10;
 	}
 }

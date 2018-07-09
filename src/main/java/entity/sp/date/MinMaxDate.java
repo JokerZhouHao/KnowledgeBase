@@ -1,7 +1,10 @@
 package entity.sp.date;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * 记录节点的时间范围
@@ -119,16 +122,20 @@ public class MinMaxDate {
     }
     
     public static void main(String[] args) {
-    	MinMaxDate arr[] = new MinMaxDate[4];
-    	arr[0] = new MinMaxDate(0, 0, 10);
-    	arr[1] = new MinMaxDate(1, 0, 10);
-    	arr[2] = new MinMaxDate(2, 2, 8);
-    	arr[3] = new MinMaxDate(3, 3, 9);
-    	
+    	List<MinMaxDate> arr = new ArrayList<>();
+    	arr.add(new MinMaxDate(0, 0, 10));
+    	arr.add(new MinMaxDate(1, 0, 10));
+    	arr.add(new MinMaxDate(2, 2, 8));
+    	arr.add(new MinMaxDate(3, 3, 9));
+    	arr.add(new MinMaxDate(4, 3, 9));
+    	arr.add(new MinMaxDate(5, 2, 8));
+    	arr.add(new MinMaxDate(6, 2, 8));
 //    	Arrays.sort(arr, MinMaxDate.MIN_ENDPOINT_ORDER);
-    	Arrays.sort(arr, MinMaxDate.MAX_ENDPOINT_ORDER);
+//    	Arrays.sort(arr, MinMaxDate.MAX_ENDPOINT_ORDER);
+    	arr.sort(MinMaxDate.MIN_ENDPOINT_ORDER);
     	for(MinMaxDate mmd : arr) {
     		System.out.println(mmd);
     	}
+    	System.out.println(Collections.binarySearch(arr, new MinMaxDate(1, 2, 10), MinMaxDate.MIN_ENDPOINT_ORDER));
     }
 }

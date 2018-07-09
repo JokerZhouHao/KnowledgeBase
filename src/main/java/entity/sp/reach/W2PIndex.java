@@ -281,6 +281,19 @@ public class W2PIndex {
 	}
 	
 	public static void main(String[] args) throws Exception{
+		long startTime = System.currentTimeMillis();
+		System.out.println("> 文件生成（创建后会被自动删除），并创建W2PIndex . . . ");
+		P2WRTreeReach.building();
+		for(Set<Integer> st : P2WRTreeReach.pid2Wids) {
+			st.clear();
+		}
+		W2PReachWriter.buildingWPReach();
+		P2WRTreeReach.deleteAllFiles();
 		W2PIndex.buidingW2PIndex();
+		W2PReachWriter.deleteAllFiles();
+		// 在初始化静态变量allWids时生成了文件
+//		AllPidWid.deleteAllPidFile();
+//		AllPidWid.deleteAllWidFile();
+		System.out.println("> Over文件生成（创建后会被自动删除），并创建W2PIndex, 用时 ：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 	}
 }

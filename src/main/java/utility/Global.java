@@ -127,7 +127,7 @@ public class Global {
 	public static String indexWIdDate = "wid_date" + File.separator;
 	public static String indexTFLabel = "tf_label" + File.separator;
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
-	public static String indexWidPN = "wid_pn" + File.separator;
+	public static String indexWidPN = "wid_pn";
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator;
 	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator + "wids_block_";
@@ -151,39 +151,23 @@ public class Global {
 	public static long tempTime = 0;
 	public static boolean isFirstRTree = true;
 	
-	public static Boolean isTest = !isDebug;
+	public static Boolean isTest = Boolean.TRUE;
+	public static Boolean isOutputTestInfo = Boolean.FALSE;
 	public static int testK = 10;
-	public static int testOrgSampleNum = 100;
+	public static int testOrgSampleNum = 500;
 	public static int testSampleNum = testOrgSampleNum;
-	public static String testSampleFile = String.valueOf(testOrgSampleNum) + "." + "testSample";
-	public static String testSampleResultFile =  "." + "testSampleResultFile";
-//	public static long limitTime = 300 * 1000; // 限制每次bsp运行的最大时间
-//	public static long limitTime0 = 180 * 1000;
-//	public static long limitTime1 = 300 * 1000;
-//	public static String timeTotal = null;
-//	public static String timeBuildSPCompleteDisk = null;
-//	public static String timeOpenLuceneIndex = null;
-//	public static String timeLoadTFLable = null;
-//	public static String timeBuildRGI = null;
+	
+	public static String testSampleFile =  "sample" + File.separator + "testSample";
+	public static String testSampleResultFile =  "sample_result" + File.separator + "testSampleResultFile";
+	
 	public static int curRecIndex = 0;
-//	public static long[] timeBsp = new long[7];
-//	public static long[] timePn = new long[3];
-//	public static long timeReadLuceneMax = 0;
 	public static boolean isFirstReadPn = false;
-//	public static String[] bspRes = new String[2];
-	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
-//	public static long[] timePTree = new long[5];
-//	public static long queueSize = 0;
-//	public static long recCount[] = new long[3];
+//	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
+//	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
+	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/100;
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
-//	public static int leftMaxSpan = 0;
-//	public static int rightMaxSpan = 0;
-//	public static int timeGetMinDateSpan = 0;
 	public static BufferedWriter recReachBW = null;
-//	public static long timeRecReachable = 0;
-//	public static long timeRecTemp = 0;
-//	public static long timeRecTemp1 = 0;
 	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
 	public static RunRecord rr = new RunRecord();
 	

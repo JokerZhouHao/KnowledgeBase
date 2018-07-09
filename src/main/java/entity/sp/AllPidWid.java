@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -35,7 +36,7 @@ public class AllPidWid {
 	 * 写所有pid
 	 * @throws Exception
 	 */
-	public static void writeAllPid() throws Exception{
+	public static Boolean writeAllPid() throws Exception{
 		String line = null;
 		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.pidFile));
 		DataOutputStream dos = AllPidWid.getDos(Global.inputDirectoryPath + Global.allPidFile);
@@ -47,13 +48,20 @@ public class AllPidWid {
 		dos.flush();
 		dos.close();
 		System.out.println("end");
+		return Boolean.TRUE;
+	}
+	
+	public static void deleteAllPidFile() throws Exception{
+		if(new File(Global.inputDirectoryPath + Global.allPidFile).exists()) {
+			new File(Global.inputDirectoryPath + Global.allPidFile).delete();
+		}
 	}
 	
 	/**
 	 * 写所有wid
 	 * @throws Exception
 	 */
-	public static void writeWid() throws Exception{
+	public static Boolean writeWid() throws Exception{
 		String line = null;
 		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile));
 		String[] strArr = null;
@@ -77,6 +85,13 @@ public class AllPidWid {
 		dos.flush();
 		dos.close();
 		System.out.println("end");
+		return Boolean.TRUE;
+	}
+	
+	public static void deleteAllWidFile() throws Exception{
+		if(new File(Global.inputDirectoryPath + Global.allWidFile).exists()) {
+			new File(Global.inputDirectoryPath + Global.allWidFile).delete();
+		}
 	}
 	
 	/**
@@ -87,6 +102,10 @@ public class AllPidWid {
 		List<Integer> li = new ArrayList<>();
 		DataInputStream dis = null;
 		try {
+			File fp = new File(Global.inputDirectoryPath + Global.allPidFile);
+			if(!fp.exists()) {
+				writeAllPid();
+			}
 			dis = AllPidWid.getDis(Global.inputDirectoryPath + Global.allPidFile);
 			while(true) {
 				li.add(dis.readInt());
@@ -113,6 +132,10 @@ public class AllPidWid {
 		List<Integer> li = new ArrayList<>();
 		DataInputStream dis = null;
 		try {
+			File fp = new File(Global.inputDirectoryPath +Global.allWidFile);
+			if(!fp.exists()) {
+				writeWid();
+			}
 			dis = AllPidWid.getDis(Global.inputDirectoryPath + Global.allWidFile);
 			while(true) {
 				li.add(dis.readInt());
@@ -132,34 +155,13 @@ public class AllPidWid {
 	} 
 	
 	public static void main(String[] args) throws Exception {
-//		AllPidWid.writeAllPid();
-//		AllPidWid.writeWid();
+		AllPidWid.writeAllPid();
+		AllPidWid.writeWid();
 //		System.out.println(AllPidWid.getAllPid().size());
-		List<Integer> wids = AllPidWid.getAllWid();
-		System.out.println(wids.size());
-		for(int i=0; i<20; i++) {
-			System.out.print(wids.get(i*i) + " ");
-		}
+//		List<Integer> wids = AllPidWid.getAllWid();
+//		System.out.println(wids.size());
+//		for(int i=0; i<20; i++) {
+//			System.out.print(wids.get(i*i) + " ");
+//		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

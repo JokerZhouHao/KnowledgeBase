@@ -463,29 +463,25 @@ public class GraphByArray {
 			}
 			
 			if(null != (dateWid = dateWIdMap.get(vertex))) {
-				if(dateWid.getDateList().get(dateWid.getDateList().size()-1)<sDate ||
-				   dateWid.getDateList().get(0)>eDate);
-				else {
-					tempList1 = dateWid.getwIdList();
-					k = Integer.MIN_VALUE;
-					j = 0;
-					for(i=0; i<tempList1.size(); i++) {
-						for(; j<sortedQwordsList.size(); j++) {
-							if(tempList1.get(i) == (t = sortedQwordsList.get(j))) {
-								recKeyVecticesMap.put(t, vertex);
-								recKeyDisMap.put(t, currentRadius);
-								sortedQwordsList.remove((Object)t);
-								j--;
-								if(sortedQwordsList.size()==0) {
-									isFound = Boolean.TRUE;
-									break;
-								}
-							} else if(tempList1.get(i) < t) {
+				tempList1 = dateWid.getwIdList();
+				k = Integer.MIN_VALUE;
+				j = 0;
+				for(i=0; i<tempList1.size(); i++) {
+					for(; j<sortedQwordsList.size(); j++) {
+						if(tempList1.get(i) == (t = sortedQwordsList.get(j))) {
+							recKeyVecticesMap.put(t, vertex);
+							recKeyDisMap.put(t, currentRadius);
+							sortedQwordsList.remove((Object)t);
+							j--;
+							if(sortedQwordsList.size()==0) {
+								isFound = Boolean.TRUE;
 								break;
 							}
+						} else if(tempList1.get(i) < t) {
+							break;
 						}
-						if(isFound || j == sortedQwordsList.size())	break;
 					}
+					if(isFound || j == sortedQwordsList.size())	break;
 				}
 			}
 			if(isFound)	break;
