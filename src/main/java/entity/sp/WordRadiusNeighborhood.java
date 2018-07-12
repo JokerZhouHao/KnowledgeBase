@@ -26,6 +26,9 @@ public class WordRadiusNeighborhood {
 	private HashMap<Integer, ArrayList<Integer>>[] eachLayerWN = null;
 	private Integer radius = Global.radius;
 	
+	public WordRadiusNeighborhood() {
+	}
+	
 	public WordRadiusNeighborhood(int radius, String placeNeigh) {
 		this.radius = radius;
 		eachLayerWN = new HashMap[this.radius  + 1];

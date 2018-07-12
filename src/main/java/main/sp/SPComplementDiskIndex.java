@@ -77,13 +77,15 @@ public class SPComplementDiskIndex {
 	public SPComplementDiskIndex() throws Exception{
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
-		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + File.separator;
+		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + File.separator;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
 		nIdWIdDateSer.openIndexReader();
 		
-		wIdPnSer = new IndexWordPNService(wIdPNIndex);
-		wIdPnSer.openIndexReader();
+		if(Global.MAX_STORED_STRING_LENGTH > 0) {
+			wIdPnSer = new IndexWordPNService(wIdPNIndex);
+			wIdPnSer.openIndexReader();
+		}
 		
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
@@ -152,7 +154,7 @@ public class SPComplementDiskIndex {
 	 */
 	public void free() throws Exception{
 		nIdWIdDateSer.closeIndexReader();
-		wIdPnSer.closeIndexReader();
+		if(Global.MAX_STORED_STRING_LENGTH > 0)	wIdPnSer.closeIndexReader();
 		wid2DateNidPairIndex.closeIndexReader();
 		w2pReachSer.closeIndexs();
 		if(Global.isDebug)	Global.recReachBW.close();
@@ -288,14 +290,16 @@ public class SPComplementDiskIndex {
 		
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
-		for(Integer in : qwords) {
-//			String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
-//			if(null != st1) {
-//				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
-//			}
-			byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
-			if(null != bs) {
-				wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
+		if(Global.MAX_STORED_STRING_LENGTH > 0) {
+			for(Integer in : qwords) {
+//				String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
+//				if(null != st1) {
+//					wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
+//				}
+				byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
+				if(null != bs) {
+					wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
+				}
 			}
 		}
 		
@@ -391,11 +395,15 @@ public class SPComplementDiskIndex {
 			radius = Integer.parseInt(args[2]);
 			k = Integer.parseInt(args[3]);
 			numWid = Integer.parseInt(args[4]);
+			if(args.length>5) {
+				Global.MAX_STORED_STRING_LENGTH = Integer.parseInt(args[5]);
+			}
 		}
 		
 		if(Global.isTest) {
 			Global.startTime = System.currentTimeMillis();
-			System.out.println("> 开始测试样本  t=" + String.valueOf(searchType) + " " +
+			System.out.println("> 开始测试样本 nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + " " +   
+								"t=" + String.valueOf(searchType) + " " +
 								"ns=" + String.valueOf(numSample) + " " +
 								"r=" + String.valueOf(radius) + " " +
 								"k=" + String.valueOf(k) + " " +
@@ -430,6 +438,7 @@ public class SPComplementDiskIndex {
 		if(Global.isTest) {
 			// 输出结果
 			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + Global.testSampleResultFile + "." + 
+									"nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + "."+ 
 									"t=" + String.valueOf(searchType) + "." +
 									"ns=" + String.valueOf(numSample) + "." +
 									"r=" + String.valueOf(radius) + "." +
@@ -476,7 +485,8 @@ public class SPComplementDiskIndex {
 		spc.free();
 		if(Global.isTest) {
 			bw.close();
-			System.out.println("> Over测试样本  t=" + String.valueOf(searchType) + " " +
+			System.out.println("> Over测试样本 nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + " " +   
+					"t=" + String.valueOf(searchType) + " " +
 					"ns=" + String.valueOf(numSample) + " " +
 					"r=" + String.valueOf(radius) + " " +
 					"k=" + String.valueOf(k) + " " +

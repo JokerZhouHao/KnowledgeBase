@@ -26,9 +26,12 @@ import utility.TimeUtility;
 public class ATest {
 	public static void main(String[] args) throws Exception{
 		
-		List<Integer> li = new ArrayList<>();
-		li.add(-100000000);
-		System.out.println(li.get(0));
+//		List<Integer> li = new ArrayList<>();
+//		li.add(-100000000);
+//		System.out.println(li.get(0));
+		System.out.println(Global.MAX_STORED_STRING_LENGTH);
+		System.out.println(Global.MAX_STORED_STRING_LENGTH/50);
+		System.out.println(Global.MAX_STORED_STRING_LENGTH/5000);
 		
 //		System.out.format("> 已处理%d%%，用时%d\n", 1212, TimeUtility.getSpanSecond(23233L, System.currentTimeMillis()));
 		
