@@ -29,9 +29,24 @@ public class ATest {
 //		List<Integer> li = new ArrayList<>();
 //		li.add(-100000000);
 //		System.out.println(li.get(0));
-		System.out.println(Global.MAX_STORED_STRING_LENGTH);
-		System.out.println(Global.MAX_STORED_STRING_LENGTH/50);
-		System.out.println(Global.MAX_STORED_STRING_LENGTH/5000);
+//		System.out.println(Integer.MAX_VALUE);
+//		System.out.println(Global.MAX_PN_LENGTH);
+//		System.out.println(Global.MAX_PN_LENGTH/50);
+//		System.out.println(Global.MAX_PN_LENGTH/5000);
+		
+		int nid = 1;
+		List<Integer> nids = new ArrayList<>();
+		nids.add(nid);
+		nid = 3;
+		nids.add(nid);
+		nid = 10;
+		nids.add(nid);
+		System.out.println(nids);
+		
+		
+		/***************
+		 *
+		 */
 		
 //		System.out.format("> 已处理%d%%，用时%d\n", 1212, TimeUtility.getSpanSecond(23233L, System.currentTimeMillis()));
 		

@@ -147,11 +147,11 @@ public class MinMaxDateService {
 		String souPath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 //		String souPath = Global.inputDirectoryPath + "test.txt";
 		String desPath = Global.outputDirectoryPath + Global.minMaxDatesFile;
-//		MinMaxDateService.writeAllMinMax(souPath, desPath);
+		MinMaxDateService.writeAllMinMax(souPath, desPath);
 		
-		MinMaxDateService ser = new MinMaxDateService(desPath);
+//		MinMaxDateService ser = new MinMaxDateService(desPath);
 //		
-		Set<Integer> se = ser.search(-55516, -55516);
+//		Set<Integer> se = ser.search(-55516, -55516);
 //		se = null;
 	}
 }

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import file.reader.ZipBase64Reader;
+import utility.IOUtility;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
 
@@ -410,9 +411,36 @@ public class NodeIdOnDateService {
 		
 	}
 	
+	// 输出包好OnDate属性的三元组
+	public static void outputRDFOnDate(String zipFP, String onDateFp) throws Exception{
+		String lineStr = null;
+		LineDealService ldS = new LineDealService();
+		ZipBase64Reader reader = new ZipBase64Reader(zipFP);
+		BufferedWriter bw = IOUtility.getBW(onDateFp);
+		System.out.println("-开始提取" + zipFP + "中包含的OnDate三元组 " + TimeUtility.getTime());
+		try {
+			do {
+				System.out.println("处理文件 : " + reader.getCurZipEntryName());
+				while(null != (lineStr = reader.readLine())) {
+					if(lineStr.contains(("OnDate")))
+						bw.write(lineStr + "\n");
+				}
+			} while (null != (reader.changeToNextZipEntry()));
+			reader.close();
+			bw.close();
+			System.out.println("-Over处理" + zipFP + TimeUtility.getTime() + "\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) throws Exception{
 		
-		new NodeIdOnDateService().writeNodeIdKeywordListOnDateMapYagoVBTxt();
+		String zipFP = LocalFileInfo.getDataSetPath() + "yago2s_ttl.zip";
+		String onDateFp = LocalFileInfo.getDataSetPath() + "yago2s_onDateRDF.txt";
+		NodeIdOnDateService.outputRDFOnDate(zipFP, onDateFp);
+		
+//		new NodeIdOnDateService().writeNodeIdKeywordListOnDateMapYagoVBTxt();
 		
 //		OnDateAddService.testNodeMap();
 //		NodeIdOnDateService.testYago2Node();

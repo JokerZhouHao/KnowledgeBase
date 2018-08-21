@@ -144,7 +144,6 @@ public class P2WRTreeReach extends RTree {
 		}
 		System.out.println("\n\n> 已处理完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
 		
-		
 		P2WRTreeReach.pid2Wids = P2WReach.pid2Wids;
 		P2WRTreeReach rtree = P2WRTreeReach.getInstance(Global.indexRTree);
 		rtree.writeRTreeNode2Nids(Global.recPidWidReachPath + ".rtree");

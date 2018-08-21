@@ -46,6 +46,7 @@ import utility.MComparator;
 import utility.PatternAnalyzer;
 import file.reader.ZipBase64Reader;
 import utility.Global;
+import utility.IOUtility;
 import utility.LocalFileInfo;
 import utility.TimeUtility;
 import main.sp.SPIncompletion;
@@ -654,6 +655,98 @@ public class IndexNidKeywordsListService {
 	}
 	
 	/**
+	 * 生成每个节点只有一个时间的文件
+	 * @throws Exception
+	 */
+	public static void buildSingleDateFile() throws Exception{
+		System.out.println("> 创建单个时间属性文件 . . . ");
+		String multiDatePath = Global.inputDirectoryPath + "muldate_" + Global.nodeIdKeywordListOnIntDateFile;
+		String singleDatePath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		BufferedReader br = IOUtility.getBR(multiDatePath);
+		BufferedWriter bw = IOUtility.getBW(singleDatePath);
+		bw.write(br.readLine() + "\n");
+		String line = null;
+		String arrStr[] = null;
+		int i = 0;
+		while(null != (line = br.readLine())) {
+			arrStr = line.split(Global.delimiterLevel1);
+			bw.write(arrStr[0] + Global.delimiterLevel1);
+			i = arrStr[1].lastIndexOf(Global.delimiterDate);
+			bw.write(arrStr[1].substring(0, i).split(Global.delimiterDate)[0] + Global.delimiterDate);
+			bw.write(arrStr[1].substring(i+1) + "\n");
+		}
+		br.close();
+		bw.close();
+		System.out.println("> Over创建单个时间属性文件 . . . ");
+	}
+	
+	/**
+	 * 创建词频文件
+	 * @throws Exception
+	 */
+	public static void buildWordFrequencyFile() throws Exception{
+		System.out.println("> 创建词频文件 . . . ");
+		String rf = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		String ff = Global.outputDirectoryPath + Global.wordFrequencyFile;
+		
+		BufferedReader br = IOUtility.getBR(rf);
+		br.readLine();
+		String line = null;
+		TreeMap<Integer, Integer> rec = new TreeMap<>();
+		Integer wid, num;
+		String[] wids = null;
+		while(null != (line = br.readLine())) {
+			wids = line.substring(line.lastIndexOf(Global.delimiterDate) + 1).split(Global.delimiterLevel2);
+			for(String st : wids) {
+				if(st.isEmpty())	continue;
+				wid = Integer.parseInt(st);
+				if(null != (num = rec.get(wid))) {
+					rec.put(wid, ++num);
+				} else rec.put(wid, 1);
+			}
+		}
+		br.close();
+		
+		TreeMap<Integer, Integer> tm = new TreeMap<>();
+		for(Entry<Integer, Integer> en : rec.entrySet()) {
+			if(tm.containsKey(en.getValue())) {
+				tm.put(en.getValue(), tm.get(en.getValue()) + 1);
+			}else tm.put(en.getValue(), 1);
+		}
+		for(Entry<Integer, Integer> en : tm.entrySet()) {
+			System.out.println(en.getKey() + Global.delimiterLevel1 + en.getValue());
+		}
+		
+		BufferedWriter bw = IOUtility.getBW(ff);
+		bw.write(String.valueOf(rec.size()) + "#\n");
+		for(Entry<Integer, Integer> en : rec.entrySet()) {
+			bw.write(String.valueOf(en.getKey()) + Global.delimiterLevel1 + String.valueOf(en.getValue()) + "\n");
+		}
+		bw.close();
+		System.out.println("> Over创建词频文件 . . . ");
+	}
+	
+	/**
+	 * 加载词频文件
+	 * @param fp
+	 * @return
+	 * @throws Exception
+	 */
+	public static Map<Integer, Integer> loadWordFrequency(String fp) throws Exception{
+		BufferedReader br = IOUtility.getBR(fp);
+		br.readLine();
+		Map<Integer, Integer> map = new HashMap<>();
+		String line = null;
+		String sts[] = null;
+		while(null != (line = br.readLine())) {
+			sts = line.split(Global.delimiterLevel1);
+			map.put(Integer.parseInt(sts[0]), Integer.parseInt(sts[1]));
+		}
+		return map;
+	}
+	
+	
+	/**
 	 * 主函数
 	 * @param args
 	 * @throws Exception
@@ -661,6 +754,11 @@ public class IndexNidKeywordsListService {
 	public static void main(String args[]) throws Exception{
 //		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
 		
+//		IndexNidKeywordsListService.buildSingleDateFile();
+//		IndexNidKeywordsListService.buildWordFrequencyFile();
+		
+		String ff = Global.outputDirectoryPath + Global.wordFrequencyFile;
+		loadWordFrequency(ff);
 		
 //		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 //		IndexNidKeywordsListService nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);

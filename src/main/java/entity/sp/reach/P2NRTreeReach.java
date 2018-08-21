@@ -74,8 +74,8 @@ public class P2NRTreeReach extends RTree {
 				tSet = pid2Nids[node.m_pIdentifier[child]];
 				if(null != tSet) {
 					pids.addAll(tSet);
-					tSet.clear();
-					pid2Nids[node.m_pIdentifier[child]] = null;
+//					tSet.clear();
+//					pid2Nids[node.m_pIdentifier[child]] = null;
 				}
 			}
 		} else {

@@ -26,12 +26,29 @@ public class RandomNumGenerator {
 		return random.nextFloat();
 	}
 	
+	public static double getRandomDouble() {
+		return random.nextDouble();
+	}
+	
+	public static int getRandomInt(int len) {
+		return (int)(random.nextFloat() * (len-1)) + 1;
+	}
+	
+	public static int getRInt(int bound) {
+		return random.nextInt(bound);
+	}
+	
 	public static void main(String[] args) {
 		
-		RandomNumGenerator rand = new RandomNumGenerator(0, 10);
 		for(int i=0; i<10; i++) {
-			System.out.println(RandomNumGenerator.getRandomFloat());
-//			System.out.println(rand.getRandomInt());
+			System.out.println(RandomNumGenerator.getRInt(6));
 		}
+		
+		
+//		RandomNumGenerator rand = new RandomNumGenerator(0, 10);
+//		for(int i=0; i<10; i++) {
+//			System.out.println(RandomNumGenerator.getRandomFloat());
+////			System.out.println(rand.getRandomInt());
+//		}
 	}
 }

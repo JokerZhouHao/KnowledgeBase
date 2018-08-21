@@ -51,7 +51,7 @@ import utility.TimeUtility;
  * @author Monica
  *
  */
-public class SPComplementDiskIndex {
+public class SPBest {
 	
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private IndexWordPNService wIdPnSer = null;
@@ -67,22 +67,21 @@ public class SPComplementDiskIndex {
 	
 	private int[] pid2RtreeLeafNode = null;
 	
-	private RandomNumGenerator dayGe = new RandomNumGenerator(1, 6);
-	
+	public static RandomNumGenerator dateSpanGen = new RandomNumGenerator(0, 7);
 	
 	/**
 	 * 初始化
 	 * @throws Exception
 	 */
-	public SPComplementDiskIndex() throws Exception{
+	public SPBest() throws Exception{
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
-		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + File.separator;
+		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_PN_LENGTH) + File.separator;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
 		nIdWIdDateSer.openIndexReader();
 		
-		if(Global.MAX_STORED_STRING_LENGTH > 0) {
+		if(Global.MAX_PN_LENGTH> 0) {
 			wIdPnSer = new IndexWordPNService(wIdPNIndex);
 			wIdPnSer.openIndexReader();
 		}
@@ -100,6 +99,8 @@ public class SPComplementDiskIndex {
 		pid2RtreeLeafNode = RTreeLeafNodeContainPids.loadPid2RTreeLeafNode(Global.recRTreeLeafNodeContainPidsPath);
 		
 		minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
+		
+		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		if(Global.isDebug) {
 			System.out.println("> 初始化RTreeWithGI . . . . ");
@@ -154,7 +155,7 @@ public class SPComplementDiskIndex {
 	 */
 	public void free() throws Exception{
 		nIdWIdDateSer.closeIndexReader();
-		if(Global.MAX_STORED_STRING_LENGTH > 0)	wIdPnSer.closeIndexReader();
+		if(Global.MAX_PN_LENGTH> 0)	wIdPnSer.closeIndexReader();
 		wid2DateNidPairIndex.closeIndexReader();
 		w2pReachSer.closeIndexs();
 		if(Global.isDebug)	Global.recReachBW.close();
@@ -176,7 +177,8 @@ public class SPComplementDiskIndex {
 		int searchIntDate = TimeUtility.getIntDate(searchDate);
 		int eIntDate = Integer.MIN_VALUE;
 		if(null != eDate) {
-			eIntDate = TimeUtility.getIntDate(eDate);
+			searchIntDate -= Global.DATE_RANGE;
+			eIntDate = TimeUtility.getIntDate(eDate) + Global.DATE_RANGE + 1;
 		}
 		
 		int i = 0;
@@ -201,25 +203,21 @@ public class SPComplementDiskIndex {
 		Map<Integer, DatesWIds> nIdDateWidMap = new HashMap<>();
 		Set<Integer> tSet = new HashSet<>();
 		for(int in : sortedQwordsList) {
-//			if(Global.isTest) {
-//				Global.rr.setFrontTime();
-//			}
 			Map<Integer, String> tempMap = null;
 			
 			if(null == (tempMap = cacheSeachedWid.get(in))) {
 				tempMap = nIdWIdDateSer.searchNIDKeyListDate(in);
 				// 不存在该wid
-				if(null==tempMap)	return null;
+				if(null==tempMap) {
+					Global.curRecIndex++;
+					return null;
+				}
 				
 				if(tempMap.size() > 100000) {	// 缓存命中量超过100000的节点的查询结果
 					cacheSeachedWid.put(in, tempMap);
 				}
 			}
 			
-//			if(Global.isTest) {
-//				Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
-//				Global.rr.setFrontTime();
-//			}
 			DatesWIds dws = null;
 			for(Entry<Integer, String> en : tempMap.entrySet()) {
 				if(eDate != null) {
@@ -242,7 +240,10 @@ public class SPComplementDiskIndex {
 		
 		// 没有符合查询条件的点
 		if(eDate != null) {
-			if(tSet.size()==0)	return null;
+			if(tSet.size()==0) {
+				Global.curRecIndex++;
+				return null;
+			}
 			else {
 				for(int ii : tSet) {
 					matchNids.add(ii);
@@ -279,9 +280,11 @@ public class SPComplementDiskIndex {
 		// 获得W2PReachable
 		Set<Integer>[] w2pReachable = new Set[sortQwords.length];
 		for(i=0; i<sortQwords.length; i++) {
-			w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);
-			// 所有pid都不能到达该wid
-			if(null == w2pReachable[i])	return null;
+			if(Global.wordFrequency.get(sortQwords[i]) >= Global.MAX_WORD_FREQUENCY) {
+				w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);
+				// 所有pid都不能到达该wid
+				if(null == w2pReachable[i])	return null;
+			}
 		}
 		if(Global.isTest) {
 			Global.rr.timeBspGetW2PReach = Global.rr.getTimeSpan();
@@ -290,12 +293,8 @@ public class SPComplementDiskIndex {
 		
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
-		if(Global.MAX_STORED_STRING_LENGTH > 0) {
+		if(Global.MAX_PN_LENGTH> 0) {
 			for(Integer in : qwords) {
-//				String st1 =  wIdPnSer.getPlaceNeighborhoodStr(in);
-//				if(null != st1) {
-//					wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, st1));
-//				}
 				byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
 				if(null != bs) {
 					wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
@@ -335,44 +334,6 @@ public class SPComplementDiskIndex {
 			if(Global.isOutputTestInfo)	System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
 		}
 		
-		// 再此清空会花费大概100ms的时间，还是让JVM自动回收好些
-		// 清空释放内存
-//		for(Entry<Integer, DatesWIds> en : nIdDateWidMap.entrySet()) {
-//			if(null != en.getValue()) {
-//				en.getValue().clear();
-//			}
-//		}
-//		nIdDateWidMap.clear();
-//		
-//		if(eIntDate==Integer.MIN_VALUE) {
-//			for(SortedDateWidIndex sdw : wid2DateNidPair) {
-//				sdw.clear();
-//			}
-//		}
-//		
-//		for(Set set : w2pReachable) {
-//			set.clear();
-//		}
-//		
-//		for(Entry<Integer, WordRadiusNeighborhood> en : wordPNMap.entrySet()) {
-//			if(null != en.getValue())	en.getValue().clear();
-//		}
-//		wordPNMap.clear();
-//		
-//		if(Global.isDebug) {
-//			System.out.print("> 查找词");
-//			for(int in : qwords) {
-//				System.out.print(in + " ");
-//			}
-//			System.out.println("，共找到" + ((KSPCandidateVisitor)v).size() + "个结果，用时：" + TimeUtility.getSpendTimeStr(Global.bspStartTime, System.currentTimeMillis()));
-//		}
-		
-//		if(Global.isTest) {
-//			Global.curRecIndex++;
-//			Global.rr.timeBspClearJob = Global.rr.getTimeSpan();
-//			Global.rr.setTimeBsp();
-//			if(Global.isOutputTestInfo)	System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
-//		}
 		return (KSPCandidateVisitor)v;
 	}
 	
@@ -383,11 +344,14 @@ public class SPComplementDiskIndex {
 	 */
 	public static void main(String[] args) throws Exception{
 		// 输入的检索参数，依次是检索类型(0为单个时间，1为时间范围), 样本数, radius, k, 检索词数
+		Global.TYPE_TEST = "SPBest";
 		int searchType = 0;
-		int numSample = 500;
+		int numSample = Global.testSampleNum;
 		int radius = 3;
 		int k = 5;
 		int numWid = 5;
+		
+		String sampleResultFile = null;
 		
 		if(args.length>0) {
 			searchType = Integer.parseInt(args[0]);
@@ -396,26 +360,52 @@ public class SPComplementDiskIndex {
 			k = Integer.parseInt(args[3]);
 			numWid = Integer.parseInt(args[4]);
 			if(args.length>5) {
-				Global.MAX_STORED_STRING_LENGTH = Integer.parseInt(args[5]);
+				Global.MAX_PN_LENGTH= Integer.parseInt(args[5]);
 			}
+			if(args.length>6) {
+				Global.maxDateSpan = Integer.parseInt(args[6]);
+			}
+			
+			sampleResultFile = Global.inputDirectoryPath + Global.testSampleResultFile + "." + Global.TYPE_TEST + "." + 
+					"nwlen=" + String.valueOf(Global.MAX_PN_LENGTH) + "."+ 
+					"mds=" + String.valueOf(Global.maxDateSpan) + "." + 
+					"t=" + String.valueOf(searchType) + "." +
+					"ns=" + String.valueOf(numSample) + "." +
+					"r=" + String.valueOf(radius) + "." +
+					"k=" + String.valueOf(k) + "." +
+					"nw=" + String.valueOf(numWid);
+			
+			if(args.length>7) {
+				Global.MAX_WORD_FREQUENCY = Integer.parseInt(args[7]);
+			}
+			sampleResultFile = sampleResultFile + ".wf=" + String.valueOf(Global.MAX_WORD_FREQUENCY);
+			
+			if(args.length>8) {
+				Global.DATE_RANGE = Integer.parseInt(args[8]);
+			}
+			sampleResultFile = sampleResultFile + ".dr=" + String.valueOf(Global.DATE_RANGE);
 		}
 		
 		if(Global.isTest) {
 			Global.startTime = System.currentTimeMillis();
-			System.out.println("> 开始测试样本 nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + " " +   
+			System.out.println("> SP_BEST 开始测试样本 nwlen=" + String.valueOf(Global.MAX_PN_LENGTH) + " " +   
+								"mds=" + String.valueOf(Global.maxDateSpan) + " " + 			
 								"t=" + String.valueOf(searchType) + " " +
 								"ns=" + String.valueOf(numSample) + " " +
 								"r=" + String.valueOf(radius) + " " +
 								"k=" + String.valueOf(k) + " " +
-								"nw=" + String.valueOf(numWid) + " . . . ");
+								"nw=" + String.valueOf(numWid) + " " + 
+								"wf=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + " " + 
+								"dr=" + String.valueOf(Global.DATE_RANGE) + " " + 
+								" . . . ");
 		}
 		
-		Global.testOrgSampleNum = Global.testSampleNum = numSample;
+		Global.testSampleNum = numSample;
 		Global.radius = radius;
 		Global.testK = k;
 		
 		System.out.println("> 开始初始化SPComplementDiskIndex . . . ");
-		SPComplementDiskIndex spc = new SPComplementDiskIndex();
+		SPBest spc = new SPBest();
 		System.out.println("> 成功初始化SPComplementDiskIndex ！ ！ ！ ");
 		double[] pcoords = new double[2];
 		pcoords[0] = 35.68275862680435;
@@ -425,6 +415,7 @@ public class SPComplementDiskIndex {
 		qwords.add(11381939);
 		Date date = TimeUtility.getDate("1954-01-09");
 		Date eDate = TimeUtility.getDate("1954-01-09");
+		int binIntDate = 0;
 		
 		if(Global.isTestRangeDate) {
 			Date sDate = TimeUtility.getDate("1954-01-09");
@@ -437,15 +428,9 @@ public class SPComplementDiskIndex {
 		BufferedWriter bw = null;
 		if(Global.isTest) {
 			// 输出结果
-			bw = new BufferedWriter(new FileWriter(Global.inputDirectoryPath + Global.testSampleResultFile + "." + 
-									"nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + "."+ 
-									"t=" + String.valueOf(searchType) + "." +
-									"ns=" + String.valueOf(numSample) + "." +
-									"r=" + String.valueOf(radius) + "." +
-									"k=" + String.valueOf(k) + "." +
-									"nw=" + String.valueOf(numWid) + ".csv"));
+			bw = new BufferedWriter(new FileWriter(sampleResultFile + ".csv"));
 			
-			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(numSample) + ".t=" + String.valueOf(searchType) + ".wn=" + String.valueOf(numWid)));
+			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(Global.testOrgSampleNum) + ".t=" + String.valueOf(searchType) + ".wn=10"));
 			String lineStr = null;
 			while(samNum > 0) {
 				lineStr = br.readLine();
@@ -454,15 +439,20 @@ public class SPComplementDiskIndex {
 				pcoords[1] = Double.parseDouble(strArr[1]);
 				
 				qwords.clear();
-				for(int i=2; i<strArr.length-2; i++) {
+				for(int i=2; i<2 + numWid; i++) {
+					if(numWid==1) {
+						qwords.add(Integer.parseInt(strArr[i+5]));	// 避免第一个关键词为一些频繁单无意义的词，例如I,the等
+						break;
+					}
 					qwords.add(Integer.parseInt(strArr[i]));
 				}
 				
 				date = TimeUtility.getDate(strArr[strArr.length-2]);
 				eDate = TimeUtility.getDate(strArr[strArr.length-1]);
+				binIntDate = (TimeUtility.getIntDate(date) + TimeUtility.getIntDate(eDate))/2;
 				
 				if(searchType==0) {
-					date = TimeUtility.getDate(TimeUtility.getDateByIntDate((TimeUtility.getIntDate(date) + TimeUtility.getIntDate(eDate))/2));
+					date = TimeUtility.getDate(TimeUtility.getDateByIntDate(binIntDate));
 					spc.bsp(k, pcoords, qwords, date, null);
 				} else {
 					spc.bsp(k, pcoords, qwords, date, eDate);
@@ -485,12 +475,16 @@ public class SPComplementDiskIndex {
 		spc.free();
 		if(Global.isTest) {
 			bw.close();
-			System.out.println("> Over测试样本 nwlen=" + String.valueOf(Global.MAX_STORED_STRING_LENGTH) + " " +   
+			System.out.println("> Over测试 SP_BEST 样本 nwlen=" + String.valueOf(Global.MAX_PN_LENGTH) + " " +   
+					"mds=" + String.valueOf(Global.maxDateSpan) + " " + 
 					"t=" + String.valueOf(searchType) + " " +
 					"ns=" + String.valueOf(numSample) + " " +
 					"r=" + String.valueOf(radius) + " " +
 					"k=" + String.valueOf(k) + " " +
-					"nw=" + String.valueOf(numWid) + "，用时：" + TimeUtility.getTailTime());
+					"nw=" + String.valueOf(numWid) + " " + 
+					"wf=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + " " + 
+					"dr=" + String.valueOf(Global.DATE_RANGE) + " " + 
+					"，用时：" + TimeUtility.getTailTime());
 			System.out.println();
 		}
 	}

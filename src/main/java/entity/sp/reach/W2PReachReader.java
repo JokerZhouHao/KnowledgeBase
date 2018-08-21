@@ -63,37 +63,42 @@ public class W2PReachReader extends Thread{
 			dis = IOUtility.getDis(fp);
 			
 			int num = dis.readInt();
-			wids = new int[num];
-			int i = 0;
-			for(i=0; i<num; i++) {
-				wids[i] = dis.readInt();
-			}
 			
-			int curIndex = 0;
-			int curWid = wids[curIndex];
-			List<Integer> pids = null;
-			
-			while(true) {
-				if(null == pids) {
-					pids = new ArrayList<>();
-					num = dis.readInt();
-					for(i=0; i<num; i++) {
-						pids.add(dis.readInt());
+			if(num>0) {
+				wids = new int[num];
+				int i = 0;
+				for(i=0; i<num; i++) {
+					wids[i] = dis.readInt();
+				}
+				
+				int curIndex = 0;
+				int curWid = wids[curIndex];
+				List<Integer> pids = null;
+				
+				while(true) {
+					if(null == pids) {
+						pids = new ArrayList<>();
+						num = dis.readInt();
+						for(i=0; i<num; i++) {
+							pids.add(dis.readInt());
+						}
+					}
+					
+					nWid = widQueue.take();
+					
+					if(curWid == nWid) {
+						pidsQueue.put(pids);
+						pids = null;
+						curIndex++;
+						if(curIndex == wids.length)	break;
+						curWid = wids[curIndex];
+					} else {
+						pidsQueue.put(signNoList);
 					}
 				}
-				
-				nWid = widQueue.take();
-				
-				if(curWid == nWid) {
-					pidsQueue.put(pids);
-					pids = null;
-					curIndex++;
-					if(curIndex == wids.length)	break;
-					curWid = wids[curIndex];
-				} else {
-					pidsQueue.put(signNoList);
-				}
 			}
+			
+			dis.close();
 		} catch(EOFException e) {
 			System.err.println("> EOFException进入文件" + fp + "而退出！！！");
 			System.exit(0);
@@ -103,7 +108,6 @@ public class W2PReachReader extends Thread{
 		}
 		
 		try {
-			dis.close();
 			System.out.println("> 完成读取文件" + fp + ", 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + ". " + TimeUtility.getTime());
 			nWid = 0;
 			while(true) {

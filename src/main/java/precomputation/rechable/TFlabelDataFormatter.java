@@ -61,7 +61,7 @@ public class TFlabelDataFormatter {
 		System.out.println("> 结束构造" + DAGedgeFile + "文件, 用时：" + TimeUtility.getSpendTimeStr(start, end));
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void build() throws Exception{
 		if(!new File(Global.inputDirectoryPath).exists()) {
 			throw new DirectoryNotEmptyException("目录inputDirectoryPath ： " + Global.inputDirectoryPath + "不存在");
 		}
@@ -91,5 +91,9 @@ public class TFlabelDataFormatter {
 //		ReachableQueryService ser = new ReachableQueryService(sccFile, Global.outputDirectoryPath + Global.indexTFLabel);
 //		ser.display();
 //		ser.freeQuery();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		TFlabelDataFormatter.build();
 	}
 }

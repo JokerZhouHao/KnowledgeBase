@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.DirectoryNotEmptyException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -50,7 +51,7 @@ public class WordPNIndexBuilder {
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			for(HashMap<Integer, String> pIdToDateMap : eachLayerWN) {
-				if(sb.length() >= Global.MAX_STORED_STRING_LENGTH) {
+				if(sb.length() >= Global.MAX_PN_LENGTH) {
 					return null;
 				}
 				if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
@@ -78,7 +79,7 @@ public class WordPNIndexBuilder {
 					len++;
 					len++;
 					len += en.getValue().split(Global.delimiterDate).length;
-					if(len*2 >= Global.MAX_STORED_STRING_LENGTH)	return null;
+					if(len*4 >= Global.MAX_PN_LENGTH)	return null;
 				}
 			}
 			
@@ -251,14 +252,12 @@ public class WordPNIndexBuilder {
 	 * 批创建WN
 	 * @throws Exception
 	 */
-	public static void batchBuildingWN() throws Exception{
-		ArrayList<Integer> radiusList = new ArrayList<>();
-//		radiusList.add(1);
-//		radiusList.add(2);
-//		radiusList.add(3);
-		radiusList.add(5);
-		
-		System.out.println("> 开始创建radius=1,2,3,5的WordPN . . . ");
+	public static void batchBuildingWN(List<Integer> radiusList) throws Exception{
+		System.out.print("> 开始创建radius=");
+		for(int ii : radiusList) {
+			System.out.print(String.valueOf(ii) + " ");
+		}
+		System.out.println("的WordPN . . . ");
 		long startTime = System.currentTimeMillis();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(Global.outputDirectoryPath + "buildRadiusTime.txt", Boolean.TRUE));
@@ -266,12 +265,12 @@ public class WordPNIndexBuilder {
 			long start = System.currentTimeMillis();
 			Global.radius = radius;
 			System.out.println("> 开始处理radius=" + radius + "的wordPN . . . ");
-			Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
+			Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_PN_LENGTH) + File.separator;
 			if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
 				new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
 			}
 			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-			PlaceWNPrecomputation.BuildingPlaceWN();
+			if(!new File(Global.placeWNFile).exists())	PlaceWNPrecomputation.BuildingPlaceWN();
 			WordPNIndexBuilder.buildingWordPN();
 //			new File(Global.placeWNFile).delete();
 			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
@@ -280,7 +279,11 @@ public class WordPNIndexBuilder {
 			System.out.println();
 		}
 		bw.close();
-		System.out.println("> Over创建radius=1,2,3,5的WordPN，共用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
+		System.out.print("> Over创建radius=");
+		for(int ii : radiusList) {
+			System.out.print(String.valueOf(ii) + " ");
+		}
+		System.out.println("的WordPN，共用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 	}
 	
 	/*
@@ -288,17 +291,19 @@ public class WordPNIndexBuilder {
 	 */
 	public static void buildingWN(int radius, int len) throws Exception{
 //		Global.MAX_STORED_STRING_LENGTH = Global.MAX_STORED_STRING_LENGTH/len;
-		Global.MAX_STORED_STRING_LENGTH = len;
+		Global.MAX_PN_LENGTH = len;
 		
 		Global.radius = radius;
 		System.out.println("> 开始创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPN . . . ");
+		
+		Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+		if(!new File(Global.placeWNFile).exists())	PlaceWNPrecomputation.BuildingPlaceWN();
 		
 		Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + "_" + String.valueOf(len) + File.separator;
 		if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
 			new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
 		}
 		
-		Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 		WordPNIndexBuilder.buildingWordPN();
 		System.out.println("> Over创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPN, 用时：" + TimeUtility.getTailTime());
 	}
@@ -309,7 +314,13 @@ public class WordPNIndexBuilder {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-//		WordPNIndexBuilder.batchBuildingWN();
+//		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+		
+		List<Integer> list = new ArrayList<>();
+		list.add(1);
+		list.add(2);
+		list.add(3);
+		list.add(5);
+		WordPNIndexBuilder.batchBuildingWN(list);
 	}
 }

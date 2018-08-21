@@ -1115,10 +1115,10 @@ public class RTree implements ISpatialIndex
 
 		rtree.flush();
 		
-		if (cntLines != Global.numPlaces) {
-			throw new Exception("actual num places in file is " + cntLines + " but config is "
-					+ Global.numPlaces);
-		}
+//		if (cntLines != Global.numPlaces) {
+//			throw new Exception("actual num places in file is " + cntLines + " but config is "
+//					+ Global.numPlaces);
+//		}
 	}
 	
 	public int getM_dimensoin() {

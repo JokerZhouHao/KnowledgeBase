@@ -23,7 +23,7 @@ public class W2PReachService {
 		init();
 	}
 	
-	public void init() {
+	public void init(){
 		int start = 0, end = 0, i =0, j = 0;
 		int span = W2PIndex.widSpan;
 		int blockNum = W2PIndex.W2PIndexNum;

@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import utility.Global;
@@ -38,13 +39,18 @@ public class AllPidWid {
 	 */
 	public static Boolean writeAllPid() throws Exception{
 		String line = null;
-		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.pidFile));
-		DataOutputStream dos = AllPidWid.getDos(Global.inputDirectoryPath + Global.allPidFile);
+		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.pidCoordFile));
+		Set<Integer> pids = new TreeSet<>();
 		br.readLine();
 		while(null != (line = br.readLine())) {
-			dos.writeInt(Integer.parseInt(line.substring(0, line.indexOf(Global.delimiterLevel1))));
+			pids.add(Integer.parseInt(line.substring(0, line.indexOf(Global.delimiterLevel1))));
 		}
 		br.close();
+		
+		DataOutputStream dos = AllPidWid.getDos(Global.inputDirectoryPath + Global.allPidFile);
+		for(int pid : pids) {
+			dos.writeInt(pid);
+		}
 		dos.flush();
 		dos.close();
 		System.out.println("end");

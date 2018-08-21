@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.lucene.index.IndexWriter;
@@ -49,6 +50,8 @@ public class Global {
 	public static String dataVersion = "";
 	public static String dataVersionWithoutExtension = "";
 	
+	public static String TYPE_TEST = "SPBest";
+	
 	/*   flag      */
 	public static String rtreeFlag = ".rtree.";
 	public static String diskFlag = ".disk.";
@@ -85,8 +88,14 @@ public class Global {
 	public static boolean iindexIsWeighted = false;
 	
 	/* input file path */
-//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "test" + File.separator;
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + "orginal" + File.separator;
+	public static String dateSetType = "yago2s" + File.separator;
+//	public static String dateSetType = "DBpedia" + File.separator;
+	
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
 	public static String nodeIdKeywordListFile = "nidKeywordsListMapYagoVB.txt";
 	public static String nodeIdKeywordListOnDateFile = "nodeIdKeywordListOnDateMapYagoVB.txt";
@@ -101,10 +110,15 @@ public class Global {
 	public static String wid2DateNidPairFile = "wid2DateNidPair.bin";
 	public static String rtreeNode2PidsFile = "rtreeNode2Pids.bin";
 	public static String minMaxDatesFile = "minMaxDates.bin";
+	public static String wordFrequencyFile = "wordFrequency.txt";
+	
 	
 	/* output file path */
-//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "testIndex" + File.separator;
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + "orginalIndex" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "testIndex" + File.separator;
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_4000000" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_6000000" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;
 	public static String sccFile = "edgeYagoVB.SCC";
 	public static String DAGFile = Global.dagFile + Global.sccFlag + Global.keywordFlag + Global.edgeFile;
@@ -165,7 +179,7 @@ public class Global {
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH;
-	public static int MAX_STORED_STRING_LENGTH = 10000000;
+	public static int MAX_PN_LENGTH = 1000000;
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;
@@ -177,4 +191,11 @@ public class Global {
 	public static int maxDateSpan = 1000;
 	
 	public static Boolean isTestRangeDate = Boolean.FALSE;
+	
+	public static Map<Integer, Integer> wordFrequency = null;
+	public static int MAX_WORD_FREQUENCY = 500;
+	public static int DATE_RANGE = 7;	
+//	public static int[] WORD_FREQUENCYS = {0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000};
+	public static int[] WORD_FREQUENCYS = null;
+	public static String recordPid2WidSizePath = "recordPid2WidSize.txt";
 }

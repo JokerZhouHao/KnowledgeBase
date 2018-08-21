@@ -1,14 +1,16 @@
 from utility import Global
 
 class Data:
-    def __init__(self, t=0, ns=500, r=1, k=1, nw=1, prefix=''):
-        self.prefix = prefix
-        self.t = t
-        self.ns = ns
-        self.r = r
-        self.k = k
-        self.nw = nw
-        self.filePath = Global.getSampleResultPath(t, ns, r, k, nw, prefix)
+    def __init__(self, t=0, ns=500, r=1, k=1, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None):
+        if fp==None:
+            self.prefix = prefix
+            self.t = t
+            self.ns = ns
+            self.r = r
+            self.k = k
+            self.nw = nw
+            self.filePath = Global.getSampleResultPath(t, ns, r, k, nw, prefix=prefix, f_TYPE_TEST=f_TYPE_TEST, f_nwlen=f_nwlen, f_mds=f_mds, relativePath=relativePath)
+        else:   self.filePath=fp
 
         self.timeSemantic = 0
         self.timeOther = 0
@@ -19,8 +21,9 @@ class Data:
     # 计算所需字段的平均值
     @staticmethod
     #testSampleResultFile.t=0.ns=500.r=1.k=10.nw=1
-    def getData(t=0, ns=500, r=1, k=1, nw=1, prefix=''):
-        data = Data(t, ns, r, k, nw, prefix)
+    def getData(t=0, ns=500, r=1, k=1, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None):
+        if fp==None:    data = Data(t, ns, r, k, nw, prefix=prefix, f_TYPE_TEST=f_TYPE_TEST, f_nwlen=f_nwlen, f_mds=f_mds, relativePath=relativePath)
+        else:   data = Data(fp=fp)
         index = 0
         with open(data.filePath) as f:
             f.readline()
@@ -48,11 +51,11 @@ class Data:
         return  data
 
     def get_info(self):
-        return self.prefix + ' type=' + str(self.t) + ' numSample=' + str(self.ns) + ' radius=' + str(self.r) + ' k=' + str(self.k) + ' numWord=' + str(self.nw)
+        return self.filePath
 
     def __str__(self):
         strs = ''
-        strs = strs + self.prefix +  ' type=' + str(self.t) + ' numSample=' + str(self.ns) + ' radius=' + str(self.r) + ' k=' + str(self.k) + ' numWord=' + str(self.nw) + '\n'
+        strs = strs + self.filePath + '\n'
         strs += 'numAccessedRTreeNode numTQSP timeSemantic timeOther timeTotal\n';
         strs += "%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d"%(self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal) + '\n'
         return strs
@@ -62,6 +65,8 @@ class Data:
 # print(Data.getData(0, 500, 3, 10, 5, prefix='nwlen=50'))
 # print(Data.getData(0, 500, 3, 10, 5, prefix='nwlen=5000'))
 # print(Data.getData(0, 500, 3, 10, 5, prefix='nwlen=-1'))
-# print(Data.getData(1, 500, 3, 10, 5, prefix='nwlen=50'))
+# print(Data.getData(0, 500, 3, 5, 10))
+# print(Data.getData(0, 200, 3, 5, 10))
+# print(Data.getData(0, 100, 3, 5, 10))
 # print(Data.getData(1, 500, 3, 10, 5, prefix='nwlen=5000'))
 # print(Data.getData(1, 500, 3, 10, 5, prefix='nwlen=-1'))

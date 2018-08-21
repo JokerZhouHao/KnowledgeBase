@@ -37,35 +37,39 @@ import utility.TimeUtility;
 /**
  * 使用索引来操作
  * @author Monica
- * @since 2018/6/9
+ * @since 2018/7/12
  */
-public class KSPIndex {
+public class KSPBase {
 	protected RTreeWithGI rgi;
-	private Set<Integer>[] rtreeNode2Pid = null;
 	private CReach cReach = null;
 	private Map<Integer, DatesWIds> nIdDateWidMap = null;
 	private SortedDateWidIndex[] wid2DateNidPair = null;
-	private Set<Integer>[] w2pReachable = null;
 	private HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
-	private int[] pid2RtreeLeafNode = null;
 	private MinMaxDateService minMaxDateSer = null;
 	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
 	
-	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
+	public KSPBase(RTreeWithGI rgi, CReach cReach,
 			Map<Integer, DatesWIds> nIdDateWidMap, SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
-			Set<Integer>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
+			HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
 		super();
 		this.rgi = rgi;
-		this.rtreeNode2Pid = rtreeNode2Pid;
-		this.pid2RtreeLeafNode = pid2RtreeLeafNode;
 		this.cReach = cReach;
 		this.nIdDateWidMap = nIdDateWidMap;
 		this.wid2DateNidPair = wid2DateNidPair;
 		this.minMaxDateSer = minMaxDateSer;
-		this.w2pReachable = w2pReachable;
  		this.wordPNMap = wordPNMap;
 	}
-
+	
+	/**
+	 * 单个时间查找
+	 * @param k
+	 * @param alphaRadius
+	 * @param qpoint
+	 * @param sortQwords
+	 * @param date
+	 * @param result
+	 * @throws Exception
+	 */
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
 			final IVisitor result) throws Exception {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
@@ -80,6 +84,17 @@ public class KSPIndex {
 
 	}
 	
+	/**
+	 * 单个时间查找
+	 * @param k
+	 * @param alphaRadius
+	 * @param qpoint
+	 * @param sortQwords
+	 * @param date
+	 * @param result
+	 * @param nnc
+	 * @throws Exception
+	 */
 	private void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
 			final IVisitor result, final INearestNeighborComparator nnc) throws Exception {
 		if (qpoint.getDimension() != rgi.getM_dimensoin())
@@ -159,11 +174,10 @@ public class KSPIndex {
 							}
 							if(Global.isTest) {
 								Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
-								Global.rr.numCptPidGetMinDateSpan += 1;
 								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getPidWidMinDateSpan(nid, sortQwords, date);
+							minDateSpanMap = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptPidGetMinDateSpan += Global.rr.getTimeSpan();
@@ -175,20 +189,8 @@ public class KSPIndex {
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
-							if (this.placeReachablePrune(-nid-1, sortQwords)) {
-								if(Global.isTest) {
-									Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
-									Global.rr.numCptPruneRTree2Wids++;
-									Global.rr.setFrontTime();
-								}
-								continue;
-							}
-							if(Global.isTest) {
-								Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
-								Global.rr.setFrontTime();
-							}
 							
-							minDateSpanMap = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+							minDateSpanMap = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptRTreeGetMinDateSpan += Global.rr.getTimeSpan();
@@ -443,36 +445,6 @@ public class KSPIndex {
 							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, sortQwords, sDate, eDate);
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
-							if(Global.isTest) {
-								Global.rr.setFrontTime();
-							}
-							if (this.placeReachablePrune(-nid-1, sortQwords)) {
-								if(Global.isTest) {
-									Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
-									Global.rr.numCptPruneRTree2Wids++;
-									Global.rr.setFrontTime();
-								}
-								continue;
-							}
-							if(Global.isTest) {
-								Global.rr.timeCptPid2Wids += Global.rr.getTimeSpan();
-								Global.rr.setFrontTime();
-							}
-							
-							// 判断RTree节点是否能到达所有matchNids
-							if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
-								if(Global.isTest) {
-									Global.rr.numCptRangeRNodePrune++;
-									Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
-									Global.rr.setFrontTime();
-								}
-								continue;
-							}
-							if(Global.isTest) {
-								Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
-								Global.rr.setFrontTime();
-							}
-							
 							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, sortQwords, sDate, eDate);
 						}
 						
@@ -624,11 +596,7 @@ public class KSPIndex {
 		 * Furthermore, the least Frequent query keyword is powerful enough for pruning.
 		 * */
 		for(int i=0; i<sortQwords.length; i++) {
-			if(null == w2pReachable[i]) {
-				if(place >=0) {
-					if(!cReach.queryReachable(place, sortQwords[i])) return Boolean.TRUE;
-				} else if(rtreeNode2Pid[-place-1]==null) return Boolean.TRUE;
-			} else if(!w2pReachable[i].contains(place))	return Boolean.TRUE;
+			if(!this.cReach.queryReachable(place, sortQwords[i]))	return Boolean.TRUE;
 		}
 		return Boolean.FALSE;
 	}
@@ -641,50 +609,13 @@ public class KSPIndex {
 	 * @return
 	 * @throws IOException
 	 */
-	public HashMap<Integer, Integer> getPidWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
-		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
-		widMinDateSpan.putAll(recMinDateSpanMap.get(pid2RtreeLeafNode[id]));
-		int i=0;
-		HashSet<Integer> rec = new HashSet<>();
-		int j1, j2, k;
-		for(i=0; i<sortQwords.length; i++) {
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach));
-			k = widMinDateSpan.get(sortQwords[i]);
-			if(k>=Global.maxDateSpan)	continue;
-			j1= wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, k-1);
-//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
-			widMinDateSpan.put(sortQwords[i], j1);
-//			if(j1 < j2) {
-//				System.out.println("pid dis less !!! --> " + "k=" + k + " j1=" + j1 + " j2=" + j2);
-//				System.exit(0);
-//			}
-		}
-		rec.clear();
-		return widMinDateSpan;
-	}
-	
-	public HashMap<Integer, Integer> getRTreeWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
-		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
-		int i=0;
+	public HashMap<Integer, Integer> getPidWidMinDateSpan(int[] sortQwords, int date) throws IOException {
 		if(Global.isTest) {
-			Global.rr.numCptRTreeGetMinDateSpan += sortQwords.length;
+			Global.rr.numCptPidGetMinDateSpan += sortQwords.length;
 		}
-		int j1, j2;
-		for(i=0; i<sortQwords.length; i++) {
-//			if(rtreeNode2Pid[id]==null) {
-//				widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
-//				continue;
-//			}
-			j1= wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date);
-//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id));
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
-			widMinDateSpan.put(sortQwords[i], j1);
-//			widMinDateSpan.put(sortQwords[i], -1);
-//			if(j1 < j2) {
-//				System.out.println("rtree dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
-//				System.exit(0);
-//			}
+		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
+		for(int i=0; i<sortQwords.length; i++) {
+			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
 		}
 		return widMinDateSpan;
 	}

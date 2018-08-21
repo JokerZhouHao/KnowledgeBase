@@ -1,5 +1,6 @@
 package entity.sp.reach;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -7,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -29,7 +31,9 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
 import entity.sp.AllPidWid;
+import precomputation.sp.IndexNidKeywordsListService;
 import utility.Global;
+import utility.IOUtility;
 import utility.LocalFileInfo;
 import utility.PatternAnalyzer;
 import utility.TimeUtility;
@@ -46,7 +50,7 @@ public class W2PIndex {
 	public final static int widSpan = allWids.size()/40;
 	public final static int W2PIndexNum = allWids.size()%widSpan==0?allWids.size()/widSpan:allWids.size()/widSpan+1;
 	
-	public W2PIndex(String indexPath) {
+	public W2PIndex(String indexPath){
 		super();
 		this.indexPath = indexPath;
 	}
@@ -189,6 +193,14 @@ public class W2PIndex {
 		
 		int widNum = allWids.size();
 		
+		// 记录不同规模文件大小
+		long[] fileSizes = null;
+		Map<Integer, Integer> wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+		if(null != Global.WORD_FREQUENCYS) {
+			fileSizes = new long[Global.WORD_FREQUENCYS.length];
+			for(i=0; i<fileSizes.length; i++)	fileSizes[i] = 0;
+		}
+		
 		for(i=0; i<W2PIndexNum; i++) {
 			indexPath = basePath + "wids_block_" + String.valueOf(W2PIndexNum) + "_" + String.valueOf(i);
 			file = new File(indexPath);
@@ -224,7 +236,19 @@ public class W2PIndex {
 					}
 				}
 				if(null!=pids && !pids.isEmpty()) {
-					index.addDoc(curWid, pids);
+					// 记录词的pids大小
+					if(Global.WORD_FREQUENCYS != null) {
+						int frequency = wordFrequency.get(curWid);
+						for(int s=0;  s<Global.WORD_FREQUENCYS.length; s++) {
+							if(frequency >= Global.WORD_FREQUENCYS[s]) {
+								fileSizes[s] += 2 + pids.size();
+							}
+						}
+					}
+					
+					if(wordFrequency.get(curWid) >= Global.MAX_WORD_FREQUENCY) {
+						index.addDoc(curWid, pids);
+					}
 					pids.clear();
 				}
 			}
@@ -232,6 +256,20 @@ public class W2PIndex {
 			System.out.println("> 已处理" + end + "个wid，共" + widNum + "个wid, 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 		}
 		System.out.println("> 完成索引创建，用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + ". " + TimeUtility.getTime());
+		
+		// 写记录文件
+		if(Global.WORD_FREQUENCYS != null) {
+			BufferedWriter bw = IOUtility.getBW(Global.outputDirectoryPath + Global.recordPid2WidSizePath);
+			bw.write("#M\n");
+			for(int s=0; s<Global.WORD_FREQUENCYS.length; s++) {
+				bw.write(String.valueOf(Global.WORD_FREQUENCYS[s]) + 
+						 Global.delimiterLevel1 + 
+						 String.valueOf(((double)fileSizes[s])*4/1024/1024) + 
+						 "\n");
+			}
+			bw.close();
+		}
+		
 		System.err.println("> 发送结束读信号 . . . ");
 		for(i=0; i<widQueues.length; i++) {
 			widQueues[i].put(-1);
@@ -248,7 +286,7 @@ public class W2PIndex {
 	}
 	
 	
-	public static void test() {
+	public static void test() throws Exception{
 //		ByteBuffer byteB = ByteBuffer.allocate(10);
 //		byteB.putInt(23);
 //		byteB.rewind();
@@ -285,7 +323,7 @@ public class W2PIndex {
 		System.out.println("> 文件生成（创建后会被自动删除），并创建W2PIndex . . . ");
 		P2WRTreeReach.building();
 		for(Set<Integer> st : P2WRTreeReach.pid2Wids) {
-			st.clear();
+			if(null!=st)	st.clear();
 		}
 		W2PReachWriter.buildingWPReach();
 		P2WRTreeReach.deleteAllFiles();

@@ -27,6 +27,10 @@ public class IOUtility {
 		return new BufferedWriter(new FileWriter(fp));
 	}
 	
+	public static BufferedWriter getBW(String fp, Boolean appand) throws Exception{
+		return new BufferedWriter(new FileWriter(fp, appand));
+	}
+	
 	public static DataOutputStream getDos(String fp) throws Exception{
 		return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fp)));
 	}

@@ -19,7 +19,7 @@ import utility.LoopQueue;
 import utility.RandomNumGenerator;
 import utility.TimeUtility;
 
-public class SampleChooser {
+public class TestSampleChooser {
 	private static GraphByArray graph = null;
 	
 	/**
@@ -428,8 +428,10 @@ public class SampleChooser {
 				minDate = tIntArr[0][0] - 1;
 				maxDate = tIntArr[0][tIntArr.length-2] + 1; 
 			} else {
-				minDate = tIntArr[0][0] - dateGe.getRandomInt();
-				maxDate = tIntArr[0][0] + dateGe.getRandomInt();
+//				minDate = tIntArr[0][0] - dateGe.getRandomInt();
+//				maxDate = tIntArr[0][0] + dateGe.getRandomInt();
+				minDate = tIntArr[0][0];
+				maxDate = tIntArr[0][0];
 			}
 			sampWids.clear();
 			for(i=0; i<wNum; i++) {
@@ -457,15 +459,15 @@ public class SampleChooser {
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
 //				Global.inputDirectoryPath + Global.testSampleFile);
-		int a[] = new int[5];
-		a[0] = 1;
-		a[1] = 3;
-		a[2] = 5;
-		a[3] = 8;
-		a[4] = 10;
+		int a[] = new int[1];
+		a[0] = 10;
+//		a[1] = 3;
+//		a[2] = 5;
+//		a[3] = 8;
+//		a[4] = 10;
 		for(int ii : a) {
-//			SampleChooser.productSingleDateTestSampleForPaper(500, ii);
-			SampleChooser.productRangeDateTestSampleForPaper(500, ii);
+			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
+			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
 		}
 	}
 }
