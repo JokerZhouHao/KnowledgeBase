@@ -1,4 +1,4 @@
-
+from utility import Global
 #testSampleResultFile.SPBest.nwlen=1000000.mds=1000.t=0.ns=200.r=2.k=5.nw=5.wf=0
 
 def sample_res_path(dir, sp='SPBest', nwlen=1000000, mds=1000, t=0, ns=200, r=2, k=5, nw=5, wf=None, dr=None):
@@ -17,6 +17,9 @@ def sample_res_path(dir, sp='SPBest', nwlen=1000000, mds=1000, t=0, ns=200, r=2,
     if dr!=None:
         fp += '.dr=' + str(dr)
     return fp+'.csv'
+
+def figure_path():
+    return '..\\Data\\figures\\'
 
 # base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\'
 # print(sample_res_path(base_dir, 'SPBest', 1000, 4, 0, 200, 2, 5, 5, 3, 3))

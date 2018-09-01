@@ -12,7 +12,7 @@ class Bar:
     spanTotal = width + span
     base_startx = 1 - width - span/2
     hatchx = 'xxxx'
-    ylim = 100000
+    ylim = 1000000
 
     def __init__(self, xLabel=None, yLabel=None ,is_stack=False, title=None, xs=None, x_txts=None, ys=None, yscale=None, y_type=None):
         self.xLabel = xLabel
@@ -298,11 +298,11 @@ class Bar:
 # 折线图
 class LineChart:
     ylim = 10000
-    line_types = ["s", "v", "|", "x", 'D', "^", 'o', "<", ">", "H"]
+    line_types = ["$\\bigcirc$", "$+$", "$\\bigtriangledown$", "$\\ast$", '$\\diamondsuit$', "$\\bigtriangleup$", '$\\times$', "<", ">", "H"]
     line_type_index = 0
     line_color = 'black'
 
-    def __init__(self, xs, x_txts, xLabel=None, yLabel=None ,title=None, ys=None, yscale=None, y_type=None, xlabel_rotation=0):
+    def __init__(self, xs, x_txts, xLabel=None, yLabel=None ,title=None, ys=None, yscale=None, ylim=None, y_type=None, xlabel_rotation=0, fpath='test.pdf'):
         self.xLabel = xLabel
         self.yLabel = yLabel
         self.y_type = y_type
@@ -314,22 +314,26 @@ class LineChart:
         else:   self.ys = ys
         if yscale==None:    self.yscale='log'
         else: self.yscale = yscale
-        self.fig = plt.figure(random.randint(1, 10000))
+        self.fig = plt.figure(random.randint(1, 10000), figsize=(10.1023, 6.5), tight_layout=True)
         if title==None: self.fig.canvas.set_window_title('Test')
         else:   self.fig.canvas.set_window_title(title)
         self.xlabel_rotation = xlabel_rotation
+        plt.rcParams['font.size'] = 20
         self.ax = self.fig.add_subplot(111)
+        self.fpath = fpath
 
     # 画折线图
     def draw_line(self, ys, label):
-        self.ax.plot(self.xs, ys, label=label, marker=self.line_types[self.line_type_index])
+        self.ax.plot(self.xs, ys, label=label, marker=self.line_types[self.line_type_index], c='black', markersize=18)
         self.line_type_index += 1
 
     def show(self):
-        self.ax.legend(loc=1, prop={'size': 9})
+        self.ax.legend(loc=1, prop={'size': 15})
 
         # 设置下方X轴刻度
-        self.ax.tick_params(direction='in')
+        self.ax.tick_params(axis='x', direction='in', width=3, length=8, which='major')
+        self.ax.tick_params(axis='y', direction='out', width=3, length=8, which='major')
+        self.ax.tick_params(direction='out', width=2, length=4, which='minor')
         self.ax.set_xticks(self.xs)
         self.ax.set_xlim(self.xs[0], self.xs[-1])
 
@@ -360,37 +364,46 @@ class LineChart:
         if self.xLabel!=None:
             # self.ax.text(xLabel_x, xLabel_y, self.xLabel)
             # self.ax.set_xlabel(self.xLabel)
-            self.ax.set_title(self.xLabel, fontsize=9, verticalalignment='bottom')
+            self.ax.set_title(self.xLabel, fontsize=20, verticalalignment='bottom')
         if self.yLabel!=None:   self.ax.set_ylabel(self.yLabel)
 
         # 添加右边y轴的刻度
-        self.ax_x = self.ax.twinx()
-        if self.yscale=='log':
-            self.ax_x.set_ylim(1, Bar.ylim)
-            self.ax_x.set_yscale('log')
-        else:
-            self.ax_x.set_yticks(self.ys)
-            self.ax_x.set_ylim(self.ys[0], self.ys[-1])
+        # self.ax_x = self.ax.twinx()
+        # self.ax_x.tick_params(axis='y', direction='out', width=3, length=8, which='major')
+        # self.ax_x.tick_params(direction='out', width=2, length=4, which='minor')
+        #
+        # if self.yscale=='log':
+        #     self.ax_x.set_ylim(1, Bar.ylim)
+        #     self.ax_x.set_yscale('log')
+        # else:
+        #     self.ax_x.set_yticks(self.ys)
+        #     self.ax_x.set_ylim(self.ys[0], self.ys[-1])
 
         interactive(True)
         plt.show()
+        self.fig.savefig(self.fpath)
 
 
     # 画k的折线图
     @staticmethod
-    def draw_k(show_type, base_y=None):
+    def draw_k(show_type, base_y=None, fpath='test.pdf'):
         ys = None
+        ys = [i*100 for i in range(17)]
         if base_y != None:
-            ys = [base_y+i*100 for i in range(0, 11)]
+            ys = [base_y+i*100 for i in range(0, 17)]
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
         xs=[i for  i in  range(len(x_txts))]
 
         yLabel = None
-        if 0==show_type: yLabel = 'Runtime (ms)'
-        elif 1==show_type: yLabel = '# of TQSP Computations'
+        yscale = 'liner'
+        if 0==show_type:
+            yLabel = 'Runtime (ms)'
+        elif 1==show_type:
+            yLabel = '# of TQTSP Computations'
+            yscale='log'
         elif 2==show_type: yLabel = '# of R-tree nodes accessed'
 
-        chart = LineChart(xs, x_txts, ys=ys, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$')
+        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
@@ -398,8 +411,8 @@ class LineChart:
 
         ks = [1, 3, 5, 8, 10, 15, 20]
         base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\k_nw\\'
-        for alg_index in range(len(alg_types)):
-            for search_index in range(len(search_types)):
+        for search_index in range(len(search_types)):
+            for alg_index in range(len(alg_types)):
                 if alg_index==0:
                     if search_index==0: type=r'$SPTD$'
                     else:   type=r'$SPTR$'
@@ -418,7 +431,7 @@ class LineChart:
 
     # 画nw的折线图
     @staticmethod
-    def draw_nw(base_y=None):
+    def draw_nw(base_y=None, fpath='test.pdf'):
         ys = None
         if base_y != None:
             ys = [base_y+i*100 for i in range(0, 11)]
@@ -427,7 +440,7 @@ class LineChart:
 
         yLabel = 'Runtime (ms)'
 
-        chart = LineChart(xs, x_txts, ys=ys, xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|')
+        chart = LineChart(xs, x_txts, ys=ys, xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
@@ -435,8 +448,8 @@ class LineChart:
 
         nws = [1, 3, 5, 8, 10]
         base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\k_nw\\'
-        for alg_index in range(len(alg_types)):
-            for search_index in range(len(search_types)):
+        for search_index in range(len(search_types)):
+            for alg_index in range(len(alg_types)):
                 if alg_index==0:
                     if search_index==0: type=r'$SPTD$'
                     else:   type=r'$SPTR$'
@@ -453,11 +466,11 @@ class LineChart:
 
     # 画radius的折线图
     @staticmethod
-    def draw_radius(type=0, base_y=600, title='TEST'):
-        ys = [base_y+i*100 for i in range(0, 11)]
+    def draw_radius(type=0, base_y=600, title='TEST', fpath='test.pdf'):
+        ys = [base_y+i*50 for i in range(0, 11)]
         xs=[i for  i in  range(0, 4)]
         x_txts = [1.0, 2.0, 3.0, 5.0]
-        chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=r'$\alpha$-radius', yLabel='Runtime (ms)', title=title)
+        chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=r'$\alpha$-radius', yLabel='Runtime (ms)', title=title, fpath=fpath)
         # chart = LineChart(xs, x_txts, xLabel=r'$\alpha$-radius', yLabel='Runtime (ms)')
 
         radius = [1, 2, 3, 5]
@@ -472,9 +485,41 @@ class LineChart:
             chart.draw_line(runtimes, 'k=' + str(k))
         chart.show()
 
+    # 绘制不同规模柱状图
+    @staticmethod
+    def draw_differ_size(line_type=0, title='Graph Vertex Size (in million)', fpath='test.pdf'):
+        # testSampleResultFile.t=0.ns=500.r=1.k=10.nw=1
+        xs = [1, 2, 3, 4]
+        x_txts = [2.0, 4.0, 6.0, 8.0]
+
+        if line_type==0:    yLabel='Runtime (ms)'
+        elif line_type==1:  yLabel = '# of R-tree nodes accessed'
+
+        chart = LineChart(xs, x_txts, xLabel=r'Graph Vertex Size (in million)', yLabel=yLabel, title=title, fpath=fpath)
+
+        alg_types = ['SPBase', 'SPBest']
+        ts = [0, 1]
+        sizes = ['2000000', '4000000', '6000000', 'org']
+        alg_names = [r'$SPTD$', r'$SPTR$', r'$SPTD^*$', r'$SPTR^*$']
+        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\diff_size\\'
+
+        alg_names_index = 0
+        for alg_type in alg_types:
+            for t in ts:
+                runtimes = []
+                for i in range(len(sizes)):
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir + sizes[i] + '\\', sp=alg_type, nwlen=1000000, mds=1000, t=t, ns=200, r=2, k=5, nw=5, wf=500, dr=7))
+                    print(data)
+                    if line_type==0:    runtimes.append(data.timeTotal)
+                    elif line_type==1:  runtimes.append(data.numAccessedRTreeNode)
+                chart.draw_line(runtimes, label=alg_names[alg_names_index])
+                alg_names_index = alg_names_index + 1
+        chart.show()
+
+
     # 画maxDateSpan=1000，不同的pn长的折线图
     @staticmethod
-    def draw_max_pn(label="MAX_PN", base_y=None):
+    def draw_max_pn(label="MAX_PN", base_y=None, x_rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*100 for i in range(0, 17)]
         xs=[i for  i in  range(0, 10)]
         lens = [500000000, 100000000, 50000000, 10000000, 5000000, 1000000, 500000, 100000, 10000, 0]
@@ -482,8 +527,8 @@ class LineChart:
                   r'$5\times10^6$', r'$1\times10^6$', r'$5\times10^5$', r'$1\times10^5$',
                   r'$1\times10^4$', '0']
 
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)')
-        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, yLabel='Runtime (ms)')
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath = fpath)
+        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
 
         types=[0, 1]
         for type in types:
@@ -500,26 +545,32 @@ class LineChart:
 
     # 画pn=10000000，不同maxDateSpan的折线图
     @staticmethod
-    def draw_max_date(nwlen=1000000, label='MAX_DATE_DIFFERENCE', base_y=None):
+    def draw_max_date(nwlen=1000000, label='MAX_DATE_DIFFERENCE', base_y=None, x_rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*50 for i in range(0, 11)]
         xs=[i for  i in  range(0, 9)]
-        x_txts = [210000000, 5000, 2500, 1000, 750, 500, 250, 100, 1]
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, yLabel='Runtime (ms)', title=label)
-        else: chart = LineChart(xs, x_txts, xLabel=label, yLabel='Runtime (ms)', title=label)
+        x_txts = [r'$2.1\times10^8$', r'$5\times10^3$', r'$2.5\times10^3$', r'$1\times10^3$',
+                  r'$7.5\times10^2$', r'$5\times10^2$', r'$2.5\times10^2$', r'$1\times10^2$',
+                  r'$1$']
+        maxDates = [210000000, 5000, 2500, 1000, 750, 500, 250, 100, 1]
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, yLabel='Runtime (ms)', title=label, xlabel_rotation=x_rotation, fpath = fpath)
+        else: chart = LineChart(xs, x_txts, xLabel=label, yLabel='Runtime (ms)', title=label, xlabel_rotation=x_rotation, fpath = fpath)
 
         chart.ax.grid('on')
 
         types=[0, 1]
         for type in types:
             runtimes = []
-            for maxDate in x_txts:
+            for maxDate in maxDates:
                 data = Data.getData(type, 200, 3, 5, 5, relativePath='nw=10\\MAX_DATE', f_nwlen=nwlen, f_mds=maxDate)
                 runtimes.append(data.timeTotal)
-            chart.draw_line(runtimes, 'type='+str(type))
+            if type==0:
+                chart.draw_line(runtimes, r'$SPTD^*$')
+            elif type==1:
+                chart.draw_line(runtimes, r'$SPTR^*$')
         chart.show()
 
     @staticmethod
-    def draw_word_frequency(title='WORD_FREQUENCY', base_y=None, rotation=0):
+    def draw_word_frequency(title='WORD_FREQUENCY', base_y=None, rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*100 for i in range(0, 14)]
         xs=[i for  i in  range(0, 10)]
         x_txts = [0, r'$5\times10^1$', r'$1\times10^2$',
@@ -528,10 +579,10 @@ class LineChart:
                      r'$5\times10^4$', r'$1\times10^5$',
                      r'$1\times10^6$'
                  ]
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation)
-        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation)
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation, fpath = fpath)
+        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation, fpath = fpath)
 
-        chart.ax.grid('on')
+        # chart.ax.grid('on')
 
         wfs = [0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000]
 
@@ -544,7 +595,7 @@ class LineChart:
         chart.show()
 
     @staticmethod
-    def draw_word_frequency_size(title='WORD_FREQUENCY_SIZE', base_y=None, rotation=0):
+    def draw_word_frequency_size(title='WORD_FREQUENCY_SIZE', base_y=None, rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*2000 for i in range(0, 21)]
         xs=[i for  i in  range(0, 10)]
         x_txts = [0, r'$5\times10^1$', r'$1\times10^2$',
@@ -553,8 +604,8 @@ class LineChart:
                      r'$5\times10^4$', r'$1\times10^5$',
                      r'$1\times10^6$'
                  ]
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='size (MB)', title=title, xlabel_rotation=rotation)
-        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='size (MB)', title=title, xlabel_rotation=rotation)
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Size (MB)', title=title, xlabel_rotation=rotation, fpath = fpath)
+        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Size (MB)', title=title, xlabel_rotation=rotation, fpath = fpath)
 
         chart.ax.grid('on')
 
@@ -572,6 +623,36 @@ class LineChart:
         chart.draw_line(sizes, r'$SPTD^*$')
         chart.show()
 
+     # 画不同date range折线图
+    @staticmethod
+    def draw_date_range(label=r'$|q.\delta|$', base_y=None, x_rotation=0, fpath='test.pdf'):
+        if base_y!=None: ys = [base_y+i*100 for i in range(0, 17)]
+        # x_txts = [r'$5\times10^8$', r'$1\times10^8$', r'$5\times10^7$', r'$1\times10^7$',
+        #           r'$5\times10^6$', r'$1\times10^6$', r'$5\times10^5$', r'$1\times10^5$',
+        #           r'$1\times10^4$', '0']
+        # x_txts = [0,3,7,15,30,50,100,150,300,600]
+        # drs = [0,3,7,15,30,50,100,150,300,600]
+        drs = [0,3,7,15,30,50,100,150]
+        x_txts = [0,6,14,30,60,100,200,300]
+        xs=[i for  i in  range(len(drs))]
+
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath = fpath)
+        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
+
+        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\dr\\'
+        alg_types=['SPBase', 'SPBest']
+        for alg_type in alg_types:
+            runtimes = []
+            for dr in drs:
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=1000000, mds=1000, t=1, ns=200, r=2, k=5, nw=5, wf=500, dr=dr))
+                # print(data)
+                runtimes.append(data.timeTotal)
+            print(runtimes)
+            if alg_type=='SPBase':
+                chart.draw_line(runtimes, r'$SPTR$')
+            elif alg_type=='SPBest':
+                chart.draw_line(runtimes, r'$SPTR^*$')
+        chart.show()
 
     @staticmethod
     def sleep():
@@ -585,37 +666,45 @@ class LineChart:
 # Bar.draw_topK(0, 2)
 # Bar.draw_topK(1, 2)
 # 折线图
-# LineChart.draw_k(0)
-# LineChart.draw_k(1)
-# LineChart.draw_k(2)
+# LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_topK.pdf')
+# LineChart.draw_k(1, fpath=PathUtility.figure_path() + 'TQTSPYagoVBDate_topK.pdf')
+# LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'RTreeNodeYagoVBDate_topK.pdf')
 
 ######### 画不同数keywords柱状图 #########
 # Bar.draw_n_words()
 # Bar.draw_n_words(1)
 # 折线图
-LineChart.draw_nw()
+# LineChart.draw_nw(fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_WordNum.pdf')
+# f = plt.figure()
+# f.savefig(fname='test.pdf')
+
+######### 画radius折线图 ################
+# LineChart.draw_radius(title="radius_k type=0")
+# LineChart.draw_radius(1, 300, title="radius_k type=1", fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_alpha_k.pdf')
 
 ######### 画不同规模子图的柱状图  #########
 # Bar.draw_differ_size(0, 0)
 # Bar.draw_differ_size(0, 2)
 # Bar.draw_differ_size(1, 0)
 # Bar.draw_differ_size(1, 2)
-
-######### 画radius折线图 ################
-# LineChart.draw_radius(title="radius_k type=0")
-# LineChart.draw_radius(1, 200, title="radius_k type=1")
+# 画折线图
+# LineChart.draw_differ_size(0)
+# LineChart.draw_differ_size(1)
 
 ######### 画MAX_PN折线图 ################
-# LineChart.draw_max_pn(label='MAX_PN')
+# LineChart.draw_max_pn(label='MAX_PN', x_rotation=45, fpath=PathUtility.figure_path() + 'MaxPNYagoVB.pdf')
 
 ######## 画MAX_DIFFERENCE折线图 ##############
-# LineChart.draw_max_date(base_y=400)
+# LineChart.draw_max_date(base_y=400, x_rotation=45, fpath=PathUtility.figure_path() + 'MaxDateDifferenceYagoVB.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
-# LineChart.draw_word_frequency(base_y=700, rotation=50)
+# LineChart.draw_word_frequency(base_y=700, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequencyRuntimeYagoVB.pdf')
 #
 ######## 画不同WORD_FREQUENCY_SIZE折线图 #####
-# LineChart.draw_word_frequency_size(base_y=0, rotation=50)
+# LineChart.draw_word_frequency_size(base_y=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequencySizeYagoVB.pdf')
+
+######## 画不同的时间差对查询情况影响  #########
+# LineChart.draw_date_range(fpath=PathUtility.figure_path() + 'DateRangeYagoVB.pdf')
 
 Bar.sleep()
 

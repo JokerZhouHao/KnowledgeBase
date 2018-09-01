@@ -107,7 +107,7 @@ public class P2NReach implements Runnable{
 		
 		int pid ;
 		
-		LoopQueue<Integer> queue = new LoopQueue<>(100000);
+		LoopQueue<Integer> queue = new LoopQueue<>(1000000);
 		for(int i = this.start; i<this.end; i++) {
 			pid = allPid.get(i);
 			queue.reset();
@@ -122,8 +122,7 @@ public class P2NReach implements Runnable{
 					for(int e : edges) {
 						if(!rec.contains(e)) {
 							if(!queue.push(e)) {
-								System.err.println("> 队列" + queue.size() + "太短");
-								System.exit(0);
+								throw new Exception("> 队列" + queue.size() + "太短");
 							}
 							rec.add(e);
 						}

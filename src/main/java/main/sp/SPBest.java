@@ -268,7 +268,10 @@ public class SPBest {
 			for(i=0; i<sortQwords.length; i++) {
 				wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i], TimeUtility.getIntDate(searchDate));
 				// 不存在该wid
-				if(null==wid2DateNidPair[i])	return null;
+				if(null==wid2DateNidPair[i]) {
+					Global.curRecIndex++;
+					return null;
+				}
 				Global.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
 			}
 			if(Global.isTest) {
@@ -283,7 +286,10 @@ public class SPBest {
 			if(Global.wordFrequency.get(sortQwords[i]) >= Global.MAX_WORD_FREQUENCY) {
 				w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);
 				// 所有pid都不能到达该wid
-				if(null == w2pReachable[i])	return null;
+				if(null == w2pReachable[i]) {
+					Global.curRecIndex++;
+					return null;
+				}
 			}
 		}
 		if(Global.isTest) {

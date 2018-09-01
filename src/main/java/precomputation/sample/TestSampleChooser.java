@@ -244,8 +244,7 @@ public class TestSampleChooser {
 					for(int e : edges) {
 						if(!recBfs.contains(e)) {
 							if(!queue.push(e)) {
-								System.err.println("> 队列" + queue.size() + "太短");
-								System.exit(0);
+								throw new Exception("队列" + queue.size() + "太短");
 							}
 							recBfs.add(e);
 							

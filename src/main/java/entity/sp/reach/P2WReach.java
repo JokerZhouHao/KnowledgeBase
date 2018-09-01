@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import entity.BFSWidRecoder;
 import entity.sp.AllDateWidNodes;
 import entity.sp.AllDateWidNodes.DWid;
 import entity.sp.AllPidWid;
@@ -86,19 +87,25 @@ public class P2WReach implements Runnable{
 		}
 	}
 	
+	
 	/**
 	 * 通过BFS的方式来创建pwTimes
 	 * @throws Exception
 	 */
 	public void buildingByBFS() throws Exception{
 		System.out.println("> 开始buildingByBFS . . . " + TimeUtility.getTime());
+		
+		BFSWidRecoder bfsWidRec = Global.orgBFSWidRecoder.copy();
+		
 		int[] edges = null;
 		
 		DWid tDWid = null;
 		
-		int pid ;
+		int pid = -1;
 		
-		LoopQueue<Integer> queue = new LoopQueue<>(100000);
+		LoopQueue<Integer> queue = new LoopQueue<>(500000);
+		
+		/********** 普通BFS ***********/
 		for(int i = this.start; i<this.end; i++) {
 			pid = allPid.get(i);
 			queue.reset();
@@ -113,19 +120,22 @@ public class P2WReach implements Runnable{
 					for(int e : edges) {
 						if(!rec.contains(e)) {
 							if(!queue.push(e)) {
-								System.err.println("> 队列" + queue.size() + "太短");
-								System.exit(0);
+								throw new Exception("> 队列" + queue.size() + "太短");
 							}
 							rec.add(e);
 						}
 					}
 				}
 				
-				// 添加date
+				// 添加wid
 				if(null != (tDWid = allDW.get(nid))) {
 					for(int wid : tDWid.wids) {
-						wids.add(wid);
+						if(Global.wordFrequency.get(wid) >= Global.MAX_WORD_FREQUENCY) {
+							wids.add(wid);
+						}
+						if(bfsWidRec.accessOver(wid))	break;
 					}
+					if(bfsWidRec.isOver())	break;
 				}
 			}
 			
@@ -139,6 +149,7 @@ public class P2WReach implements Runnable{
 				System.out.println("> 已处理" + dealedNum + "个pid, 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 			}
 		}
+		
 		blockingQueue.put(new TempClass(-1, null));
 		System.out.println("> 结束 . " + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()) + "   " + TimeUtility.getTime());
 	}

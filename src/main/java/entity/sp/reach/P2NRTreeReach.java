@@ -11,7 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import entity.sp.AllDateWidNodes;
+import entity.sp.AllPidWid;
+import entity.sp.GraphByArray;
 import entity.sp.RTreeWithGI;
+import entity.sp.AllDateWidNodes.DWid;
 import spatialindex.rtree.Node;
 import spatialindex.rtree.RTree;
 import spatialindex.storagemanager.DiskStorageManager;
@@ -21,6 +25,7 @@ import spatialindex.storagemanager.PropertySet;
 import spatialindex.storagemanager.TreeLRUBuffer;
 import utility.Global;
 import utility.IOUtility;
+import utility.LoopQueue;
 import utility.TimeUtility;
 
 /**
@@ -35,10 +40,33 @@ public class P2NRTreeReach extends RTree {
 	private final static int numRTreeNode = 17482;
 	public static Set<Integer>[] pid2Nids = null;
 	private ArrayBlockingQueue<TempClass> queue;
+	private static GraphByArray graph = null;
+	private static Map<Integer, DWid> allDW = null;
+	private static List<Integer> allPid = null;
+	private static boolean hasInit = false;
 	
 	public P2NRTreeReach(PropertySet psRTree, IStorageManager sm, ArrayBlockingQueue<TempClass> queue) throws Exception {
 		super(psRTree, sm);
 		this.queue = queue;
+		init();
+	}
+	
+	
+	public void init() {
+		if(hasInit)	return;
+		hasInit = true;
+		try {
+			System.out.println("> 开始初始化P2NRTreeReach . . . ");
+			graph = new GraphByArray(Global.numNodes);
+			graph.loadGraph(Global.inputDirectoryPath + Global.edgeFile);
+			allDW = AllDateWidNodes.loadFromFile(Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile);
+			allPid = AllPidWid.getAllPid();
+			System.out.println("> 成功初始化P2NRTreeReach 。 ");
+		} catch (Exception e) {
+			System.err.println("> 初始化P2NRTreeReach失败！");
+			e.printStackTrace();
+			System.exit(0);
+		}
 	}
 	
 	public static P2NRTreeReach getInstance(String treePath, ArrayBlockingQueue<TempClass> queue) throws Exception{
@@ -64,20 +92,56 @@ public class P2NRTreeReach extends RTree {
 		}
 	}
 	
+	private Set<Integer> getRtreeNodeReachNids(Set<Integer> pids) throws Exception{
+		Set<Integer> allSuitableNids = new HashSet<>();
+		Set<Integer> allAccessedNids = new HashSet<>();
+		
+		int[] edges = null;
+		DWid tDWid = null;
+		LoopQueue<Integer> queue = new LoopQueue<>(1000000);
+		
+		for(int pid : pids) {
+			if(allAccessedNids.contains(pid))	continue;
+			
+			// BFS
+			queue.reset();
+			Integer nid = -1;
+			
+			queue.push(pid);
+			while(null != (nid = queue.poll())) {
+				if(null != (edges =  graph.getEdge(nid))) {
+					for(int e : edges) {
+						if(!allAccessedNids.contains(e)) {
+							if(!queue.push(e)) {
+								throw new Exception("> 队列" + queue.size() + "太短");
+							}
+							allAccessedNids.add(e);
+						}
+					}
+				}
+				
+				// 添加date
+				if(null != (tDWid = allDW.get(nid)) && !allSuitableNids.contains(nid)) {
+					allSuitableNids.add(nid);
+				}
+			}
+		}
+		
+		allAccessedNids.clear();
+		return allSuitableNids;
+	}
+	
 	private Set<Integer> writeRTreeNode(int nid) throws Exception{
 //		if(maxNid < nid) maxNid = nid;
 		Node node = readNode(nid);
 		Set<Integer> pids = new HashSet<>();
 		Set<Integer> tSet = null;
 		if(node.isLeaf()) {
+			Set<Integer> rtreeNodeContainPids = new HashSet<>();
 			for(int child = 0; child < node.m_children; child++) {
-				tSet = pid2Nids[node.m_pIdentifier[child]];
-				if(null != tSet) {
-					pids.addAll(tSet);
-//					tSet.clear();
-//					pid2Nids[node.m_pIdentifier[child]] = null;
-				}
+				rtreeNodeContainPids.add(node.m_pIdentifier[child]);
 			}
+			pids = getRtreeNodeReachNids(rtreeNodeContainPids);
 		} else {
 			for(int child = 0; child < node.m_children; child++) {
 				tSet = writeRTreeNode(node.m_pIdentifier[child]);
@@ -87,7 +151,6 @@ public class P2NRTreeReach extends RTree {
 			}
 		}
 		if(!pids.isEmpty()) {
-//			write(nid, pids);
 			queue.put(new TempClass(nid, pids));
 		}
 		if((++count)%1000 == 0) {
@@ -141,17 +204,16 @@ public class P2NRTreeReach extends RTree {
 	public static void building() throws Exception{
 		System.out.println("> 开始生成文件" + Global.recRTreeNode2NidReachPath + " . . . .");
 		
-		System.out.println("> 开始读取pid . . . " + TimeUtility.getTime());
-		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2NReach.zipNum);
-		P2NReach.buidingP2NReachFile(endSignQueue);
-		int i = 0;
-		for(i=0; i<P2NReach.zipNum; i++) {
-			endSignQueue.take();
-		}
-		System.out.println("\n\n> 已读取完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
+//		System.out.println("> 开始读取pid . . . " + TimeUtility.getTime());
+//		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2NReach.zipNum);
+//		P2NReach.buidingP2NReachFile(endSignQueue);
+//		int i = 0;
+//		for(i=0; i<P2NReach.zipNum; i++) {
+//			endSignQueue.take();
+//		}
+//		System.out.println("\n\n> 已读取完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
 		
-		
-		P2NRTreeReach.pid2Nids = P2NReach.pid2Nids;
+//		P2NRTreeReach.pid2Nids = P2NReach.pid2Nids;
 		ArrayBlockingQueue<TempClass> queue = new ArrayBlockingQueue(4);
 		new TempClassWriteThread(queue, Global.recRTreeNode2NidReachPath).start();
 		P2NRTreeReach rtree = P2NRTreeReach.getInstance(Global.indexRTree, queue);

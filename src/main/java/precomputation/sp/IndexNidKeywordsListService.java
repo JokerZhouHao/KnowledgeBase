@@ -713,9 +713,9 @@ public class IndexNidKeywordsListService {
 				tm.put(en.getValue(), tm.get(en.getValue()) + 1);
 			}else tm.put(en.getValue(), 1);
 		}
-		for(Entry<Integer, Integer> en : tm.entrySet()) {
-			System.out.println(en.getKey() + Global.delimiterLevel1 + en.getValue());
-		}
+//		for(Entry<Integer, Integer> en : tm.entrySet()) {
+//			System.out.println(en.getKey() + Global.delimiterLevel1 + en.getValue());
+//		}
 		
 		BufferedWriter bw = IOUtility.getBW(ff);
 		bw.write(String.valueOf(rec.size()) + "#\n");

@@ -543,11 +543,62 @@ public class DateInfoSpider implements Runnable{
 	}
 	
 	/**
+	 * 创建文件NodeIdKeywordListOnIntDateMapFile
+	 * @throws Exception
+	 */
+	public static void buildingNodeIdKeywordListOnIntDateMapFile() throws Exception{
+		System.out.println("> buildingNodeIdKeywordListOnIntDateMapFile . . . ");
+		String souPath = Global.inputDirectoryPath + "nodeIdIntDateMapYagoVB.txt";
+		Map<String, String> idDate = new HashMap<>();
+		BufferedReader br = IOUtility.getBR(souPath);
+		String line = br.readLine();
+		while(null != (line=br.readLine())) {
+			idDate.put(line.split(Global.delimiterLevel1)[0], line);
+		}
+		br.close();
+		
+		String arr[] = null;
+		souPath = Global.inputDirectoryPath + Global.nodeIdKeywordListFile;
+		br = IOUtility.getBR(souPath);
+		String desPath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		BufferedWriter bw = IOUtility.getBW(desPath);
+		br.readLine();
+		while(null != (line=br.readLine())) {
+			arr = line.split(Global.delimiterLevel1);
+			if(idDate.containsKey(arr[0])) {
+				bw.write(idDate.get(arr[0]) + Global.delimiterDate + arr[1] + "\n");
+			}
+			
+		}
+		br.close();
+		bw.close();
+		System.out.println("> Over");
+	}
+	
+	
+	public static int getMaxWid() throws Exception{
+		int maxWid = -1;
+		String souPath =  Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		BufferedReader br = IOUtility.getBR(souPath);
+		String line = br.readLine();
+		while(null != (line=br.readLine())) {
+			String arr[] = line.substring(line.lastIndexOf(Global.delimiterDate) + 1).split(Global.delimiterLevel2);
+			for(String st : arr) {
+				int x = Integer.parseInt(st);
+				if(maxWid < x)	maxWid=x;
+			}
+		}
+		return maxWid;
+	}
+	
+	/**
 	 * 主方法
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception{
-		DateInfoSpider.extractDateInfo();
+//		DateInfoSpider.extractDateInfo();
+//		DateInfoSpider.buildingNodeIdKeywordListOnIntDateMapFile();
+		System.out.println(DateInfoSpider.getMaxWid());
 	}
 }

@@ -43,7 +43,6 @@ import utility.TimeUtility;
 public class Wid2DateNidPairIndex extends Index{
 	
 	private static long startTime = System.currentTimeMillis();
-	private static int maxDateSpan = Global.maxDateSpan  - 1;
 	
 	public Wid2DateNidPairIndex(String indexPath) {
 		super(indexPath);
@@ -160,7 +159,7 @@ public class Wid2DateNidPairIndex extends Index{
 		int date = 0;
 		for(int i=0; i<size; i++) {
 			date = bb.getInt();
-			if(Math.abs(date - sDate) >= maxDateSpan) {
+			if(Math.abs(date - sDate) >= Global.maxDateSpan) {
 				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
 			} else {
 				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
