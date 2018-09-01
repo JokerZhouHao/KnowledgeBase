@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
+import org.apache.lucene.analysis.query.QueryAutoStopWordAnalyzer;
 import org.tartarus.snowball.ext.LovinsStemmer;
 
 import entity.sp.NidToDateWidIndex;
@@ -397,7 +398,7 @@ public class GraphByArray {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
+	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, Map<Integer, Set<Integer>> nidWidMap,
 			 List<List<Integer>> semanticTree) throws Exception {
 
 		if (sortQwords.length == 0) {
@@ -413,21 +414,12 @@ public class GraphByArray {
 					+ (this.numVertices - 1) + "]");
 		}
 		
-		double looseness = 0;
-		Map<Integer, Integer> recKeyVecticesMap = new HashMap<>();
-		Map<Integer, Double> recKeyDisMap = new HashMap<>();
-		
-		ArrayList<Integer> sortedQwordsList = new ArrayList();
-		for(int in : sortQwords) {
-			sortedQwordsList.add(in);
+		double looseness = sortQwords.length;
+		Set<Integer> keyVertices = new HashSet<Integer>();
+		Set<Integer> qwordsCopy = new HashSet<Integer>();
+		for (int i = 0; i < sortQwords.length; i++) {
+			qwordsCopy.add(sortQwords[i]);
 		}
-		
-		int qwordsNum = sortedQwordsList.size();
-		List<Integer> tempList = new ArrayList<>();
-		List<Integer> tempList1 = null;
-		DatesWIds dateWid = null;
-		int i, j, k, t;
-		Double d1 = null;
 		
 		preceder[source] = -1;
 		distance2Source[source] = 1;
@@ -435,56 +427,44 @@ public class GraphByArray {
 		
 		Queue<Integer> queue = new LinkedList<Integer>();
 		queue.add(source);
-		double preRadius = 0;
-		int candidateNum = 0;
-		int vertex = 0;
-		double currentRadius = 0;
-		Boolean isFound = Boolean.FALSE;
+		double preRadius = 1;
+		double currentRadius = 1;
+		int vertex = -1;
+		int i;
+		List<Integer> tList = new ArrayList<>();
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
 			currentRadius = distance2Source[vertex];
-			isFound = Boolean.FALSE;
 			if (currentRadius != preRadius) {
+				double delta = currentRadius - preRadius;
 				preRadius = currentRadius;
-				// 计算新层下的looseness
-				if(candidateNum != qwordsNum) {
-					looseness = sortedQwordsList.size() * currentRadius;
-					for(Double doub : recKeyDisMap.values()) {
-						looseness += doub;
-					}
-					if(looseness >= loosenessThreshold) {
-						if(Global.isTest) {
-							Global.rr.numCptPruneInSemanticTree++;
-						}
-						return Double.POSITIVE_INFINITY;
-					}
+				looseness += delta * qwordsCopy.size();
+				if (looseness > loosenessThreshold) { //Dynamic bound based pruning
+					return Double.POSITIVE_INFINITY;
 				}
 			}
 			
-			if(null != (dateWid = dateWIdMap.get(vertex))) {
-				tempList1 = dateWid.getwIdList();
-				k = Integer.MIN_VALUE;
-				j = 0;
-				for(i=0; i<tempList1.size(); i++) {
-					for(; j<sortedQwordsList.size(); j++) {
-						if(tempList1.get(i) == (t = sortedQwordsList.get(j))) {
-							recKeyVecticesMap.put(t, vertex);
-							recKeyDisMap.put(t, currentRadius);
-							sortedQwordsList.remove((Object)t);
-							j--;
-							if(sortedQwordsList.size()==0) {
-								isFound = Boolean.TRUE;
-								break;
-							}
-						} else if(tempList1.get(i) < t) {
-							break;
-						}
+			Set<Integer> qwordsContainedByVertex = nidWidMap.get(vertex);
+			if (qwordsContainedByVertex != null) {
+				// vertex contains some query keywords.
+				int prevQwordSize = qwordsCopy.size();
+				tList.clear();
+				for(int it : qwordsCopy) {
+					if(qwordsContainedByVertex.contains(it))	tList.add(it);
+				}
+				if(!tList.isEmpty()) {
+					for(int it : tList)
+						qwordsCopy.remove(it);
+				}
+				if (prevQwordSize > qwordsCopy.size()) {
+					// vertex is a key-vertex
+					keyVertices.add(vertex);
+					if (qwordsCopy.size() == 0) {
+						break;
 					}
-					if(isFound || j == sortedQwordsList.size())	break;
 				}
 			}
-			if(isFound)	break;
 			
 			// add the unvisited adj vertices of vertex into queue
 			int[] adjList = this.adjLists[vertex];
@@ -504,16 +484,11 @@ public class GraphByArray {
 			}
 		}
 
-		// compute semantic tree paths
-		if(!sortedQwordsList.isEmpty()) {
+		if(!qwordsCopy.isEmpty()) {
 			return Double.POSITIVE_INFINITY;
 		}
-		looseness = 0;
-		Set<Integer> keyVertices = new HashSet<Integer>();
-		for(Entry<Integer, Double> en : recKeyDisMap.entrySet()) {
-			keyVertices.add(recKeyVecticesMap.get(en.getKey()));
-			looseness += en.getValue();
-		}
+		
+		// compute semantic tree paths
 		for (Integer keyVertex : keyVertices) {
 			semanticTree.add(this.getPath(source, keyVertex));
 		}

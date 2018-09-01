@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import entity.sp.WordRadiusNeighborhood;
@@ -376,7 +377,15 @@ public class KSPIndex {
 		double kthScore = Double.POSITIVE_INFINITY;
 		
 		rgi.readLock();
-
+		
+		// 方便计算tree
+		Map<Integer, Set<Integer>> nidWidMap = new HashMap<>();
+		for(Entry<Integer, DatesWIds> en : nIdDateWidMap.entrySet()) {
+			Set<Integer> wids = new HashSet<>();
+			wids.addAll(en.getValue().getwIdList());
+			nidWidMap.put(en.getKey(), wids);
+		}
+		
 		try {
 			/* I need a priority queue here. It turns out that TreeSet sorts unique keys only and since I am
 		 	   sorting according to distances, it is not assured that all distances will be unique. TreeMap
@@ -538,7 +547,7 @@ public class KSPIndex {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, nIdDateWidMap, semanticTree);
+							sortQwords, sDate, eDate, loosenessThreshold, nidWidMap, semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
