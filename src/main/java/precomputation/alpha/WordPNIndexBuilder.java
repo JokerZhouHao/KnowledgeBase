@@ -314,13 +314,13 @@ public class WordPNIndexBuilder {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-//		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		
-		List<Integer> list = new ArrayList<>();
-		list.add(1);
-		list.add(2);
-		list.add(3);
-		list.add(5);
-		WordPNIndexBuilder.batchBuildingWN(list);
+//		List<Integer> list = new ArrayList<>();
+//		list.add(1);
+//		list.add(2);
+//		list.add(3);
+//		list.add(5);
+//		WordPNIndexBuilder.batchBuildingWN(list);
 	}
 }

@@ -199,7 +199,7 @@ public class GraphByArray {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
+	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, DatesWIds searchedDatesWids[],
 			Map<Integer, Integer> wordMinDateSpanMap, List<List<Integer>> semanticTree) throws Exception {
 
 		if (sortQwords.length == 0) {
@@ -290,7 +290,7 @@ public class GraphByArray {
 				if(isFound)	break;
 			}
 			
-			if(null != (dateWid = dateWIdMap.get(vertex))){
+			if(null != (dateWid = searchedDatesWids[vertex])){
 				tempList1 = dateWid.getwIdList();
 				k = Integer.MIN_VALUE;
 				double disMSpan = 0;
@@ -397,7 +397,7 @@ public class GraphByArray {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, Map<Integer, DatesWIds> dateWIdMap,
+	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
 			 List<List<Integer>> semanticTree) throws Exception {
 
 		if (sortQwords.length == 0) {
@@ -462,7 +462,7 @@ public class GraphByArray {
 				}
 			}
 			
-			if(null != (dateWid = dateWIdMap.get(vertex))) {
+			if(null != (dateWid = searchedDatesWids[vertex])) {
 				tempList1 = dateWid.getwIdList();
 				k = Integer.MIN_VALUE;
 				j = 0;

@@ -519,7 +519,7 @@ class LineChart:
 
     # 画maxDateSpan=1000，不同的pn长的折线图
     @staticmethod
-    def draw_max_pn(label="MAX_PN", base_y=None, x_rotation=0, fpath='test.pdf'):
+    def draw_max_pn(label="l", base_y=None, x_rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*100 for i in range(0, 17)]
         xs=[i for  i in  range(0, 10)]
         lens = [500000000, 100000000, 50000000, 10000000, 5000000, 1000000, 500000, 100000, 10000, 0]
@@ -692,7 +692,7 @@ class LineChart:
 # LineChart.draw_differ_size(1)
 
 ######### 画MAX_PN折线图 ################
-# LineChart.draw_max_pn(label='MAX_PN', x_rotation=45, fpath=PathUtility.figure_path() + 'MaxPNYagoVB.pdf')
+LineChart.draw_max_pn(label='l', x_rotation=45, fpath=PathUtility.figure_path() + 'MaxPNYagoVB.pdf')
 
 ######## 画MAX_DIFFERENCE折线图 ##############
 # LineChart.draw_max_date(base_y=400, x_rotation=45, fpath=PathUtility.figure_path() + 'MaxDateDifferenceYagoVB.pdf')

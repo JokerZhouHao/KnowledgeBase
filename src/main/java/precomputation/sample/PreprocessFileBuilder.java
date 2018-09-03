@@ -32,18 +32,20 @@ public class PreprocessFileBuilder {
 //		indexWDNP.createIndex(filePath);
 		
 		// 创建RTree
-		RTreeService.build();
+//		RTreeService.build();
 		
 		// PN
-		List<Integer> radius = new ArrayList<>();
-		radius.add(2);
-		WordPNIndexBuilder.batchBuildingWN(radius);
+//		List<Integer> radius = new ArrayList<>();
+//		radius.add(1);
+//		radius.add(2);
+//		radius.add(3);
+//		WordPNIndexBuilder.batchBuildingWN(radius);
 		
 		// TF-Label
 //		TFlabelDataFormatter.build();
 		
 		// rtree_leaf_node_contain_pid
-		RTreeLeafNodeContainPids.main(null);
+//		RTreeLeafNodeContainPids.main(null);
 		
 		// 创建词频文件
 		IndexNidKeywordsListService.buildWordFrequencyFile();

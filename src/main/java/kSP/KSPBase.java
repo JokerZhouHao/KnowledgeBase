@@ -42,19 +42,19 @@ import utility.TimeUtility;
 public class KSPBase {
 	protected RTreeWithGI rgi;
 	private CReach cReach = null;
-	private Map<Integer, DatesWIds> nIdDateWidMap = null;
+	private DatesWIds searchedDatesWids[] = null;
 	private SortedDateWidIndex[] wid2DateNidPair = null;
 	private HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	private MinMaxDateService minMaxDateSer = null;
 	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
 	
 	public KSPBase(RTreeWithGI rgi, CReach cReach,
-			Map<Integer, DatesWIds> nIdDateWidMap, SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
+			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
 			HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
 		super();
 		this.rgi = rgi;
 		this.cReach = cReach;
-		this.nIdDateWidMap = nIdDateWidMap;
+		this.searchedDatesWids = searchedDatesWids;
 		this.wid2DateNidPair = wid2DateNidPair;
 		this.minMaxDateSer = minMaxDateSer;
  		this.wordPNMap = wordPNMap;
@@ -267,7 +267,7 @@ public class KSPBase {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, date, loosenessThreshold, nIdDateWidMap, recMinDateSpanMap.get(nid), semanticTree);
+							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -510,7 +510,7 @@ public class KSPBase {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, nIdDateWidMap, semanticTree);
+							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -684,7 +684,7 @@ public class KSPBase {
 		int numHasAccess = 0;
 		for(int ni : matchNids) {
 			if(rNids.contains(ni)) {
-				wids = nIdDateWidMap.get(ni).getwIdList();
+				wids = searchedDatesWids[ni].getwIdList();
 				j=0;
 				for(i=0; i<sortQwords.length; i++) {
 					if(hasAccess[i])	continue;

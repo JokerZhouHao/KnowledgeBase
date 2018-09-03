@@ -92,10 +92,11 @@ public class Global {
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
-	public static int rtreePageSize = 32768;
+//	public static int rtreePageSize = 32768;
+	public static int rtreePageSize = 65536;
 //	public static int rtreeFanout = 5;
 //	public static int rtreeFanout = 1500;
-	public static int rtreeFanout = 800;
+	public static int rtreeFanout = 400;
 	public static int iindexBufferSize = 4096000;
 	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
@@ -194,7 +195,7 @@ public class Global {
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH;
 	
-	public static int MAX_PN_LENGTH = 1000000;
+	public static int MAX_PN_LENGTH = 100000000;
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;

@@ -36,6 +36,8 @@ public class P2WReach implements Runnable{
 	private static long startTime = System.currentTimeMillis();
 	public static Set<Integer>[] pid2Wids = null;
 	
+	public Boolean bfsNoAccessedNid[] = new Boolean[Global.numNodes]; // 记录BFS所访问过的点
+	
 	private String filePath;
 	
 	private int start;
@@ -94,35 +96,32 @@ public class P2WReach implements Runnable{
 	 */
 	public void buildingByBFS() throws Exception{
 		System.out.println("> 开始buildingByBFS . . . " + TimeUtility.getTime());
-		
-		BFSWidRecoder bfsWidRec = Global.orgBFSWidRecoder.copy();
-		
 		int[] edges = null;
-		
 		DWid tDWid = null;
-		
 		int pid = -1;
-		
 		LoopQueue<Integer> queue = new LoopQueue<>(500000);
 		
 		/********** 普通BFS ***********/
 		for(int i = this.start; i<this.end; i++) {
 			pid = allPid.get(i);
 			queue.reset();
+			for(int j=0; j<bfsNoAccessedNid.length; j++)	bfsNoAccessedNid[j] = Boolean.TRUE;
+//			BFSWidRecoder bfsWidRec = Global.orgBFSWidRecoder.copy();
+			
 			Integer nid = -1;
-			HashSet<Integer> rec = new HashSet<Integer>();
+//			HashSet<Integer> rec = new HashSet<Integer>();
 			queue.push(pid);
-			rec.add(pid);
+			bfsNoAccessedNid[pid] = Boolean.FALSE;
 			HashSet<Integer> wids = new HashSet<>();
 			while(null != (nid = queue.poll())) {
 				// bfs
 				if(null != (edges =  graph.getEdge(nid))) {
 					for(int e : edges) {
-						if(!rec.contains(e)) {
+						if(bfsNoAccessedNid[e]) {
 							if(!queue.push(e)) {
 								throw new Exception("> 队列" + queue.size() + "太短");
 							}
-							rec.add(e);
+							bfsNoAccessedNid[e] = Boolean.FALSE;
 						}
 					}
 				}
@@ -133,9 +132,9 @@ public class P2WReach implements Runnable{
 						if(Global.wordFrequency.get(wid) >= Global.MAX_WORD_FREQUENCY) {
 							wids.add(wid);
 						}
-						if(bfsWidRec.accessOver(wid))	break;
+//						if(bfsWidRec.accessOver(wid))	break;
 					}
-					if(bfsWidRec.isOver())	break;
+//					if(bfsWidRec.isOver())	break;
 				}
 			}
 			

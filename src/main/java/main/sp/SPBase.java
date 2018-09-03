@@ -65,6 +65,8 @@ public class SPBase {
 	
 	private int[] pid2RtreeLeafNode = null;
 	
+	private DatesWIds searchedDatesWids[] = new DatesWIds[Global.numNodes];
+	
 	/**
 	 * 初始化
 	 * @throws Exception
@@ -186,7 +188,7 @@ public class SPBase {
 		}
 		
 		// 获得nIdDateWidMap
-		Map<Integer, DatesWIds> nIdDateWidMap = new HashMap<>();
+		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		Set<Integer> tSet = new HashSet<>();
 		for(int in : sortedQwordsList) {
 			Map<Integer, String> tempMap = null;
@@ -214,10 +216,10 @@ public class SPBase {
 						tSet.add(en.getKey());
 					}
 				}
-				if(null == (dws = nIdDateWidMap.get(en.getKey()))) {
+				if(null == (dws = searchedDatesWids[en.getKey()])) {
 					dws = new DatesWIds(en.getValue());
 					dws.addWid(in);
-					nIdDateWidMap.put(en.getKey(), dws);
+					searchedDatesWids[en.getKey()] = dws;
 				} else {
 					dws.addWid(in);
 				}
@@ -235,7 +237,7 @@ public class SPBase {
 					matchNids.add(ii);
 				}
 			}
-			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + nIdDateWidMap.size());
+			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
 			matchSetNids.clear();
 		}
 		
@@ -286,7 +288,7 @@ public class SPBase {
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
-		KSPBase kSPExecutor = new KSPBase(rgi, cReach, nIdDateWidMap, wid2DateNidPair, minMaxDateSer, wordPNMap);
+		KSPBase kSPExecutor = new KSPBase(rgi, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, wordPNMap);
 		if(eDate == null)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, sortQwords, searchIntDate, v);
 		else kSPExecutor.kSPComputation(k, Global.radius, matchNids, qpoint, sortQwords, searchIntDate, eIntDate, v);
 		
