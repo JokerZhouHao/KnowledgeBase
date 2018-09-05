@@ -654,6 +654,63 @@ class LineChart:
                 chart.draw_line(runtimes, r'$SPTR^*$')
         chart.show()
 
+    # 画节点度的分布图
+    @staticmethod
+    def draw_degree_distribution():
+        fpath = PathUtility.output_path + "degreeYagoVB.txt"
+        org_data = []
+        max_degree = 0
+        with open(fpath) as fp:
+            line = ','
+            while True:
+                line = fp.readline()
+                if line=='': break
+                if line=="\n": continue
+                line = line[:-1]
+                # print(line)
+                ints = line.split(': ')
+                degree = int(ints[1])
+                if max_degree<degree:   max_degree = degree
+                org_data.append(degree)
+        # print(org_data)
+        print(max_degree)
+        degree_nums = {}
+        for i in range(max_degree+1):
+            degree_nums[i] = 0
+
+        for degree in org_data:
+            if degree in degree_nums:
+                degree_nums[degree] = degree_nums[degree] + 1
+            else:
+                degree_nums[degree] = 1
+        # print(degree_nums)
+        nums = []
+        degrees = sorted(degree_nums.keys())
+        print(degrees)
+        for dg in degrees:
+            nums.append(degree_nums[dg])
+        # plt.xlim([0, 1400])
+        figure = plt.figure()
+        ax1 = figure.add_subplot(221)
+        ax1.plot(degrees, nums)
+        # ax1.scatter(degrees, nums)
+
+        ax2 = figure.add_subplot(222)
+        ax2.set_ylim([0, 100])
+        ax2.plot(degrees, nums)
+
+        ax3 = figure.add_subplot(223)
+        ax3.set_ylim([0, 10])
+        ax3.plot(degrees, nums)
+
+        ax4 = figure.add_subplot(224)
+        ax4.set_ylim([0, 5])
+        ax4.plot(degrees, nums)
+
+        plt.show()
+
+
+
     @staticmethod
     def sleep():
         plt.pause(1200)
@@ -692,7 +749,7 @@ class LineChart:
 # LineChart.draw_differ_size(1)
 
 ######### 画MAX_PN折线图 ################
-LineChart.draw_max_pn(label='l', x_rotation=45, fpath=PathUtility.figure_path() + 'MaxPNYagoVB.pdf')
+# LineChart.draw_max_pn(label='l', x_rotation=45, fpath=PathUtility.figure_path() + 'MaxPNYagoVB.pdf')
 
 ######## 画MAX_DIFFERENCE折线图 ##############
 # LineChart.draw_max_date(base_y=400, x_rotation=45, fpath=PathUtility.figure_path() + 'MaxDateDifferenceYagoVB.pdf')
@@ -706,7 +763,11 @@ LineChart.draw_max_pn(label='l', x_rotation=45, fpath=PathUtility.figure_path() 
 ######## 画不同的时间差对查询情况影响  #########
 # LineChart.draw_date_range(fpath=PathUtility.figure_path() + 'DateRangeYagoVB.pdf')
 
-Bar.sleep()
+######## 画节点度的分布图  #########
+LineChart.draw_degree_distribution()
+
+
+# Bar.sleep()
 
 ###########################  Bar 测试代码 ###############################################
 # bar = Bar(xLabel='top-k', yLabel='# of TQSP Computations')

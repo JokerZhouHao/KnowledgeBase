@@ -108,6 +108,11 @@ public class RTreeLeafNodeContainPids extends RTree{
 		String filePath = Global.recRTreeLeafNodeContainPidsPath;
 		RTreeLeafNodeContainPids.getInstance(Global.indexRTree).writeRTreeNode2Nids(filePath);
 //		int[] ins = RTreeLeafNodeContainPids.loadPid2RTreeLeafNode(filePath);
+//		System.out.println(ins[158823]);
+		
+//		RTreeLeafNodeContainPids rtree = RTreeLeafNodeContainPids.getInstance(Global.indexRTree);
+//		System.out.println(rtree.readNode(615).isLeaf());
+		
 //		int i = -1;
 //		i = i+1;
 	}

@@ -45,7 +45,7 @@ public class PreprocessFileBuilder {
 //		TFlabelDataFormatter.build();
 		
 		// rtree_leaf_node_contain_pid
-//		RTreeLeafNodeContainPids.main(null);
+		RTreeLeafNodeContainPids.main(null);
 		
 		// 创建词频文件
 		IndexNidKeywordsListService.buildWordFrequencyFile();

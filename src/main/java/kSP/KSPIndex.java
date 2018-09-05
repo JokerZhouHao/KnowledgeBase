@@ -49,7 +49,7 @@ public class KSPIndex {
 	private HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	private int[] pid2RtreeLeafNode = null;
 	private MinMaxDateService minMaxDateSer = null;
-	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
+	private HashMap<Integer, int[]> recMinDateSpanMap = new HashMap<>();
 	
 	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
@@ -88,7 +88,6 @@ public class KSPIndex {
 		
 		int nid;
 		Boolean sign = Boolean.FALSE;
-		HashMap<Integer, Integer> minDateSpanMap = null;
 		
 		NNEntry first = null;
 		
@@ -96,6 +95,8 @@ public class KSPIndex {
 		Node n = null;
 		
 		double kthScore = Double.POSITIVE_INFINITY;
+		
+		int[] minDateSpans = null;
 		
 		rgi.readLock();
 
@@ -163,13 +164,13 @@ public class KSPIndex {
 								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getPidWidMinDateSpan(nid, sortQwords, date);
+							minDateSpans = this.getPidWidMinDateSpan(nid, sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptPidGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
-							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, sortQwords, date);
+							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpans, sortQwords, date);
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							if(Global.isTest) {
@@ -188,14 +189,25 @@ public class KSPIndex {
 								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+							minDateSpans = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptRTreeGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
-							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpanMap, sortQwords, date);
+							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpans, sortQwords, date);
 						}
+						
+//						if(nid==615) {
+//							System.out.println("nid==615");
+//						}
+//						
+//						if(rgi.readNode(nid).isLeaf()) {
+//							if(null==minDateSpans) {
+//								throw new Exception("in put null==minDateSpans");
+//							}
+//							recMinDateSpanMap.put(-nid-1, minDateSpans);
+//						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
 						if (alphaRankingScoreBound > kthScore) {
@@ -207,10 +219,10 @@ public class KSPIndex {
 							continue;
 						}
 						
-						if(n.m_level == 0) {
-							recMinDateSpanMap.put(nid, minDateSpanMap);
-						} else if(n.m_level == 1) {
-							recMinDateSpanMap.put(-nid-1, minDateSpanMap);
+						if(n.m_level==0) {
+							recMinDateSpanMap.put(nid, minDateSpans);
+						} else if(n.m_level==1) {
+							recMinDateSpanMap.put(-nid-1, minDateSpans);
 						}
 						
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
@@ -257,6 +269,15 @@ public class KSPIndex {
 					if (kthScore != Double.POSITIVE_INFINITY) {
 						loosenessThreshold = kthScore / placeData.getWeight();
 					}
+					
+					//////////////////////////////////////////////////////////////////
+					if(kthScore != Double.POSITIVE_INFINITY) {
+						System.out.println("kthScore = " + String.valueOf(kthScore) + "      " + 
+											"placeData.getWeight = " + String.valueOf(placeData.getWeight()) + "      " + 
+											"loosenessThreshold = " + String.valueOf(loosenessThreshold));
+					}
+					
+					
 					
 					// compute shortest path between place and qword
 					if(Global.isTest) {
@@ -641,52 +662,50 @@ public class KSPIndex {
 	 * @return
 	 * @throws IOException
 	 */
-	public HashMap<Integer, Integer> getPidWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
-		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
-		widMinDateSpan.putAll(recMinDateSpanMap.get(pid2RtreeLeafNode[id]));
+	public int[] getPidWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
+		int widMinDateSpans[] = new int[sortQwords.length];
 		int i=0;
-		HashSet<Integer> rec = new HashSet<>();
-		int j1, j2, k;
+		int rtreeLeafDateSpans[] =  recMinDateSpanMap.get(pid2RtreeLeafNode[id]);
+		
+//		if(rtreeLeafDateSpans==null) {
+//			for(i=0 ; i<sortQwords.length; i++) {
+//				widMinDateSpans[i] = 1;
+//			}
+//			return widMinDateSpans;
+//		}
+		if(null==rtreeLeafDateSpans) {
+			System.out.println(id + "  " + recMinDateSpanMap.size());
+			throw new IOException("in getPidWidMinDateSpan null==rtreeLeafDateSpans");
+		}
+		
 		for(i=0; i<sortQwords.length; i++) {
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach));
-			k = widMinDateSpan.get(sortQwords[i]);
+			widMinDateSpans[i] = rtreeLeafDateSpans[i];
+		}
+		
+		HashSet<Integer> rec = new HashSet<>();
+		int j1, k;
+		for(i=0; i<sortQwords.length; i++) {
+			k = widMinDateSpans[i];
 			if(k>=Global.maxDateSpan)	continue;
 			j1= wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, k-1);
-//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
-			widMinDateSpan.put(sortQwords[i], j1);
-//			if(j1 < j2) {
-//				System.out.println("pid dis less !!! --> " + "k=" + k + " j1=" + j1 + " j2=" + j2);
-//				System.exit(0);
-//			}
+			widMinDateSpans[i] = j1;
 		}
 		rec.clear();
-		return widMinDateSpan;
+		return widMinDateSpans;
 	}
 	
-	public HashMap<Integer, Integer> getRTreeWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
-		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
+	public int[] getRTreeWidMinDateSpan(int id, int[] sortQwords, int date) throws IOException {
+		int[] widMinDateSpans = new int[sortQwords.length];
 		int i=0;
 		if(Global.isTest) {
 			Global.rr.numCptRTreeGetMinDateSpan += sortQwords.length;
 		}
-		int j1, j2;
+		int j1;
 		for(i=0; i<sortQwords.length; i++) {
-//			if(rtreeNode2Pid[id]==null) {
-//				widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
-//				continue;
-//			}
 			j1= wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date);
-//			j2 = wid2DateNidPair[i].getMinDateSpan(date);
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(rec, date, id));
-//			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
-			widMinDateSpan.put(sortQwords[i], j1);
-//			widMinDateSpan.put(sortQwords[i], -1);
-//			if(j1 < j2) {
-//				System.out.println("rtree dis less !!! --> " + "j1=" + j1 + " j2=" + j2);
-//				System.exit(0);
-//			}
+			widMinDateSpans[i] = j1;
 		}
-		return widMinDateSpan;
+		return widMinDateSpans;
 	}
 	
 	/**
@@ -699,16 +718,16 @@ public class KSPIndex {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getAlphaLoosenessBound(int id, int alphaRadius, Map<Integer, Integer> widMinDateSpanMap, int[] sortQwords, int date) throws IOException {
+	public double getAlphaLoosenessBound(int id, int alphaRadius, int[] widMinDateSpans, int[] sortQwords, int date) throws IOException {
 		double alphaLoosenessBound = 0;
 		double tempd1 = 0;
 		double tempd2 = 0;
-		for(int wid : sortQwords) {
-			if(null == wordPNMap.get(wid)) {
-				alphaLoosenessBound += widMinDateSpanMap.get(wid);
+		for(int i=0; i<sortQwords.length; i++) {
+			if(null == wordPNMap.get(sortQwords[i])) {
+				alphaLoosenessBound += widMinDateSpans[i];
 			} else {
-				tempd1 = (alphaRadius + 2) * widMinDateSpanMap.get(wid);
-				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
+				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i];
+				tempd2 = wordPNMap.get(sortQwords[i]).getLooseness(id, date);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}
 		}
@@ -746,38 +765,31 @@ public class KSPIndex {
 	 * @return
 	 */
 	public Boolean rTreeNodeReachable(List<Integer> matchNids, Set<Integer> rNids, int[] sortQwords) {
-		int i, j;
-		Boolean rSign = Boolean.TRUE;
-		boolean hasAccess[] = new boolean[sortQwords.length];
-		List<Integer> wids = null;
-		int numHasAccess = 0;
+		int i;
+		int[] wids = null;
+		
+		List<Integer> recCurWidIndex = new ArrayList<>();
+		for(i=0; i<sortQwords.length; i++) {
+			recCurWidIndex.add(i);
+		}
+		List<Integer> tempList = new ArrayList<>();
+		int numAccessWid = 0;
+		
 		for(int ni : matchNids) {
 			if(rNids.contains(ni)) {
-				wids = searchedDatesWids[ni].getwIdList();
-				j=0;
-				for(i=0; i<sortQwords.length; i++) {
-					if(hasAccess[i])	continue;
-					for(; j<wids.size(); j++) {
-						if(sortQwords[i]>wids.get(j)) {
-							continue;
-						} else if (sortQwords[i]<wids.get(j)) {
-							break;
-						} else {
-							hasAccess[i] = Boolean.TRUE;
-							if((++numHasAccess)==sortQwords.length) {
-								rSign = Boolean.FALSE;
-								break;
-							}
-						}
+				wids = searchedDatesWids[ni].getWids();
+				for(int curWidIndex : recCurWidIndex) {
+					if(sortQwords[curWidIndex] == wids[curWidIndex]) {
+						numAccessWid++;
+						if(numAccessWid==sortQwords.length)	return Boolean.FALSE;
+						tempList.add(curWidIndex);
 					}
-					if(j==wids.size() || !rSign)	break;
 				}
-//				rSign = Boolean.FALSE;
-//				break;
+				for(int in : tempList) {
+					recCurWidIndex.remove((Object)in);
+				}
 			}
-			if(!rSign)	break;
 		}
-		
-		return rSign;
+		return Boolean.TRUE;
 	}
 }

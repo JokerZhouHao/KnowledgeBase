@@ -126,7 +126,7 @@ public class IndexWid2NidDates extends Index{
 				
 				nid = bb.getInt();
 				
-				dw = new DatesWIds();
+				dw = new DatesWIds(wids.length);
 				
 				num = bb.getInt();
 				for(j=0; j<num; j++) {
@@ -144,7 +144,7 @@ public class IndexWid2NidDates extends Index{
 					for(;k<wids.length; k++) {
 						if(tList.get(j) < wids[k])	break;
 						else if(tList.get(j) == wids[k]) {
-							dw.addWid(wids[k]);
+							dw.addWid(k, wids[k]);
 						}
 					}
 					if(k== wids.length)	break;

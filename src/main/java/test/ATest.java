@@ -34,14 +34,30 @@ public class ATest {
 //		System.out.println(Global.MAX_PN_LENGTH/50);
 //		System.out.println(Global.MAX_PN_LENGTH/5000);
 		
-		int nid = 1;
-		List<Integer> nids = new ArrayList<>();
-		nids.add(nid);
-		nid = 3;
-		nids.add(nid);
-		nid = 10;
-		nids.add(nid);
-		System.out.println(nids);
+//		int[] its = new int[10000];
+//		for(int i=0; i<its.length; i++) {
+//			if(its[i]!=0) {
+//				System.out.println(its[i]);
+//				break;
+//			}
+//		}
+//		System.out.println("OK");
+		
+		List<Integer> lis = new ArrayList<>();
+		lis.add(5);
+		lis.add(6);
+		lis.add(8);
+		lis.remove((Object)8);
+		System.out.println(lis);
+		
+//		int nid = 1;
+//		List<Integer> nids = new ArrayList<>();
+//		nids.add(nid);
+//		nid = 3;
+//		nids.add(nid);
+//		nid = 10;
+//		nids.add(nid);
+//		System.out.println(nids);
 		
 		
 		/***************

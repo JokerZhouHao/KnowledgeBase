@@ -7,13 +7,17 @@ import utility.Global;
 
 public class DatesWIds {
 	private List<Integer> dateList = null;
-	private List<Integer> wIdList = null;
+	private int wids[] = null;
+	
 	private String datesStr = null;
 	
-	public DatesWIds() {}
+	public DatesWIds(int numWids) {
+		this.wids = new int[numWids];
+	}
 	
-	public DatesWIds(String datesStr) {
+	public DatesWIds(String datesStr, int numWids) {
 		this.datesStr = datesStr;
+		this.wids = new int[numWids];
 		formatDatesStr();
 	}
 	
@@ -26,9 +30,8 @@ public class DatesWIds {
 		}
 	}
 
-	public void addWid(int wid) {
-		if(null == wIdList)	wIdList = new ArrayList<>();
-		wIdList.add(wid);
+	public void addWid(int indexWid, int wid) {
+		this.wids[indexWid] = wid;
 	}
 	
 	public void addDate(int date) {
@@ -41,17 +44,16 @@ public class DatesWIds {
 		return dateList;
 	}
 
-	public List<Integer> getwIdList() {
-		return wIdList;
+	public int[] getWids() {
+		return wids;
 	}
 	
 	public void clear() {
 		if(null != dateList)	dateList.clear();
-		if(null != this.wIdList) wIdList.clear();
 	}
 	
 	public static void main(String[] args) {
-		DatesWIds dw = new DatesWIds("-18094#14644");
+		DatesWIds dw = new DatesWIds("-18094#14644", 4);
 		for(int in : dw.getDateList()) {
 			System.out.println(in);
 		}

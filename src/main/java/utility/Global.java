@@ -92,11 +92,11 @@ public class Global {
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
-//	public static int rtreePageSize = 32768;
-	public static int rtreePageSize = 65536;
+//	public static int rtreePageSize = 32768;	// 400
+	public static int rtreePageSize = 65536;	// 800
 //	public static int rtreeFanout = 5;
 //	public static int rtreeFanout = 1500;
-	public static int rtreeFanout = 400;
+	public static int rtreeFanout = 800;
 	public static int iindexBufferSize = 4096000;
 	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
@@ -112,6 +112,7 @@ public class Global {
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
+	public static String degreeFile = "degreeYagoVB.txt";
 	public static String nodeIdKeywordListFile = "nidKeywordsListMapYagoVB.txt";
 	public static String nodeIdKeywordListOnDateFile = "nodeIdKeywordListOnDateMapYagoVB.txt";
 	public static String nodeIdKeywordListOnIntDateFile = "nodeIdKeywordListOnIntDateMapYagoVB.txt";
@@ -149,7 +150,7 @@ public class Global {
 	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.bin";
 	public static String recP2NReachPath = outputDirectoryPath + "recP2NReach.bin";
 	public static String recRTreeNode2NidReachPath = outputDirectoryPath + "recRTreeNode2NidReach.bin";
-	public static String recRTreeLeafNodeContainPidsPath = Global.outputDirectoryPath + "recRtreeLeafNodeContainPids.bin";
+	public static String recRTreeLeafNodeContainPidsPath = Global.outputDirectoryPath + "recRtreeLeafNodeContainPids."  + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion + ".bin";
 	
 	/*	index path	*/
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
