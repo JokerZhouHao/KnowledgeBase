@@ -8,8 +8,10 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.Set;
@@ -43,12 +45,29 @@ public class ATest {
 //		}
 //		System.out.println("OK");
 		
-		List<Integer> lis = new ArrayList<>();
-		lis.add(5);
-		lis.add(6);
-		lis.add(8);
-		lis.remove((Object)8);
-		System.out.println(lis);
+		Map<Integer, Integer> mp = new HashMap<>();
+		mp.put(1, 2);
+		mp.put(2, 5);
+		System.out.println(mp.toString());
+		
+		
+//		List<Integer> li = new ArrayList<>();
+//		for(int i=-128; i<=127; i++) {
+//			li.add(i);
+//		}
+//		byte bt = 0;
+//		for(int it : li) {
+//			System.out.println((byte)it);
+//		}
+		
+//		System.out.println(Byte.MAX_VALUE + " " + Byte.MIN_VALUE);
+		
+//		List<Integer> lis = new ArrayList<>();
+//		lis.add(5);
+//		lis.add(6);
+//		lis.add(8);
+//		lis.remove((Object)8);
+//		System.out.println(lis);
 		
 //		int nid = 1;
 //		List<Integer> nids = new ArrayList<>();

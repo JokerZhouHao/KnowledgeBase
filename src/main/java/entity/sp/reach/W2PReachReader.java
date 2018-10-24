@@ -3,7 +3,9 @@ package entity.sp.reach;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -19,38 +21,42 @@ import utility.TimeUtility;
 public class W2PReachReader extends Thread{
 	private static long startTime = System.currentTimeMillis();
 	private ArrayBlockingQueue<Integer> widQueue = null;
-	private ArrayBlockingQueue<List<Integer>> pidsQueue = null;
+	private ArrayBlockingQueue<Map<Integer, Short>> pidsQueue = null;
 	private int start = 0;
 	private int end = 0;
 	private int[] wids = null;
-	public static List<Integer> signNoList = null;
-	public static List<Integer> signReadOver = null;
+	public static Map<Integer, Short> signNoList = null;
+	public static Map<Integer, Short> signReadOver = null;
 	private String fp = null;
 	
-	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<List<Integer>> pidsQueue, String fp) {
+	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<Map<Integer, Short>> pidsQueue, String fp) {
 		this.widQueue = widQueue;
 		this.pidsQueue = pidsQueue;
 		this.fp = fp;
 		
 		if(signNoList==null) {
-			signNoList = new ArrayList<>();
-			signNoList.add(Integer.MIN_VALUE + 1);
-			signReadOver = new ArrayList<>();
-			signReadOver.add(Integer.MIN_VALUE);
+			signNoList = new HashMap<>();
+//			signNoList.add(Integer.MIN_VALUE + 1);
+			signNoList.put(Integer.MIN_VALUE+1, (short)0);
+			signReadOver = new HashMap<>();
+//			signReadOver.add(Integer.MIN_VALUE);
+			signReadOver.put(Integer.MIN_VALUE, (short)0);
 		}
 	}
 	
-	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<List<Integer>> pidsQueue, int start, int end) {
+	public W2PReachReader(ArrayBlockingQueue<Integer> widQueue, ArrayBlockingQueue<Map<Integer, Short>> pidsQueue, int start, int end) {
 		this.widQueue = widQueue;
 		this.pidsQueue = pidsQueue;
 		this.start = start;
 		this.end = end;
 		
 		if(signNoList==null) {
-			signNoList = new ArrayList<>();
-			signNoList.add(Integer.MIN_VALUE + 1);
-			signReadOver = new ArrayList<>();
-			signReadOver.add(Integer.MIN_VALUE);
+			signNoList = new HashMap<>();
+//			signNoList.add(Integer.MIN_VALUE + 1);
+			signNoList.put(Integer.MIN_VALUE+1, (short)0);
+			signReadOver = new HashMap<>();
+//			signReadOver.add(Integer.MIN_VALUE);
+			signReadOver.put(Integer.MIN_VALUE, (short)0);
 		}
 	}
 	
@@ -73,22 +79,22 @@ public class W2PReachReader extends Thread{
 				
 				int curIndex = 0;
 				int curWid = wids[curIndex];
-				List<Integer> pids = null;
+				Map<Integer, Short> pidDis = null;
 				
 				while(true) {
-					if(null == pids) {
-						pids = new ArrayList<>();
+					if(null == pidDis) {
+						pidDis = new HashMap<>();
 						num = dis.readInt();
 						for(i=0; i<num; i++) {
-							pids.add(dis.readInt());
+							pidDis.put(dis.readInt(), dis.readShort());
 						}
 					}
 					
 					nWid = widQueue.take();
 					
 					if(curWid == nWid) {
-						pidsQueue.put(pids);
-						pids = null;
+						pidsQueue.put(pidDis);
+						pidDis = null;
 						curIndex++;
 						if(curIndex == wids.length)	break;
 						curWid = wids[curIndex];

@@ -1,0 +1,10 @@
+默认：
+num_sample=200 k=5 num_word=5
+
+yago:
+alpha=2 对应length=1000000
+word_frequency=50
+
+dbpedia:
+alpha=1	对应length=10000000
+word_frequency=1000

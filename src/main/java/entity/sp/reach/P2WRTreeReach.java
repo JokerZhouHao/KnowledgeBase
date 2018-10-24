@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import entity.sp.RTreeWithGI;
@@ -33,8 +34,7 @@ public class P2WRTreeReach extends RTree {
 	
 	private DataOutputStream dos = null;
 	private int count = 0;
-	private final static int numRTreeNode = 17482;
-	public static Set<Integer>[] pid2Wids = null;
+	public static Map<Integer, Short>[] pid2Wids = null;
 	
 	public P2WRTreeReach(PropertySet psRTree, IStorageManager sm) throws Exception {
 		super(psRTree, sm);
@@ -55,24 +55,33 @@ public class P2WRTreeReach extends RTree {
 		return new P2WRTreeReach(psRTree, file);
 	}
 	
-	private void write(int nid, Set<Integer> wids) throws Exception{
+	private void write(int nid, Map<Integer, Short> widDis) throws Exception{
 		dos.writeInt(nid);
-		dos.writeInt(wids.size());
-		for(int in : wids) {
-			dos.writeInt(in);
+		dos.writeInt(widDis.size());
+		for(Entry<Integer, Short> en : widDis.entrySet()) {
+			dos.writeInt(en.getKey());
+			dos.writeShort(en.getValue());
 		}
 	}
 	
-	private Set<Integer> writeRTreeNode(int nid) throws Exception{
+	private Map<Integer, Short> writeRTreeNode(int nid) throws Exception{
 //		if(maxNid < nid) maxNid = nid;
 		Node node = readNode(nid);
-		Set<Integer> wids = new HashSet<>();
-		Set<Integer> tSet = null;
+		Map<Integer, Short> widDis = new HashMap<>();
+		Map<Integer, Short> tSet = null;
 		if(node.isLeaf()) {
 			for(int child = 0; child < node.m_children; child++) {
 				tSet = pid2Wids[node.m_pIdentifier[child]];
 				if(null != tSet) {
-					wids.addAll(tSet);
+					for(Entry<Integer, Short> en : tSet.entrySet()) {
+						if(widDis.containsKey(en.getKey())) {
+							if(widDis.get(en.getKey()) > en.getValue()) {
+								widDis.put(en.getKey(), en.getValue());
+							}
+						} else {
+							widDis.put(en.getKey(), en.getValue());
+						}
+					}
 					tSet.clear();
 					pid2Wids[node.m_pIdentifier[child]] = null;
 				}
@@ -81,16 +90,24 @@ public class P2WRTreeReach extends RTree {
 			for(int child = 0; child < node.m_children; child++) {
 				tSet = writeRTreeNode(node.m_pIdentifier[child]);
 				if(!tSet.isEmpty()) {
-					wids.addAll(tSet);
+					for(Entry<Integer, Short> en : tSet.entrySet()) {
+						if(widDis.containsKey(en.getKey())) {
+							if(widDis.get(en.getKey()) > en.getValue()) {
+								widDis.put(en.getKey(), en.getValue());
+							}
+						} else {
+							widDis.put(en.getKey(), en.getValue());
+						}
+					}
 					tSet.clear();
 				}
 			}
 		}
-		if(!wids.isEmpty())	write(-nid-1, wids);	// -nid-1是为了与pid区分开
+		if(!widDis.isEmpty())	write(-nid-1, widDis);	// -nid-1是为了与pid区分开
 		if((++count)%1000 == 0) {
 			System.out.println("> 已处理" + count + "个rtree node，用时：" + TimeUtility.getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()));
 		}
-		return wids;
+		return widDis;
 	}
 	
 	public void writeRTreeNode2Nids(String filePath) throws Exception{
@@ -104,9 +121,9 @@ public class P2WRTreeReach extends RTree {
 		System.out.println("> Over输出writeRTreeNode2Nids, 共处理" + count + "个rTree节点（除掉了root节点） ！！！ " + TimeUtility.getTailTime());
 	}
 	
-	public static Set<Integer>[] loadRTreeNode2Pids(String filePath){
+	public static Set<Integer>[] loadRTreeNode2Pids(String filePath) throws Exception{
 		DataInputStream dis = null;
-		Set<Integer>[] rtreeNode2Pids = new Set[numRTreeNode + 1];
+		Set<Integer>[] rtreeNode2Pids = new Set[RTreeLeafNodeContainPids.getMaxRtreeNodeId() + 1];
 		try {
 			dis = IOUtility.getDis(filePath);
 			int nid, size;

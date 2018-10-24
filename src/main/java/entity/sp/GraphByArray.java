@@ -212,7 +212,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			int[] wordMinDateSpans, List<List<Integer>> semanticTree) throws Exception {
+			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -267,16 +267,14 @@ public class GraphByArray {
 		double currentRadius = 0;
 		Boolean isFound = Boolean.FALSE;
 		
-		int numAccessNid = 0;
+//		int numAccessNid = 0;
 		
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
 			
 			///////////////////////////////////////////////////
-			numAccessNid++;
-			
-			
+//			numAccessNid++;
 			
 			currentRadius = distance2Source[vertex];
 			if (currentRadius != preRadius) {
@@ -286,9 +284,9 @@ public class GraphByArray {
 					looseness = 0;
 					
 					for(int in : recSearchWidIndex) {
-						looseness += wordMinDateSpans[in];
+						if(null==pid2WidPathDis) looseness += (wordMinDateSpans[in][0] * currentRadius);
+						else looseness += (wordMinDateSpans[in][0] * (pid2WidPathDis[in]>=currentRadius?pid2WidPathDis[in]:currentRadius));
 					}
-					looseness *= currentRadius;
 					
 					for(int in : recOkWidIndex) {
 						looseness += recKeyDis[in];
@@ -304,7 +302,7 @@ public class GraphByArray {
 				// 计算那些候选节点可成为tree里面的节点
 				tempList.clear();
 				for(int candWidIndex : recCanWidIndex) {
-					if(recCandDis[candWidIndex] <= currentRadius * wordMinDateSpans[candWidIndex]) {
+					if(recCandDis[candWidIndex] <= currentRadius * wordMinDateSpans[candWidIndex][0]) {
 						recKeyVectices[candWidIndex] = recCandVectices[candWidIndex];
 						recKeyDis[candWidIndex] = recCandDis[candWidIndex];
 						recOkWidIndex.add(candWidIndex);
@@ -349,7 +347,7 @@ public class GraphByArray {
 							k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
 						}
 						disMSpan = currentRadius * k;
-						if(wordMinDateSpans[searchedWidIndex] == k) {
+						if(wordMinDateSpans[searchedWidIndex][0] == k) {
 							recKeyVectices[searchedWidIndex] = vertex;
 							recKeyDis[searchedWidIndex] = disMSpan;
 							recOkWidIndex.add(searchedWidIndex);
@@ -408,14 +406,14 @@ public class GraphByArray {
 		}
 		
 		///////////////////////////////////////////////////
-		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {
-			System.out.print("GetSemanticPlaceP >  " + 
-								"loosenessThreshold = " + String.valueOf(loosenessThreshold) + "    " + 
-								"looseness=" + String.valueOf(looseness) + "    " + 
-								"numAccessNid=" + String.valueOf(numAccessNid) + "    " + 
-								"queue.isEmpty=" + String.valueOf(queue.isEmpty()) + "    " +  
-								"isFound=" + String.valueOf((numCurFindedWid + numCandWid) == qwordsNum) + "    ");
-		}
+//		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {
+//			System.out.print("GetSemanticPlaceP >  " + 
+//								"loosenessThreshold = " + String.valueOf(loosenessThreshold) + "    " + 
+//								"looseness=" + String.valueOf(looseness) + "    " + 
+//								"numAccessNid=" + String.valueOf(numAccessNid) + "    " + 
+//								"queue.isEmpty=" + String.valueOf(queue.isEmpty()) + "    " +  
+//								"isFound=" + String.valueOf((numCurFindedWid + numCandWid) == qwordsNum) + "    ");
+//		}
 		
 		if(numCurFindedWid + numCandWid != qwordsNum) {
 			return Double.POSITIVE_INFINITY;
@@ -456,9 +454,9 @@ public class GraphByArray {
 		}
 		
 		////////////////////////////////////////////////////////
-		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {
-			System.out.println("looseness of keys = " + String.valueOf(looseness));
-		}
+//		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {
+//			System.out.println("looseness of keys = " + String.valueOf(looseness));
+//		}
 		
 		if(looseness <= loosenessThreshold)	return looseness;
 		else return Double.POSITIVE_INFINITY;
@@ -478,7 +476,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			 List<List<Integer>> semanticTree) throws Exception {
+			List<List<Integer>> semanticTree) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");

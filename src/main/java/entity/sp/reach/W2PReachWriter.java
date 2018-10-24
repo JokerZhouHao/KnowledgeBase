@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -52,8 +53,9 @@ public class W2PReachWriter extends Thread{
 	
 	public void writeWidToPidFile() throws Exception{
 		DataInputStream dis = null;
-		Map<Integer, Set<Integer>> rec = new TreeMap<>();
-		Set<Integer> pids = null;
+		Map<Integer, Map<Integer, Short>> rec = new TreeMap<>();
+		Map<Integer, Short> pidDis = null;
+		short distance = 0;
 		int pid, wid, wid_num, i;
 		try {
 			if(pTwFile == null)	pTwFile = Global.recPidWidReachPath + "." + String.valueOf(start) + "." + String.valueOf(end);
@@ -64,11 +66,12 @@ public class W2PReachWriter extends Thread{
 				wid_num = dis.readInt();
 				for(i=0; i<wid_num; i++) {
 					wid = dis.readInt();
-					if(null == (pids = rec.get(wid))) {
-						pids = new HashSet<>();
-						rec.put(wid, pids);
+					distance = dis.readShort();
+					if(null == (pidDis = rec.get(wid))) {
+						pidDis = new HashMap<>();
+						rec.put(wid, pidDis);
 					}
-					pids.add(pid);
+					pidDis.put(pid, distance);
 				}
 			}
 		} catch(EOFException e) {
@@ -98,16 +101,17 @@ public class W2PReachWriter extends Thread{
 			dos.writeInt(in);
 		}
 		// 写所有pid
-		for(Set<Integer> vSet : rec.values()) {
-			dos.writeInt(vSet.size());
-			for(int in : vSet) {
-				dos.writeInt(in);
+		for(Map<Integer, Short> pdMap : rec.values()) {
+			dos.writeInt(pdMap.size());
+			for(Entry<Integer, Short> en : pdMap.entrySet()) {
+				dos.writeInt(en.getKey());
+				dos.writeShort(en.getValue());
 			}
 		}
 		
 		// 清理内存
-		for(Set<Integer> vSet : rec.values()) {
-			vSet.clear();
+		for(Map<Integer, Short> pdMap : rec.values()) {
+			pdMap.clear();
 		}
 		rec.clear();
 		

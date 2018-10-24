@@ -190,11 +190,11 @@ public class SPBase {
 		// 获得nIdDateWidMap
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		Set<Integer> tSet = new HashSet<>();
-		for(int in : sortedQwordsList) {
+		for(i=0; i<sortQwords.length; i++) {
 			Map<Integer, String> tempMap = null;
 			
-			if(null == (tempMap = cacheSeachedWid.get(in))) {
-				tempMap = nIdWIdDateSer.searchNIDKeyListDate(in);
+			if(null == (tempMap = cacheSeachedWid.get(sortQwords[i]))) {
+				tempMap = nIdWIdDateSer.searchNIDKeyListDate(sortQwords[i]);
 				// 不存在该wid
 				if(null==tempMap) {
 					Global.curRecIndex++;
@@ -202,7 +202,7 @@ public class SPBase {
 				}
 				
 				if(tempMap.size() > 100000) {	// 缓存命中量超过100000的节点的查询结果
-					cacheSeachedWid.put(in, tempMap);
+					cacheSeachedWid.put(sortQwords[i], tempMap);
 				}
 			}
 			
@@ -217,11 +217,11 @@ public class SPBase {
 					}
 				}
 				if(null == (dws = searchedDatesWids[en.getKey()])) {
-					dws = new DatesWIds(en.getValue());
-					dws.addWid(in);
+					dws = new DatesWIds(en.getValue(), sortQwords.length);
+					dws.addWid(i, sortQwords[i]);
 					searchedDatesWids[en.getKey()] = dws;
 				} else {
-					dws.addWid(in);
+					dws.addWid(i, sortQwords[i]);
 				}
 			}
 		}

@@ -34,9 +34,10 @@ public class P2WReach implements Runnable{
 	private static List<Integer> allPid = null;
 	private static boolean hasInit = false;
 	private static long startTime = System.currentTimeMillis();
-	public static Set<Integer>[] pid2Wids = null;
+	public static Map<Integer, Short>[] pid2Wids = null;
 	
-	public Boolean bfsNoAccessedNid[] = new Boolean[Global.numNodes]; // 记录BFS所访问过的点
+	protected short[] distance2Source;
+	protected int[] visitedFlag;
 	
 	private String filePath;
 	
@@ -73,6 +74,12 @@ public class P2WReach implements Runnable{
 	}
 	
 	public void init() {
+		this.distance2Source = new short[Global.numNodes];
+		this.visitedFlag = new int[Global.numNodes];
+		for (int i = 0; i < this.visitedFlag.length; i++) {
+			this.visitedFlag[i] = -1;
+		}
+		
 		if(hasInit)	return;
 		hasInit = true;
 		try {
@@ -81,6 +88,7 @@ public class P2WReach implements Runnable{
 			graph.loadGraph(Global.inputDirectoryPath + Global.edgeFile);
 			allDW = AllDateWidNodes.loadFromFile(Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile);
 			allPid = AllPidWid.getAllPid();
+			
 			System.out.println("> 成功初始化PWReach 。 ");
 		} catch (Exception e) {
 			System.err.println("> 初始化PWReach失败！");
@@ -96,50 +104,59 @@ public class P2WReach implements Runnable{
 	 */
 	public void buildingByBFS() throws Exception{
 		System.out.println("> 开始buildingByBFS . . . " + TimeUtility.getTime());
-		int[] edges = null;
 		DWid tDWid = null;
-		int pid = -1;
 		LoopQueue<Integer> queue = new LoopQueue<>(500000);
+		int[] adjList = null;
+		int i, j;
+		int source;
+		Integer nid = -1;
 		
 		/********** 普通BFS ***********/
-		for(int i = this.start; i<this.end; i++) {
-			pid = allPid.get(i);
+		for(i = this.start; i<this.end; i++) {
+			source = allPid.get(i);
 			queue.reset();
-			for(int j=0; j<bfsNoAccessedNid.length; j++)	bfsNoAccessedNid[j] = Boolean.TRUE;
-//			BFSWidRecoder bfsWidRec = Global.orgBFSWidRecoder.copy();
+			distance2Source[source] = 1;
+			visitedFlag[source] = source;
 			
-			Integer nid = -1;
-//			HashSet<Integer> rec = new HashSet<Integer>();
-			queue.push(pid);
-			bfsNoAccessedNid[pid] = Boolean.FALSE;
-			HashSet<Integer> wids = new HashSet<>();
+//			BFSWidRecoder bfsWidRec = Global.orgBFSWidRecoder.copy();
+			queue.push(source);
+			Map<Integer, Short> widDis = new HashMap<>();
+			
 			while(null != (nid = queue.poll())) {
-				// bfs
-				if(null != (edges =  graph.getEdge(nid))) {
-					for(int e : edges) {
-						if(bfsNoAccessedNid[e]) {
-							if(!queue.push(e)) {
-								throw new Exception("> 队列" + queue.size() + "太短");
-							}
-							bfsNoAccessedNid[e] = Boolean.FALSE;
-						}
-					}
-				}
-				
 				// 添加wid
 				if(null != (tDWid = allDW.get(nid))) {
 					for(int wid : tDWid.wids) {
 						if(Global.wordFrequency.get(wid) >= Global.MAX_WORD_FREQUENCY) {
-							wids.add(wid);
+							if(!widDis.containsKey(wid)) {
+								widDis.put(wid, distance2Source[nid]);
+							}
 						}
 //						if(bfsWidRec.accessOver(wid))	break;
 					}
 //					if(bfsWidRec.isOver())	break;
 				}
+				
+				// bfs
+				if(null != (adjList = this.graph.getEdge(nid))) {
+					for (j = 0; j < adjList.length; j++) {
+						int adjVertex = adjList[j];
+						if (visitedFlag[adjVertex] != source) {
+							// not visited yet
+							distance2Source[adjVertex] = (short)(1 + distance2Source[nid]);
+							if(distance2Source[adjVertex] < 0) {
+								throw new Exception("distance2Source[adjVertex]大于short最大值");
+							}
+							visitedFlag[adjVertex] = source;
+							if(!queue.push(adjVertex)) {
+								throw new Exception("> 队列" + queue.size() + "太短");
+							}
+						}
+					}
+				}
 			}
 			
-			if(!wids.isEmpty()) {
-				blockingQueue.put(new TempClass(pid, wids));
+			if(!widDis.isEmpty()) {
+				blockingQueue.put(new TempClass(source, widDis));
 			}
 			
 			dealedNum++;
@@ -164,11 +181,12 @@ public class P2WReach implements Runnable{
 				tc = blockingQueue.take();
 				if(tc.pid == -1)	break;
 				dos.writeInt(tc.pid);
-				dos.writeInt(tc.wids.size());
-				for(int in : tc.wids) {
-					dos.writeInt(in);
+				dos.writeInt(tc.widDis.size());
+				for(Entry<Integer, Short> en : tc.widDis.entrySet()) {
+					dos.writeInt(en.getKey());
+					dos.writeShort(en.getValue());
 				}
-				pid2Wids[tc.pid] = tc.wids;
+				pid2Wids[tc.pid] = tc.widDis;
 			}
 			dos.flush();
 			dos.close();
@@ -200,7 +218,7 @@ public class P2WReach implements Runnable{
 	// 计算出记录pid到wid可达情况的文件
 	public static void buildingPidToWidReachFile(ArrayBlockingQueue<Integer> endSignQueue) throws Exception{
 		P2WReach.endSignQueue = endSignQueue;
-		P2WReach.pid2Wids = new HashSet[Global.numPid];
+		P2WReach.pid2Wids = new Map[Global.numPid];
 		int start = 0, end = 0;
 		int span = zipContianNodeNum;
 		while(end < Global.numPid) {
@@ -230,6 +248,20 @@ public class P2WReach implements Runnable{
 	
 	public static void main(String[] args) throws Exception{
 		P2WReach.buildingPidToWidReachFile(null);
+		
+//		System.out.println(P2WReach.zipNum);
+		
+//		int start = 0, end = 0;
+//		int i=0;
+//		int span = zipContianNodeNum;
+//		while(end < Global.numPid) {
+//			start = end;
+//			end += span;
+//			if(end > Global.numPid)	end = Global.numPid;
+//			i++;
+//		}
+//		System.out.println(i);
+		
 //		PWReach.getWidToPidFile();
 	}
 }

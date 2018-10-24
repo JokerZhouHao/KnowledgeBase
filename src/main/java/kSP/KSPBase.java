@@ -46,7 +46,8 @@ public class KSPBase {
 	private SortedDateWidIndex[] wid2DateNidPair = null;
 	private HashMap<Integer, WordRadiusNeighborhood> wordPNMap = null;
 	private MinMaxDateService minMaxDateSer = null;
-	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
+//	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
+	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
 	
 	public KSPBase(RTreeWithGI rgi, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
@@ -103,7 +104,6 @@ public class KSPBase {
 		
 		int nid;
 		Boolean sign = Boolean.FALSE;
-		HashMap<Integer, Integer> minDateSpanMap = null;
 		
 		NNEntry first = null;
 		
@@ -111,6 +111,8 @@ public class KSPBase {
 		Node n = null;
 		
 		double kthScore = Double.POSITIVE_INFINITY;
+		
+		int[][] minDateSpans = null;
 		
 		rgi.readLock();
 
@@ -177,26 +179,26 @@ public class KSPBase {
 								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getPidWidMinDateSpan(sortQwords, date);
+							minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptPidGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
-							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpanMap, sortQwords, date);
+							alphaLoosenessBound = this.getAlphaLoosenessBound(nid, alphaRadius, minDateSpans, sortQwords, date);
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							if(Global.isTest) {
 								Global.rr.setFrontTime();
 							}
 							
-							minDateSpanMap = this.getPidWidMinDateSpan(sortQwords, date);
+							minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(Global.isTest) {
 								Global.rr.timeCptRTreeGetMinDateSpan += Global.rr.getTimeSpan();
 							}
 							
-							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpanMap, sortQwords, date);
+							alphaLoosenessBound = this.getAlphaLoosenessBound(-nid-1, alphaRadius, minDateSpans, sortQwords, date);
 						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
@@ -210,9 +212,7 @@ public class KSPBase {
 						}
 						
 						if(n.m_level == 0) {
-							recMinDateSpanMap.put(nid, minDateSpanMap);
-						} else if(n.m_level == 1) {
-							recMinDateSpanMap.put(-nid-1, minDateSpanMap);
+							recMinDateSpanMap.put(nid, minDateSpans);
 						}
 						
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
@@ -267,7 +267,7 @@ public class KSPBase {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), semanticTree);
+							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), null, semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -609,15 +609,15 @@ public class KSPBase {
 	 * @return
 	 * @throws IOException
 	 */
-	public HashMap<Integer, Integer> getPidWidMinDateSpan(int[] sortQwords, int date) throws IOException {
+	public int[][] getPidWidMinDateSpan(int[] sortQwords, int date) throws IOException {
 		if(Global.isTest) {
 			Global.rr.numCptPidGetMinDateSpan += sortQwords.length;
 		}
-		HashMap<Integer, Integer> widMinDateSpan = new HashMap<>();
+		int widMinDateSpans[][] = new int[sortQwords.length][1];
 		for(int i=0; i<sortQwords.length; i++) {
-			widMinDateSpan.put(sortQwords[i], wid2DateNidPair[i].getMinDateSpan(date));
+			widMinDateSpans[i][0] = wid2DateNidPair[i].getMinDateSpan(date);
 		}
-		return widMinDateSpan;
+		return widMinDateSpans;
 	}
 	
 	/**
@@ -630,16 +630,16 @@ public class KSPBase {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getAlphaLoosenessBound(int id, int alphaRadius, Map<Integer, Integer> widMinDateSpanMap, int[] sortQwords, int date) throws IOException {
+	public double getAlphaLoosenessBound(int id, int alphaRadius, int[][] widMinDateSpans, int[] sortQwords, int date) throws IOException {
 		double alphaLoosenessBound = 0;
 		double tempd1 = 0;
 		double tempd2 = 0;
-		for(int wid : sortQwords) {
-			if(null == wordPNMap.get(wid)) {
-				alphaLoosenessBound += widMinDateSpanMap.get(wid);
+		for(int i=0; i<sortQwords.length; i++) {
+			if (null == wordPNMap.get(sortQwords[i])) {
+				alphaLoosenessBound += widMinDateSpans[i][0];
 			} else {
-				tempd1 = (alphaRadius + 2) * widMinDateSpanMap.get(wid);
-				tempd2 = wordPNMap.get(wid).getLooseness(id, date);
+				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
+				tempd2 = wordPNMap.get(sortQwords[i]).getLooseness(id, date);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}
 		}
@@ -669,46 +669,4 @@ public class KSPBase {
 		return alphaLoosenessBound;
 	}
 	
-	/**
-	 * 判断rtree节点能否到达既在时间范围内，又包含全部查询词的点集
-	 * @param matchNids
-	 * @param rNids
-	 * @param sortQwords
-	 * @return
-	 */
-	public Boolean rTreeNodeReachable(List<Integer> matchNids, Set<Integer> rNids, int[] sortQwords) {
-		int i, j;
-		Boolean rSign = Boolean.TRUE;
-		boolean hasAccess[] = new boolean[sortQwords.length];
-		List<Integer> wids = null;
-		int numHasAccess = 0;
-		for(int ni : matchNids) {
-			if(rNids.contains(ni)) {
-				wids = searchedDatesWids[ni].getwIdList();
-				j=0;
-				for(i=0; i<sortQwords.length; i++) {
-					if(hasAccess[i])	continue;
-					for(; j<wids.size(); j++) {
-						if(sortQwords[i]>wids.get(j)) {
-							continue;
-						} else if (sortQwords[i]<wids.get(j)) {
-							break;
-						} else {
-							hasAccess[i] = Boolean.TRUE;
-							if((++numHasAccess)==sortQwords.length) {
-								rSign = Boolean.FALSE;
-								break;
-							}
-						}
-					}
-					if(j==wids.size() || !rSign)	break;
-				}
-//				rSign = Boolean.FALSE;
-//				break;
-			}
-			if(!rSign)	break;
-		}
-		
-		return rSign;
-	}
 }

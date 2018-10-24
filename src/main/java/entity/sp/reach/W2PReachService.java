@@ -51,7 +51,7 @@ public class W2PReachService {
 		}
 	}
 	
-	public Set<Integer> getPids(int wid){
+	public Map<Integer, Short> getPids(int wid){
 		Integer blockIndex = null;
 		if(null != (blockIndex = widToBlock.get(wid))) {
 			return indexs[blockIndex].getPids(wid);
@@ -66,29 +66,29 @@ public class W2PReachService {
 	}
 	
 	public static void main(String[] args) {
-		W2PReachService ser = new W2PReachService(Global.indexWid2PidBase);
-		ser.openIndexs();
-		int wid = 0;
-		Scanner scan = new Scanner(System.in);
-		Set<Integer> pids = null;
-		while(true) {
-			System.out.print("> 请输入wid : ");
-			wid = Integer.parseInt(scan.nextLine());
-			if(-1==wid) break;
-			pids = ser.getPids(wid);
-			int k = 5;
-			for(int in : pids) {
-				if(0 != k) {
-					k--;
-					System.out.print(in + " ");
-				}
-				if(in < 0) {
-					System.out.print(in + " ");
-				}
-			}
-			System.out.println();
-		}
-		ser.closeIndexs();
+//		W2PReachService ser = new W2PReachService(Global.indexWid2PidBase);
+//		ser.openIndexs();
+//		int wid = 0;
+//		Scanner scan = new Scanner(System.in);
+//		Set<Integer> pids = null;
+//		while(true) {
+//			System.out.print("> 请输入wid : ");
+//			wid = Integer.parseInt(scan.nextLine());
+//			if(-1==wid) break;
+//			pids = ser.getPids(wid);
+//			int k = 5;
+//			for(int in : pids) {
+//				if(0 != k) {
+//					k--;
+//					System.out.print(in + " ");
+//				}
+//				if(in < 0) {
+//					System.out.print(in + " ");
+//				}
+//			}
+//			System.out.println();
+//		}
+//		ser.closeIndexs();
 	}
 	
 }

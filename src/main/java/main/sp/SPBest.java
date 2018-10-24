@@ -94,6 +94,7 @@ public class SPBest {
 		
 		rtreeNode2Pid = P2WRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
 		
+		Global.indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
 		w2pReachSer = new W2PReachService(Global.indexWid2PidBase);
 		w2pReachSer.openIndexs();
 		
@@ -284,7 +285,7 @@ public class SPBest {
 		}
 		
 		// 获得W2PReachable
-		Set<Integer>[] w2pReachable = new Set[sortQwords.length];
+		Map<Integer, Short>[] w2pReachable = new Map[sortQwords.length];
 		for(i=0; i<sortQwords.length; i++) {
 			if(Global.wordFrequency.get(sortQwords[i]) >= Global.MAX_WORD_FREQUENCY) {
 				w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);

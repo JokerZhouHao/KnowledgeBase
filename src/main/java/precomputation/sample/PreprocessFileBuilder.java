@@ -23,7 +23,7 @@ public class PreprocessFileBuilder {
 		System.out.println("> 开始创建" + String.valueOf(nodeNum) + "个节点的子图所需的文件 . . . . ");
 		
 		// 创建nid dates wids index
-//		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
+		IndexNidKeywordsListService.mainToCreateNidWidDataIndex(true);
 		
 		// wid nid_date_pair index
 //		String indexPath = Global.indexWid2DateNid;
@@ -35,32 +35,45 @@ public class PreprocessFileBuilder {
 //		RTreeService.build();
 		
 		// PN
-//		List<Integer> radius = new ArrayList<>();
-//		radius.add(1);
-//		radius.add(2);
-//		radius.add(3);
+//		int[] radius = {2};
+//		int[] lens = {1000000};
+//		for(int r : radius) {
+//			for(int l : lens) {
+//				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
+//			}
+//		}
+		
 //		WordPNIndexBuilder.batchBuildingWN(radius);
 		
 		// TF-Label
 //		TFlabelDataFormatter.build();
 		
 		// rtree_leaf_node_contain_pid
-		RTreeLeafNodeContainPids.main(null);
+//		RTreeLeafNodeContainPids.main(null);
 		
 		// 创建词频文件
-		IndexNidKeywordsListService.buildWordFrequencyFile();
-		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+//		IndexNidKeywordsListService.buildWordFrequencyFile();
+//		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		// 各节点（包括rtree node）到wid的可达性
-		Global.numPid = AllPidWid.getAllPid().size();
-		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
-		W2PIndex.main(null);
+//		Global.numPid = AllPidWid.getAllPid().size();
+//		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
+//		W2PIndex.main(null);
+//		List<Integer> fres = new ArrayList<>();
+//		fres.add(100);
+//		fres.add(250);
+//		fres.add(500);
+//		fres.add(1000);
+//		fres.add(10000);
+//		fres.add(100000);
+//		fres.add(1000000);
+//		W2PIndex.batchBuildW2PIndex(fres);
 		
 		// rtreeNode到pid的可达情况
-		P2NRTreeReach.main(null);
+//		P2NRTreeReach.main(null);
 		
 		// MinMaxDate
-		MinMaxDateService.main(null);
+//		MinMaxDateService.main(null);
 		
 		System.out.println("> Over创建" + String.valueOf(nodeNum) + "个节点的子图所需的文件! ! ! ");
 	}

@@ -10,11 +10,12 @@ class Bar:
     width = 0.148
     span = 0.05
     spanTotal = width + span
-    base_startx = 1 - width - span/2
-    hatchx = 'xxxx'
+    base_startx = 1 - 2*width - span/2*3
+    hatchx = 'xx'
+    hatchxes = ['xx', '.', '+', 'O']
     ylim = 1000000
 
-    def __init__(self, xLabel=None, yLabel=None ,is_stack=False, title=None, xs=None, x_txts=None, ys=None, yscale=None, y_type=None):
+    def __init__(self, xLabel=None, yLabel=None ,is_stack=False, title=None, xs=None, x_txts=None, ys=None, yscale=None, y_type=None, f_type=None, fpath='test.pdf'):
         self.xLabel = xLabel
         self.yLabel = yLabel
         self.y_type = y_type
@@ -27,10 +28,13 @@ class Bar:
         else:   self.ys = ys
         if yscale==None:    self.yscale='log'
         else: self.yscale = yscale
-        self.fig = plt.figure(random.randint(1, 10000))
+        self.fig = plt.figure(random.randint(1, 10000), figsize=(10.1023, 6.5), tight_layout=True)
         if title==None: self.fig.canvas.set_window_title('Test')
         else:   self.fig.canvas.set_window_title(title)
+        self.f_type = f_type
+        plt.rcParams['font.size'] = 20
         self.ax = self.fig.add_subplot(111)
+        self.fpath = fpath
 
     # 画柱状图
     def draw_bar(self, start_index, hs, ys=None, label=None, faceColor='#CCCCCC', hatch=None, linestyle='solid', edgecolor='black'):
@@ -48,15 +52,24 @@ class Bar:
             bys.append(ys[i])
             bys.append(ys[i] + hs[i])
             bys.append(ys[i] + hs[i])
-            self.ax.fill(bxs, bys, hatch=hatch, fc=faceColor, ls=linestyle, ec=edgecolor, lw=1)
-            yPos = 0.72
-            if self.yscale != 'log': yPos=-30
-            if self.y_type=='TQSP': yPos = 0.7
-            if self.y_type=='RTree': yPos = 0.7
+            if i==0:
+                self.ax.fill(bxs, bys, hatch=hatch, fc=faceColor, ls=linestyle, ec=edgecolor, lw=1, label=label)
+            else:
+                self.ax.fill(bxs, bys, hatch=hatch, fc=faceColor, ls=linestyle, ec=edgecolor, lw=1)
+
+            yPos = self.ys[0] - 11
+            if self.f_type=='radius_len_SPTD*':
+                yPos = self.ys[0] - 13
+            elif self.f_type=='radius_len_SPTR*':
+                yPos = self.ys[0] - 14
+
+            # if self.yscale != 'log': yPos=-30
+            # if self.y_type=='TQSP': yPos = 0.7
+            # if self.y_type=='RTree': yPos = 0.7
             # if self.y_type=='NW': yPos = -35
-            if label!=None:
-                # self.ax.vlines((startx + i + startx + i + Bar.width)/2, 0, 1.2, colors='k', lw=1.4)
-                self.ax.text((startx + i + startx + i + Bar.width)/2, yPos, label, fontsize=9, ha='center', rotation=90)
+
+            # if label!=None:
+            #     self.ax.text((startx + i + startx + i + Bar.width)/2, yPos, label, fontsize=20, ha='center', rotation=0)
 
     def show(self):
         # 设置legend
@@ -64,9 +77,13 @@ class Bar:
             self.ax.fill([-1, 0, 0, -1], [-1, -1, -1.1, -1.1], label='Other Time', fc='white', ec='black')
             self.ax.fill([-1, 0, 0, -1], [-1, -1, -1.1, -1.1], hatch=Bar.hatchx, label='Semantic Time', fc='#CCCCCC', ec='black')
             self.ax.legend(loc=2, frameon=False, prop={'size': 9})
+        elif self.f_type.startswith('Alpha'):
+            self.ax.legend(loc=2, frameon=False, prop={'size': 20})
 
         # 设置X、Y限制
-        self.ax.tick_params(direction='in')
+        self.ax.tick_params(axis='x', direction='in', width=3, length=8, which='major')
+        self.ax.tick_params(axis='y', direction='out', width=3, length=8, which='major')
+        self.ax.tick_params(direction='out', width=2, length=4, which='minor')
         self.ax.set_xticks(self.xs)
         self.ax.set_xlim(self.xs[0], self.xs[-1])
         if self.yscale=='log':
@@ -87,51 +104,83 @@ class Bar:
         # if self.y_type=='NW':
         #     xLabel_x = 3
         #     xLabel_y = -35 - 100
-        if self.xLabel!=None:
+        # if self.xLabel!=None:
             # self.ax.text(xLabel_x, xLabel_y, self.xLabel)
             # self.ax.set_xlabel(self.xLabel, va='bottom', visible=True)
-            self.ax.set_title(self.xLabel, fontsize=9, verticalalignment='bottom', pad=17)
+            # self.ax.set_title(self.xLabel, fontsize=9, verticalalignment='bottom', pad=17)
         if self.yLabel!=None:   self.ax.set_ylabel(self.yLabel)
+        if self.xLabel != None:  self.ax.set_xlabel(self.xLabel)
 
         # 隐藏下方x轴的label
+        yPos = None
+        if self.f_type.startswith('radius_len'):
+            yPos = -0.015
         xaxis = self.ax.get_xaxis()
         x_labels = xaxis.get_ticklabels()
         for i in range(len(x_labels)):
-            x_labels[i].set_visible(False)
+            if i==0 or i==len(x_labels)-1:
+                x_labels[i].set_visible(False)
+            else:
+                pos = x_labels[i].get_position()
+                print(pos)
+                print(x_labels[i].get_verticalalignment())
+                if yPos!=None:
+                    pos = (pos[0], yPos)
+                x_labels[i].set_position(pos)
+                x_labels[i].set_verticalalignment('top')
+                x_labels[i].set_text(self.x_txts[i-1])
         xaxis.set_ticklabels(x_labels)
         # 隐藏下方x轴的刻度线
         x_lines = xaxis.get_ticklines()
         for ln in x_lines:
             ln.set_visible(False)
 
-        # 设置左边Y轴刻度
-        self.ax_x = self.ax.twinx()
-        if self.yscale=='log':
-            self.ax_x.set_ylim(1, Bar.ylim)
-            self.ax_x.set_yscale('log')
-        else:
-            self.ax_x.set_yticks(self.ys)
-            self.ax_x.set_ylim(self.ys[0], self.ys[-1])
-
         # 设置右边Y轴刻度
-        self.ax_y = self.ax.twiny()
-        self.ax_y.tick_params(direction='in')
-        self.ax_y.set_xticks(self.xs)
-        self.ax_y.set_xlim(self.xs[0], self.xs[-1])
+        # self.ax_x = self.ax.twinx()
+        # right_y_axis = self.ax_x.get_yaxis()
+        # yticks = right_y_axis.get_ticklabels()
+        # for tk in yticks:
+        #     tk.set_visible(False)
+        # right_y_axis.set_ticklabels(yticks)
 
-        # self.fig.canvas.draw()
-        # 改变上方x轴的labels
-        xaxis = self.ax_y.get_xaxis()
-        x_labels = xaxis.get_ticklabels()
-        for i in range(len(x_labels)):
-            if i==0 or i==len(x_labels)-1:
-                x_labels[i].set_visible(False)
-            else:
-                x_labels[i].set_text(self.x_txts[i-1])
-        xaxis.set_ticklabels(x_labels)
+        # if self.yscale=='log':
+        #     self.ax_x.set_ylim(1, Bar.ylim)
+        #     self.ax_x.set_yscale('log')
+        # else:
+        #     self.ax_x.set_yticks(self.ys)
+        #     self.ax_x.set_ylim(self.ys[0], self.ys[-1])
+
+        # 设置上方X轴刻度
+        # self.ax_y = self.ax.twiny()
+        #
+        # if self.xLabel != None:
+        #     self.ax_y.set_xlabel(self.xLabel)
+        #
+        # self.ax_y.tick_params(axis='x', direction='in', width=3, length=8, which='major')
+        # self.ax_y.set_xticks(self.xs)
+        # self.ax_y.set_xlim(self.xs[0], self.xs[-1])
+        #
+        # # 改变上方x轴的labels
+        # xaxis = self.ax_y.get_xaxis()
+        # # 替换刻度
+        # x_labels = xaxis.get_ticklabels()
+        # for i in range(len(x_labels)):
+        #     if i==0 or i==len(x_labels)-1:
+        #         x_labels[i].set_visible(False)
+        #     else:
+        #         x_labels[i].set_text(self.x_txts[i-1])
+        # xaxis.set_ticklabels(x_labels)
+        # # 隐藏刻度线
+        # x_lines = xaxis.get_ticklines()
+        # for i in range(len(x_lines)):
+        #     if i==1 or i==len(x_labels)*2-1:
+        #         x_lines[i].set_visible(False)
+
         # self.ax.grid('on')
+
         interactive(True)
         plt.show()
+        self.fig.savefig(self.fpath)
 
     @staticmethod
     def sleep():
@@ -228,6 +277,42 @@ class Bar:
             timeBar.draw_bar(i, timeOthers, ys=timeSemantics, faceColor='white')
         timeBar.show()
 
+    # 绘制查询词的图
+    @staticmethod
+    def draw_radius_len(search_type=0, base_y = 600, ftype=None, fpath='test.pdf'):
+        xs = [0.5, 1, 2, 3, 3.5]
+        x_txts = [r'$10^5$', r'$10^6$', r'$10^7$']
+
+        if search_type==0:
+            ys = [base_y+i*200 for i in range(0, 7)]
+        elif search_type==1:
+            ys = [base_y+i*400 for i in range(0, 6)]
+
+        if search_type==0:
+            title = 'SPTD*'
+        elif search_type==1:
+            title = 'SPTR*'
+
+        timeBar = Bar(xLabel=r'$\mathit{l}$', yLabel='Runtime (ms)', is_stack=False, title=title, ys=ys, xs=xs, x_txts=x_txts, yscale='linear', y_type='NW', f_type=ftype, fpath=fpath)
+
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new1\\radius_len\\'
+        radius = [1, 2, 3]
+        radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
+        lens = (100000, 1000000, 10000000)
+
+        indexs = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=100000, mds=50000000, t=search_type, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+
+        for radiu_i in range(len(radius)):
+            runtimes = []
+            for len_i in range(len(lens)):
+                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=5, wf=1000, dr=7), time_total_threshold=12000000)
+                data = Data.getData_by_indexs(indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+                print(data)
+                runtimes.append(data.timeTotal)
+            timeBar.draw_bar(radiu_i, runtimes, hatch=Bar.hatchxes[radiu_i], label=radius_txt[radiu_i], )
+            # timeBar.draw_bar(radiu_i, runtimes, label=radius[radiu_i])
+        timeBar.show()
+
     # 绘制不同规模柱状图
     @staticmethod
     def draw_differ_size(search_type=0, bar_type=0):
@@ -320,6 +405,7 @@ class LineChart:
         self.xlabel_rotation = xlabel_rotation
         plt.rcParams['font.size'] = 20
         self.ax = self.fig.add_subplot(111)
+        self.ylim = ylim
         self.fpath = fpath
 
     # 画折线图
@@ -328,7 +414,11 @@ class LineChart:
         self.line_type_index += 1
 
     def show(self):
-        self.ax.legend(loc=1, prop={'size': 15})
+        if self.yLabel.find('TQTSP') != -1:
+            # self.ax.legend(loc=0, prop={'size': 15}, bbox_to_anchor=(0.97, 0.84))
+            self.ax.legend(loc=0, prop={'size': 15})
+        else:
+            self.ax.legend(loc=0, prop={'size': 15})
 
         # 设置下方X轴刻度
         self.ax.tick_params(axis='x', direction='in', width=3, length=8, which='major')
@@ -339,7 +429,9 @@ class LineChart:
 
         # 设置Y轴的刻度
         if self.yscale=='log':
-            self.ax.set_ylim(1, Bar.ylim)
+            if self.ylim != None:
+                self.ax.set_ylim(self.ylim)
+            else:   self.ax.set_ylim(1, Bar.ylim)
             self.ax.set_yscale('log')
         else:
             self.ax.set_yticks(self.ys)
@@ -364,7 +456,8 @@ class LineChart:
         if self.xLabel!=None:
             # self.ax.text(xLabel_x, xLabel_y, self.xLabel)
             # self.ax.set_xlabel(self.xLabel)
-            self.ax.set_title(self.xLabel, fontsize=20, verticalalignment='bottom')
+            # self.ax.set_title(self.xLabel, fontsize=20, verticalalignment='bottom')
+            self.ax.set_xlabel(self.xLabel, fontsize=20)
         if self.yLabel!=None:   self.ax.set_ylabel(self.yLabel)
 
         # 添加右边y轴的刻度
@@ -388,29 +481,38 @@ class LineChart:
     @staticmethod
     def draw_k(show_type, base_y=None, fpath='test.pdf'):
         ys = None
-        ys = [i*100 for i in range(17)]
-        if base_y != None:
-            ys = [base_y+i*100 for i in range(0, 17)]
+        yLabel = None
+        yscale = 'liner'
+        ylim = None
+
+        if show_type==0:
+            yLabel = 'Runtime (s)'
+            # yscale = 'log'
+            # ylim = (1000, 100000)
+            ys = [base_y+i*2 for i in range(0, 9)]
+        elif show_type==1:
+            yLabel = '# of TQTSP Computations'
+            # yscale='log'
+            # ylim = (100, 100000)
+            ys = [base_y+i*300 for i in range(0, 9)]
+        elif show_type==2:
+            yLabel = '# of R-tree nodes accessed'
+            ys = [i*20 for i in range(5)]
+
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
         xs=[i for  i in  range(len(x_txts))]
 
-        yLabel = None
-        yscale = 'liner'
-        if 0==show_type:
-            yLabel = 'Runtime (ms)'
-        elif 1==show_type:
-            yLabel = '# of TQTSP Computations'
-            yscale='log'
-        elif 2==show_type: yLabel = '# of R-tree nodes accessed'
-
-        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
+        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
-        type = None
-
         ks = [1, 3, 5, 8, 10, 15, 20]
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\k_nw\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new1\\k_n_wrod_dr\\'
+
+        index0 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=0, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        index1 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=1, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        indexs = (index0, index1)
+
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
@@ -421,9 +523,10 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for k in ks:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=1000, t=search_types[search_index], ns=200, r=2, k=k, nw=5, wf=500, dr=7))
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=4, k=k, nw=5, wf=50, dr=7))
+                    data = Data.getData_by_indexs(indexs[search_index], fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=10000000, mds=50000000, t=search_types[search_index], ns=200, r=1, k=k, nw=5, wf=1000, dr=7), time_total_threshold=12000000)
                     print(data)
-                    if 0==show_type: runtimes.append(data.timeTotal)
+                    if 0==show_type: runtimes.append(data.timeTotal/1000)
                     elif 1==show_type: runtimes.append(data.numTQSP)
                     elif 2==show_type: runtimes.append(data.numAccessedRTreeNode)
                 chart.draw_line(runtimes, type)
@@ -434,20 +537,23 @@ class LineChart:
     def draw_nw(base_y=None, fpath='test.pdf'):
         ys = None
         if base_y != None:
-            ys = [base_y+i*100 for i in range(0, 11)]
+            ys = [base_y+i*5 for i in range(0, 7)]
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0]
         xs=[i for  i in  range(len(x_txts))]
 
-        yLabel = 'Runtime (ms)'
+        yLabel = 'Runtime (s)'
 
-        chart = LineChart(xs, x_txts, ys=ys, xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|', fpath=fpath)
+        chart = LineChart(xs, x_txts, ys=ys, yscale='linear', xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
-        type = None
-
         nws = [1, 3, 5, 8, 10]
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\k_nw\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new1\\k_n_wrod_dr\\'
+
+        index0 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=0, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        index1 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=1, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        indexs = (index0, index1)
+
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
@@ -458,16 +564,20 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for nw in nws:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=1000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=500, dr=7))
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=4, k=5, nw=nw, wf=50, dr=7))
+                    data = Data.getData_by_indexs(indexs[search_index], fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=10000000, mds=50000000, t=search_types[search_index], ns=200, r=1, k=5, nw=nw, wf=1000, dr=7), time_total_threshold=12000000)
                     print(data)
-                    runtimes.append(data.timeTotal)
+                    runtimes.append(data.timeTotal/1000)
                 chart.draw_line(runtimes, type)
         chart.show()
 
     # 画radius的折线图
     @staticmethod
     def draw_radius(type=0, base_y=600, title='TEST', fpath='test.pdf'):
-        ys = [base_y+i*50 for i in range(0, 11)]
+        if type==0:
+            ys = [base_y+i*50 for i in range(0, 8)]
+        elif type==1:
+            ys = [base_y+i*50 for i in range(0, 9)]
         xs=[i for  i in  range(0, 4)]
         x_txts = [1.0, 2.0, 3.0, 5.0]
         chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=r'$\alpha$-radius', yLabel='Runtime (ms)', title=title, fpath=fpath)
@@ -475,14 +585,47 @@ class LineChart:
 
         radius = [1, 2, 3, 5]
         ks = [1, 3, 5, 8, 10, 15, 20]
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\radius_k\\'
+        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new\\radius_k\\'
         for k in ks:
             runtimes = []
             for r in radius:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, nwlen=1000000, mds=1000, t=type, ns=200, r=r, k=k, nw=5, wf=500, dr=7))
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=type, ns=200, r=r, k=k, nw=5, wf=50, dr=7), time_total_threshold=12000000)
                 print(data)
                 runtimes.append(data.timeTotal)
             chart.draw_line(runtimes, 'k=' + str(k))
+        chart.show()
+
+
+    # 画radius_len的折线图
+    @staticmethod
+    def radius_len(type=0, base_y=600, title='TEST', fpath='test.pdf'):
+        if type==0:
+            ys = [base_y+i*20 for i in range(0, 11)]
+            yscale = 'liner'
+        elif type==1:
+            ys = [base_y+i*40 for i in range(0, 7)]
+            yscale = 'liner'
+        # x_txts = [1.0, 2.0, 3.0]
+        x_txts = (r'$1\times10^5$', r'$1\times10^6$', r'$1\times10^7$')
+        # x_txts = (r'$1\times10^5$', r'$1\times10^6$', r'$1\times10^7$', r'$1\times10^8$', r'$1\times10^9$')
+        xs=[i for  i in  range(len(x_txts))]
+        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, xLabel=r'l', yLabel='Runtime (ms)', title=title, fpath=fpath, xlabel_rotation=45)
+        # chart = LineChart(xs, x_txts, xLabel=r'$\alpha$-radius', yLabel='Runtime (ms)')
+
+        radius = (1, 2, 3, 4)
+        radius_txt = (r'$\alpha-radius=1$', r'$\alpha-radius=2$', r'$\alpha-radius=3$', r'$\alpha-radius=4$')
+        lens = (100000, 1000000, 10000000)
+        # lens = (100000, 1000000, 10000000, 100000000, 1000000000)
+        lens_txt = (r'$\mathit{l}=1\times10^5$', r'$\mathit{l}=1\times10^6$', r'$\mathit{l}=1\times10^7$', r'$\mathit{l}=1\times10^8$', r'$\mathit{l}=1\times10^9$')
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\new\\radius_len\\'
+        for radiu_i in range(len(radius)):
+            runtimes = []
+            for len_i in range(len(lens)):
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=type, ns=200, r=radius[radiu_i], k=5, nw=5, wf=50, dr=7), time_total_threshold=12000000)
+                print(data)
+                runtimes.append(data.timeTotal)
+            # chart.draw_line(runtimes, lens_txt[len_i])
+            chart.draw_line(runtimes, radius_txt[radiu_i])
         chart.show()
 
     # 绘制不同规模柱状图
@@ -570,28 +713,39 @@ class LineChart:
         chart.show()
 
     @staticmethod
-    def draw_word_frequency(title='WORD_FREQUENCY', base_y=None, rotation=0, fpath='test.pdf'):
-        if base_y!=None: ys = [base_y+i*100 for i in range(0, 14)]
-        xs=[i for  i in  range(0, 10)]
-        x_txts = [0, r'$5\times10^1$', r'$1\times10^2$',
+    def draw_word_frequency(title=r'$\tau$', search_type=0, base_y=None, rotation=0, fpath='test.pdf'):
+        if base_y!=None:
+            if search_type == 0:
+                ys = [base_y+i*1 for i in range(0, 7)]
+            elif search_type == 1:
+                ys = [base_y+i*200 for i in range(0, 5)]
+        xs=[i for  i in  range(0, 7)]
+        x_txts = [r'$1\times10^2$', r'$2.5\times10^2$',
                      r'$5\times10^2$', r'$1\times10^3$',
-                     r'$5\times10^3$', r'$1\times10^4$',
-                     r'$5\times10^4$', r'$1\times10^5$',
+                     r'$1\times10^4$',r'$1\times10^5$',
                      r'$1\times10^6$'
                  ]
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation, fpath = fpath)
-        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Runtime (ms)', title=title, xlabel_rotation=rotation, fpath = fpath)
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Runtime (s)', title=title, xlabel_rotation=rotation, fpath = fpath)
+        else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Runtime (s)', title=title, xlabel_rotation=rotation, fpath = fpath)
 
-        # chart.ax.grid('on')
+        wfs = [100, 250, 500, 1000, 10000, 100000, 1000000]
 
-        wfs = [0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000]
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new1\\word_frequency\\'
+        search_name = None
+        if search_type==0:
+            search_name = r'$SPTD^*$'
+        else:
+            search_name = r'$SPTR^*$'
 
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\word_fequency_test\\'
-        runtimes = []
-        for wf in wfs:
-            data = Data.getData(fp=PathUtility.sample_res_path(base_dir, wf=wf))
-            runtimes.append(data.timeTotal)
-        chart.draw_line(runtimes, r'$SPTD^*$')
+        search_types = (0, 1)
+        search_names = (r'$SPTD^*$', r'$SPTR^*$')
+
+        for search_type_index in range(len(search_types)):
+            runtimes = []
+            for wf in wfs:
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=search_types[search_type_index], ns=200, r=3, k=5, nw=5, wf=wf, dr=7), time_total_threshold=120000)
+                runtimes.append(data.timeTotal/1000)
+            chart.draw_line(runtimes, search_names[search_type_index])
         chart.show()
 
     @staticmethod
@@ -626,7 +780,7 @@ class LineChart:
      # 画不同date range折线图
     @staticmethod
     def draw_date_range(label=r'$|q.\delta|$', base_y=None, x_rotation=0, fpath='test.pdf'):
-        if base_y!=None: ys = [base_y+i*100 for i in range(0, 17)]
+        if base_y!=None: ys = [base_y+i*1 for i in range(0, 5)]
         # x_txts = [r'$5\times10^8$', r'$1\times10^8$', r'$5\times10^7$', r'$1\times10^7$',
         #           r'$5\times10^6$', r'$1\times10^6$', r'$5\times10^5$', r'$1\times10^5$',
         #           r'$1\times10^4$', '0']
@@ -636,21 +790,26 @@ class LineChart:
         x_txts = [0,6,14,30,60,100,200,300]
         xs=[i for  i in  range(len(drs))]
 
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath = fpath)
-        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (s)', xlabel_rotation=x_rotation, fpath = fpath)
+        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, ylim=(100, 1000), yLabel='Runtime (s)', xlabel_rotation=x_rotation, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\dr\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new1\\k_n_wrod_dr\\'
         alg_types=['SPBase', 'SPBest']
-        for alg_type in alg_types:
+
+        index0 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBase', nwlen=10000000, mds=50000000, t=1, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        index1 = Data.get_in_time_simple_indexs(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=1, ns=200, r=1, k=5, nw=5, wf=1000, dr=7), time_total_threshold=120000)
+        indexs = (index0, index1)
+
+        for alg_type_index in range(len(alg_types)):
             runtimes = []
             for dr in drs:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=1000000, mds=1000, t=1, ns=200, r=2, k=5, nw=5, wf=500, dr=dr))
-                # print(data)
-                runtimes.append(data.timeTotal)
+                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=1000000, mds=50000000, t=1, ns=200, r=4, k=5, nw=5, wf=50, dr=dr))
+                data = Data.getData_by_indexs(indexs[alg_type_index], fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_type_index], nwlen=10000000, mds=50000000, t=1, ns=200, r=1, k=5, nw=5, wf=1000, dr=dr), time_total_threshold=120000)
+                runtimes.append(data.timeTotal/1000)
             print(runtimes)
-            if alg_type=='SPBase':
+            if alg_types[alg_type_index]=='SPBase':
                 chart.draw_line(runtimes, r'$SPTR$')
-            elif alg_type=='SPBest':
+            elif alg_types[alg_type_index]=='SPBest':
                 chart.draw_line(runtimes, r'$SPTR^*$')
         chart.show()
 
@@ -709,11 +868,20 @@ class LineChart:
 
         plt.show()
 
-
-
     @staticmethod
     def sleep():
         plt.pause(1200)
+
+
+######## 画WORD_FREQUENCY折线图 ##############
+# LineChart.draw_word_frequency(base_y=3, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
+
+
+######### 画radius_len柱状图 ################
+# Bar.draw_radius_len(0, 7200, ftype='Alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 3800, ftype='Alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
+
 
 ######### 画top-k柱状图 #################
 # Bar.draw_topK()
@@ -723,21 +891,44 @@ class LineChart:
 # Bar.draw_topK(0, 2)
 # Bar.draw_topK(1, 2)
 # 折线图
-# LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_topK.pdf')
-# LineChart.draw_k(1, fpath=PathUtility.figure_path() + 'TQTSPYagoVBDate_topK.pdf')
-# LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'RTreeNodeYagoVBDate_topK.pdf')
+# LineChart.draw_k(0, base_y=2, fpath=PathUtility.figure_path() + 'topK_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_k(1, base_y=800, fpath=PathUtility.figure_path() + 'topK_TQTSPDBpediaVB_Date.pdf')
+# LineChart.draw_k(2, base_y=10, fpath=PathUtility.figure_path() + 'topK_RTreeNodeDBpediaVB_Date.pdf')
+
 
 ######### 画不同数keywords柱状图 #########
 # Bar.draw_n_words()
 # Bar.draw_n_words(1)
 # 折线图
-# LineChart.draw_nw(fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_WordNum.pdf')
-# f = plt.figure()
-# f.savefig(fname='test.pdf')
+LineChart.draw_nw(base_y=0, fpath=PathUtility.figure_path() + 'WordNum_RuntimeDBpediaVB_Date.pdf')
 
-######### 画radius折线图 ################
-# LineChart.draw_radius(title="radius_k type=0")
-# LineChart.draw_radius(1, 300, title="radius_k type=1", fpath=PathUtility.figure_path() + 'RuntimeYagoVBDate_alpha_k.pdf')
+######## 画不同的时间差对查询情况影响  #########
+LineChart.draw_date_range(base_y=2, fpath=PathUtility.figure_path() + 'DateRange_RuntimeDBpediaVB_Date.pdf')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######### 画radius_k折线图 ################
+# LineChart.draw_radius(0, 750, title="radius_k SPTD*", fpath=PathUtility.figure_path() + 'Radius_RuntimeYago_SPTDStar.pdf')
+# LineChart.draw_radius(1, 400, title="radius_k SPTR*", fpath=PathUtility.figure_path() + 'Radius_RuntimeYago_SPTRStar.pdf')
+
+######### 画radius_len折线图 ################
+# LineChart.radius_len(0, 790, title="radius_len SPTD*", fpath=PathUtility.figure_path() + 'RadiusLenLine_RuntimeYago_SPTDStar.pdf')
+# LineChart.radius_len(1, 400, title="radius_len SPTR*", fpath=PathUtility.figure_path() + 'RadiusLenLine_RuntimeYago_SPTRStar.pdf')
 
 ######### 画不同规模子图的柱状图  #########
 # Bar.draw_differ_size(0, 0)
@@ -754,20 +945,13 @@ class LineChart:
 ######## 画MAX_DIFFERENCE折线图 ##############
 # LineChart.draw_max_date(base_y=400, x_rotation=45, fpath=PathUtility.figure_path() + 'MaxDateDifferenceYagoVB.pdf')
 
-######## 画WORD_FREQUENCY折线图 ##############
-# LineChart.draw_word_frequency(base_y=700, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequencyRuntimeYagoVB.pdf')
-#
 ######## 画不同WORD_FREQUENCY_SIZE折线图 #####
 # LineChart.draw_word_frequency_size(base_y=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequencySizeYagoVB.pdf')
 
-######## 画不同的时间差对查询情况影响  #########
-# LineChart.draw_date_range(fpath=PathUtility.figure_path() + 'DateRangeYagoVB.pdf')
-
 ######## 画节点度的分布图  #########
-LineChart.draw_degree_distribution()
+# LineChart.draw_degree_distribution()
 
-
-# Bar.sleep()
+Bar.sleep()
 
 ###########################  Bar 测试代码 ###############################################
 # bar = Bar(xLabel='top-k', yLabel='# of TQSP Computations')

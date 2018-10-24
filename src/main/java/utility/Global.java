@@ -39,7 +39,7 @@ public class Global {
 	public static long[] runtime = new long[10];
 	
 	// radius
-	public static int radius = 3;
+	public static int radius = 1;
 	
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
@@ -159,8 +159,9 @@ public class Global {
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexWidPN = "wid_pn";
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
-	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator;
-	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable" + File.separator + "wids_block_";
+	public static int MAX_WORD_FREQUENCY = 1000;
+	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
+	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
 	public static String indexWid2DateNid = Global.outputDirectoryPath + "wid_2_DateNids";
 	
 	/* file content delimiter sign */
@@ -196,7 +197,7 @@ public class Global {
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH;
 	
-	public static int MAX_PN_LENGTH = 100000000;
+	public static int MAX_PN_LENGTH = 10000000;
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;
@@ -210,7 +211,6 @@ public class Global {
 	public static Boolean isTestRangeDate = Boolean.FALSE;
 	
 	public static Map<Integer, Integer> wordFrequency = null;
-	public static int MAX_WORD_FREQUENCY = 500;
 	public static int DATE_RANGE = 7;	
 //	public static int[] WORD_FREQUENCYS = {0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000};
 	public static int[] WORD_FREQUENCYS = null;

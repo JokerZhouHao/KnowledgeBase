@@ -316,6 +316,16 @@ public class WordPNIndexBuilder {
 	public static void main(String[] args) throws Exception {
 		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		
+//		List<Integer> lens = new ArrayList<>();
+//		lens.add(100000);
+//		lens.add(1000000);
+//		lens.add(10000000);
+//		lens.add(100000000);
+//		lens.add(1000000000);
+//		for(int len : lens) {
+//			buildingWN(3, len);
+//		}
+		
 //		List<Integer> list = new ArrayList<>();
 //		list.add(1);
 //		list.add(2);

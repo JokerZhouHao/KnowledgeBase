@@ -6,16 +6,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import utility.IOUtility;
 
 public class TempClassWriteThread extends Thread{
-	private ArrayBlockingQueue<TempClass> queue = null;
+	private ArrayBlockingQueue<TempClassInt> queue = null;
 	private String fp = null;
-	public TempClassWriteThread(ArrayBlockingQueue<TempClass> qu, String fp) {
+	public TempClassWriteThread(ArrayBlockingQueue<TempClassInt> qu, String fp) {
 		queue = qu;
 		this.fp = fp;
 	}
 	
 	public void run() {
 		try {
-			TempClass tc = null;
+			TempClassInt tc = null;
 			DataOutputStream dos = IOUtility.getDos(fp);
 			while(true) {
 				tc = queue.take();

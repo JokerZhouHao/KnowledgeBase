@@ -6,9 +6,11 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -70,32 +72,34 @@ public class W2PIndex {
 		}
 	}
 	
-	private byte[] listToBytes(List<Integer> li) {
-		int byteNum = (1 + li.size()) * 4;
+	private byte[] listToBytes(Map<Integer, Short> pidDis) {
+//		int byteNum = (1 + li.size()) * 4;
+		int byteNum = 1*4 + pidDis.size()*6;
 		ByteBuffer bb = ByteBuffer.allocate(byteNum);
 		bb.rewind();
-		bb.putInt(li.size());
-		for(int in : li) {
-			bb.putInt(in);
+		bb.putInt(pidDis.size());
+		for(Entry<Integer, Short> en : pidDis.entrySet()) {
+			bb.putInt(en.getKey());
+			bb.putShort(en.getValue());
 		}
 		return bb.array();
 	}
 	
-	private Set<Integer> bytesToSet(byte[] bytes){
+	private Map<Integer, Short> bytesToSet(byte[] bytes){
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
-		Set<Integer> set = new HashSet<>();
+		Map<Integer, Short> mp = new HashMap<>();
 		int size = bb.getInt();
 		for(int i=0; i<size; i++) {
-			set.add(bb.getInt());
+			mp.put(bb.getInt(), bb.getShort());
 		}
-		return set;
+		return mp;
 	}
 	
 	// 添加document
-	public void addDoc(int wid, List<Integer> pids) {
+	public void addDoc(int wid, Map<Integer, Short> pidDis) {
 		Document doc = new Document();
 		doc.add(new IntPoint("wid", wid));
-		doc.add(new StoredField("pids", new BytesRef(listToBytes(pids))));
+		doc.add(new StoredField("pids", new BytesRef(listToBytes(pidDis))));
 		try {
 			indexWriter.addDocument(doc);
 		} catch (Exception e) {
@@ -127,7 +131,7 @@ public class W2PIndex {
 	}
 	
 	// 检索关键字id，获得对应点
-	public Set<Integer> getPids(Integer wid){
+	public Map<Integer, Short> getPids(Integer wid){
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wid", wid), 1);
 			ScoreDoc[] hits = results.scoreDocs;
@@ -165,7 +169,7 @@ public class W2PIndex {
 		for(i=0; i<widQueues.length; i++) {
 			widQueues[i] = new ArrayBlockingQueue<Integer>(1);
 		}
-		ArrayBlockingQueue<List<Integer>> pidsQueue = new ArrayBlockingQueue<>(zipNum + 1);
+		ArrayBlockingQueue<Map<Integer, Short>> pidsQueue = new ArrayBlockingQueue<>(zipNum + 1);
 		
 		for(i=0; i<zipNum; i++) {
 			start = end;
@@ -188,8 +192,8 @@ public class W2PIndex {
 		int j = 0, k;
 		int curWid = 0;
 		W2PIndex index = null;
-		List<Integer> pids = null;
-		List<Integer> tList = null;
+		Map<Integer, Short> tPidDis = null;
+		Map<Integer, Short> pidDis = null;
 		
 		int widNum = allWids.size();
 		
@@ -219,37 +223,35 @@ public class W2PIndex {
 					widQueues[k].put(curWid);
 				}
 				for(k=0; k<widQueues.length; k++) {
-					tList = pidsQueue.take();
-					if(tList.size()==0) {
-						System.out.println(tList == W2PReachReader.signNoList);
+					tPidDis = pidsQueue.take();
+					if(tPidDis.size()==0) {
+						System.out.println(tPidDis == W2PReachReader.signNoList);
 						System.out.println("退出");
 						System.exit(0);
 					}
-					if(tList.get(0) > Integer.MIN_VALUE + 1) {
-						if(null == pids) {
-							pids = new ArrayList<>();
+					if((tPidDis != W2PReachReader.signNoList) && (tPidDis != W2PReachReader.signReadOver)) {
+						if(null == pidDis) {
+							pidDis = new HashMap<>();
 						}
-						for(int in : tList) {
-							pids.add(in);
-						}
-						tList.clear();
+						pidDis.putAll(tPidDis);
+						tPidDis.clear();
 					}
 				}
-				if(null!=pids && !pids.isEmpty()) {
+				if(null!=pidDis && !pidDis.isEmpty()) {
 					// 记录词的pids大小
 					if(Global.WORD_FREQUENCYS != null) {
 						int frequency = wordFrequency.get(curWid);
 						for(int s=0;  s<Global.WORD_FREQUENCYS.length; s++) {
 							if(frequency >= Global.WORD_FREQUENCYS[s]) {
-								fileSizes[s] += 2 + pids.size();
+								fileSizes[s] += 2*4 + pidDis.size()*6;
 							}
 						}
 					}
 					
 					if(wordFrequency.get(curWid) >= Global.MAX_WORD_FREQUENCY) {
-						index.addDoc(curWid, pids);
+						index.addDoc(curWid, pidDis);
 					}
-					pids.clear();
+					pidDis.clear();
 				}
 			}
 			index.closeIndexWriter();
@@ -275,8 +277,9 @@ public class W2PIndex {
 			widQueues[i].put(-1);
 		}
 		for(i=0; i<widQueues.length; i++) {
-			tList = pidsQueue.take();
-			if(tList.get(0) != Integer.MIN_VALUE) break;
+			tPidDis = pidsQueue.take();
+//			if(tList.get(0) != Integer.MIN_VALUE) break;
+			if(tPidDis != W2PReachReader.signReadOver)	break;
 		}
 		if(i != widQueues.length) {
 			System.err.println("> 发送的结束信号未正常收到");
@@ -299,17 +302,17 @@ public class W2PIndex {
 		int wid = 1;
 		List<Integer> pids = new ArrayList<>();
 		
-		index.openIndexWriter();
-		wid = 1;
-		pids.add(11);
-		pids.add(111);
-		index.addDoc(wid, pids);
-		pids.clear();
-		wid = 2;
-		pids.add(22);
-		pids.add(222);
-		index.addDoc(wid, pids);
-		index.closeIndexWriter();
+//		index.openIndexWriter();
+//		wid = 1;
+//		pids.add(11);
+//		pids.add(111);
+//		index.addDoc(wid, pids);
+//		pids.clear();
+//		wid = 2;
+//		pids.add(22);
+//		pids.add(222);
+//		index.addDoc(wid, pids);
+//		index.closeIndexWriter();
 		
 		index.openIndexReader();
 //		pids = index.getPids(1);
@@ -318,11 +321,20 @@ public class W2PIndex {
 		
 	}
 	
+	public static void batchBuildW2PIndex(List<Integer> fres) throws Exception{
+		for(int fre : fres) {
+			Global.MAX_WORD_FREQUENCY = fre;
+			Global.indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
+			W2PIndex.buidingW2PIndex();
+		}
+	}
+	
+	
 	public static void main(String[] args) throws Exception{
 		long startTime = System.currentTimeMillis();
 		System.out.println("> 文件生成（创建后会被自动删除），并创建W2PIndex . . . ");
 		P2WRTreeReach.building();
-		for(Set<Integer> st : P2WRTreeReach.pid2Wids) {
+		for(Map<Integer, Short> st : P2WRTreeReach.pid2Wids) {
 			if(null!=st)	st.clear();
 		}
 		W2PReachWriter.buildingWPReach();
