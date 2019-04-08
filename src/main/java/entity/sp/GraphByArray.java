@@ -269,7 +269,6 @@ public class GraphByArray {
 		
 //		int numAccessNid = 0;
 		
-		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
 			
