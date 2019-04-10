@@ -80,7 +80,7 @@ public class RTreeService{
 	}
 	
 	public static void main(String[] args) throws Exception{
-		
+		Global.printInputOutputPath();
 		RTreeService.build();
 //		RTreeService.testGetNext();
 	}

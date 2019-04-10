@@ -870,8 +870,8 @@ class LineChart:
         plt.pause(1200)
 
 ######## 画WORD_FREQUENCY折线图 ##############
-LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
-LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_SPTRStar1.pdf')
+# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_SPTRStar1.pdf')
 
 
 ######### 画radius_len柱状图 ################
@@ -886,7 +886,7 @@ LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=Path
 # Bar.draw_topK(0, 2)
 # Bar.draw_topK(1, 2)
 # 折线图
-# LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'topK_RuntimeYagoVB_Date.pdf')
+LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'topK_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_k(1, base_y=0, fpath=PathUtility.figure_path() + 'topK_TQTSPYagoVB_Date.pdf')
 # LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'topK_RTreeNodeYagoVB_Date.pdf')
 

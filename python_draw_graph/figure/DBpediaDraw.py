@@ -502,7 +502,7 @@ class LineChart:
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
         xs=[i for  i in  range(len(x_txts))]
 
-        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
+        # chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
@@ -529,8 +529,8 @@ class LineChart:
                     if 0==show_type: runtimes.append(data.timeTotal/1000)
                     elif 1==show_type: runtimes.append(data.numTQSP)
                     elif 2==show_type: runtimes.append(data.numAccessedRTreeNode)
-                chart.draw_line(runtimes, type)
-        chart.show()
+                # chart.draw_line(runtimes, type)
+        # chart.show()
 
     # 画nw的折线图
     @staticmethod
@@ -874,8 +874,8 @@ class LineChart:
 
 
 ######## 画WORD_FREQUENCY折线图 ##############
-LineChart.draw_word_frequency(base_y=3, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
-LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
+# LineChart.draw_word_frequency(base_y=3, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
 
 
 ######### 画radius_len柱状图 ################
@@ -891,7 +891,7 @@ LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=Pat
 # Bar.draw_topK(0, 2)
 # Bar.draw_topK(1, 2)
 # 折线图
-# LineChart.draw_k(0, base_y=2, fpath=PathUtility.figure_path() + 'topK_RuntimeDBpediaVB_Date.pdf')
+LineChart.draw_k(0, base_y=2, fpath=PathUtility.figure_path() + 'topK_RuntimeDBpediaVB_Date.pdf')
 # LineChart.draw_k(1, base_y=800, fpath=PathUtility.figure_path() + 'topK_TQTSPDBpediaVB_Date.pdf')
 # LineChart.draw_k(2, base_y=10, fpath=PathUtility.figure_path() + 'topK_RTreeNodeDBpediaVB_Date.pdf')
 
@@ -900,10 +900,10 @@ LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=Pat
 # Bar.draw_n_words()
 # Bar.draw_n_words(1)
 # 折线图
-LineChart.draw_nw(base_y=0, fpath=PathUtility.figure_path() + 'WordNum_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_nw(base_y=0, fpath=PathUtility.figure_path() + 'WordNum_RuntimeDBpediaVB_Date.pdf')
 
 ######## 画不同的时间差对查询情况影响  #########
-LineChart.draw_date_range(base_y=2, fpath=PathUtility.figure_path() + 'DateRange_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_date_range(base_y=2, fpath=PathUtility.figure_path() + 'DateRange_RuntimeDBpediaVB_Date.pdf')
 
 
 

@@ -314,6 +314,7 @@ public class WordPNIndexBuilder {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		Global.printInputOutputPath();
 		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		
 //		List<Integer> lens = new ArrayList<>();
