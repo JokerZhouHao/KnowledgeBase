@@ -40,6 +40,7 @@ class Data:
                 if single_total_time >= time_total_threshold:  continue
                 else:
                     index += 1
+                # index += 1
                 data.numAccessedRTreeNode += int(strArr[25])
                 data.numTQSP += int(strArr[27])
                 data.timeSemantic += int(strArr[28])

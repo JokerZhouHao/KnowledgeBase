@@ -512,7 +512,9 @@ class LineChart:
         base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
+                nwlen = 1000000
                 if alg_index==0:
+                    nwlen = 2147483631
                     if search_index==0: type=r'$SPTD$'
                     else:   type=r'$SPTR$'
                 else:
@@ -520,7 +522,8 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for k in ks:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=k, nw=5, wf=50, dr=7))
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=k, nw=5, wf=50, dr=7))
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=nwlen, mds=50000000, t=search_types[search_index], ns=200, r=2, k=k, nw=5, wf=50, dr=7))
                     print(data)
                     if 0==show_type: runtimes.append(data.timeTotal)
                     elif 1==show_type: runtimes.append(data.numTQSP)
@@ -549,7 +552,9 @@ class LineChart:
         base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
+                nwlen = 1000000
                 if alg_index==0:
+                    nwlen = 2147483631
                     if search_index==0: type=r'$SPTD$'
                     else:   type=r'$SPTR$'
                 else:
@@ -557,7 +562,8 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for nw in nws:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=50, dr=7))
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=50, dr=7))
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=nwlen, mds=50000000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=50, dr=7))
                     print(data)
                     runtimes.append(data.timeTotal)
                 chart.draw_line(runtimes, type)
@@ -648,8 +654,12 @@ class LineChart:
         for t in ts:
             for alg_type in alg_types:
                 runtimes = []
+                nwlen = 1000000
                 for i in range(len(sizes)):
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir + sizes[i] + '\\', sp=alg_type, nwlen=1000000, mds=50000000, t=t, ns=200, r=2, k=5, nw=5, wf=50, dr=7))
+                    # if i==3 and alg_type=='SPBase':
+                    #     nwlen = 2147483631
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir + sizes[i] + '\\', sp=alg_type, nwlen=1000000, mds=50000000, t=t, ns=200, r=2, k=5, nw=5, wf=50, dr=7))
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir + sizes[i] + '\\', sp=alg_type, nwlen=nwlen, mds=50000000, t=t, ns=200, r=2, k=5, nw=5, wf=50, dr=7))
                     print(data)
                     if line_type==0:    runtimes.append(data.timeTotal)
                     elif line_type==1:  runtimes.append(data.numAccessedRTreeNode)
@@ -796,9 +806,12 @@ class LineChart:
         base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\dr\\'
         alg_types=['SPBase', 'SPBest']
         for alg_type in alg_types:
+            nwlen = 1000000
+            if alg_type=='SPBase':
+                nwlen =  2147483631
             runtimes = []
             for dr in drs:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=5, nw=5, wf=50, dr=dr))
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=nwlen, mds=50000000, t=1, ns=200, r=2, k=5, nw=5, wf=50, dr=dr))
                 # print(data)
                 runtimes.append(data.timeTotal)
             print(runtimes)
@@ -869,6 +882,11 @@ class LineChart:
     def sleep():
         plt.pause(1200)
 
+
+def printData(dir, sp='SPBest', nwlen=1000000, mds=1000, t=0, ns=200, r=2, k=5, nw=5, wf=None, dr=None, opt=None):
+    data = Data.getData(fp=PathUtility.sample_res_path(dir, sp=sp, nwlen=nwlen, mds=mds, t=t, ns=ns, r=r, k=k, nw=nw, wf=wf, dr=dr, opt=opt))
+    print(data)
+
 ######## 画WORD_FREQUENCY折线图 ##############
 # LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_SPTRStar1.pdf')
@@ -890,6 +908,26 @@ class LineChart:
 # LineChart.draw_k(1, base_y=0, fpath=PathUtility.figure_path() + 'topK_TQTSPYagoVB_Date.pdf')
 # LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'topK_RTreeNodeYagoVB_Date.pdf')
 
+# base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7)
+#
+# base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\opt\\'
+# printData(base_dir, sp='SPBase', nwlen=2147483631, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7)
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7, opt='O1')
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7, opt='O2')
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7, opt='O3')
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=0, ns=200, r=2, k=5, nw=5, wf=50, dr=7, opt='O4')
+
+
+
+# base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=5, nw=5, wf=50, dr=7)
+#
+# base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\opt\\'
+# printData(base_dir, sp='SPBase', nwlen=2147483631, mds=50000000, t=1, ns=200, r=2, k=10, nw=5, wf=50, dr=7)
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=10, nw=5, wf=50, dr=7, opt='O2')
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=10, nw=5, wf=50, dr=7, opt='O3')
+# printData(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=10, nw=5, wf=50, dr=7, opt='O4')
 
 ######### 画不同数keywords柱状图 #########
 # Bar.draw_n_words()
@@ -898,7 +936,7 @@ class LineChart:
 # LineChart.draw_nw(fpath=PathUtility.figure_path() + 'WordNum_RuntimeYagoVB_Date.pdf')
 
 ######## 画不同的时间差对查询情况影响  #########
-# LineChart.draw_date_range(fpath=PathUtility.figure_path() + 'DateRange_RuntimeYagoVB_SPTRStar.pdf')
+LineChart.draw_date_range(fpath=PathUtility.figure_path() + 'DateRange_RuntimeYagoVB_SPTRStar.pdf')
 
 ######### 画不同规模子图的柱状图  #########
 # Bar.draw_differ_size(0, 0)

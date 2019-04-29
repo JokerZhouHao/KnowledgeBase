@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import entity.OptMethod;
 import utility.Global;
 import utility.IOUtility;
 import utility.LoopQueue;
@@ -29,7 +30,8 @@ public class ATest {
 	public static void main(String[] args) throws Exception{
 		
 		
-		
+		OptMethod om = OptMethod.O1;
+		System.out.println(om);
 		
 		
 //		List<Integer> li = new ArrayList<>();
@@ -49,10 +51,10 @@ public class ATest {
 //		}
 //		System.out.println("OK");
 		
-		Map<Integer, Integer> mp = new HashMap<>();
-		mp.put(1, 2);
-		mp.put(2, 5);
-		System.out.println(mp.toString());
+//		Map<Integer, Integer> mp = new HashMap<>();
+//		mp.put(1, 2);
+//		mp.put(2, 5);
+//		System.out.println(mp.toString());
 		
 		
 //		List<Integer> li = new ArrayList<>();

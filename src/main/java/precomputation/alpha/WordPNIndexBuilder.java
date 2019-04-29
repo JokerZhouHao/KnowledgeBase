@@ -79,7 +79,16 @@ public class WordPNIndexBuilder {
 					len++;
 					len++;
 					len += en.getValue().split(Global.delimiterDate).length;
-					if(len*4 >= Global.MAX_PN_LENGTH)	return null;
+					if(len*4 >= Global.MAX_PN_LENGTH) {
+						
+//						long pidNum = 0;
+//						for(HashMap<Integer, String> pIdToDateMap1 : eachLayerWN) {
+//							pidNum += pIdToDateMap1.size();
+//						}
+//						System.out.println("> W_PN too long > pidNum = " + pidNum + " MAX_PN_LENGTH = " + Global.MAX_PN_LENGTH);
+						
+						return null;
+					}
 				}
 			}
 			

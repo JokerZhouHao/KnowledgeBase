@@ -26,7 +26,7 @@ import entity.sp.RunRecord;
  * @author jieming
  *
  */
-public class YagoGlobal {
+public class DBpediaGlobal {
 	// optimization method
 	public static OptMethod optMethod = OptMethod.O1;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
@@ -69,49 +69,49 @@ public class YagoGlobal {
 	
 	/* graph statistic info */
 	/******************      yago2s       ***************/
-	public static int numPlaces = 4774796;
-//	public static int numNodes = 12;//include nodes that are places
-	public static int numNodes0 = 8091179;	//include nodes that are places
-	public static int numNodes = 8091179;	//include nodes that are places
-//	public static int numKeywords = 18;
-	public static int numKeywords = 3778457;
-	public static int numEdges = 50415307;
-	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
-	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
-//	public static int numSCCs = 30;
-//	public static int numContainCoordWordDate = 12;
-	public static int numContainCoordWordDate = 812532;
-	public static int numPid = 4774796;
-	public static int numWid = 518314;
-	
-	/*******************     DBpedia      ***************/
-//	public static int numPlaces = 883665;
+//	public static int numPlaces = 4774796;
 ////	public static int numNodes = 12;//include nodes that are places
-//	public static int numNodes0 = 8099955;	//include nodes that are places
-//	public static int numNodes = 8099955;	//include nodes that are places
-//	public static int numKeywords = 2927050; // 准确2927024
+//	public static int numNodes0 = 8091179;	//include nodes that are places
+//	public static int numNodes = 8091179;	//include nodes that are places
+////	public static int numKeywords = 18;
+//	public static int numKeywords = 3778457;
+//	public static int numEdges = 50415307;
 //	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
 //	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
-//	public static int numContainCoordWordDate = 1138751;	// 不确定
-//	public static int numPid = 883665;
+////	public static int numSCCs = 30;
+////	public static int numContainCoordWordDate = 12;
+//	public static int numContainCoordWordDate = 812532;
+//	public static int numPid = 4774796;
 //	public static int numWid = 518314;
+	
+	/*******************     DBpedia      ***************/
+	public static int numPlaces = 883665;
+//	public static int numNodes = 12;//include nodes that are places
+	public static int numNodes0 = 8099955;	//include nodes that are places
+	public static int numNodes = 8099955;	//include nodes that are places
+	public static int numKeywords = 2927050; // 准确2927024
+	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
+	public static int numContainCoordWordDate = 1138751;	// 不确定
+	public static int numPid = 883665;
+	public static int numWid = 518314;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
-	public static int rtreePageSize = 32768;	// 400
-//	public static int rtreePageSize = 65536;	// 800
+//	public static int rtreePageSize = 32768;	// 400
+	public static int rtreePageSize = 65536;	// 800
 //	public static int rtreeFanout = 5;
 //	public static int rtreeFanout = 1500;
-	public static int rtreeFanout = 400;
-//	public static int rtreeFanout = 800;
+//	public static int rtreeFanout = 400;
+	public static int rtreeFanout = 800;
 	public static int iindexBufferSize = 4096000;
 	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
 	public static boolean iindexIsWeighted = false;
 	
 	/* input file path */
-	public static String dateSetType = "yago2s" + File.separator;
-//	public static String dateSetType = "DBpedia" + File.separator;
+//	public static String dateSetType = "yago2s" + File.separator;
+	public static String dateSetType = "DBpedia" + File.separator;
 	
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
 	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
@@ -144,10 +144,10 @@ public class YagoGlobal {
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_6000000" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;
 	public static String sccFile = "edgeYagoVB.SCC";
-	public static String DAGFile = Global.dagFile + Global.sccFlag + Global.keywordFlag + Global.edgeFile;
-	public static String placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-	public static String wordPNFile = Global.outputDirectoryPath + "wordPN"+ Global.rtreeFlag
-			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String DAGFile = DBpediaGlobal.dagFile + DBpediaGlobal.sccFlag + DBpediaGlobal.keywordFlag + DBpediaGlobal.edgeFile;
+	public static String placeWNFile = DBpediaGlobal.outputDirectoryPath + "placeWN" + DBpediaGlobal.rtreeFlag + DBpediaGlobal.rtreeFanout + "." + DBpediaGlobal.radius + DBpediaGlobal.dataVersion;
+	public static String wordPNFile = DBpediaGlobal.outputDirectoryPath + "wordPN"+ DBpediaGlobal.rtreeFlag
+			+ DBpediaGlobal.rtreeFanout + "." + DBpediaGlobal.radius + DBpediaGlobal.dataVersion;
 	public static String alphaIindexFile = null;
 	public static int alphaIindexRTNodeBufferSize = -1;
 	public static String tfindexDirectoryPath = null;
@@ -157,7 +157,7 @@ public class YagoGlobal {
 	public static String recWidPidReachPath = outputDirectoryPath + "recWidToPidReach.bin";
 	public static String recP2NReachPath = outputDirectoryPath + "recP2NReach.bin";
 	public static String recRTreeNode2NidReachPath = outputDirectoryPath + "recRTreeNode2NidReach.bin";
-	public static String recRTreeLeafNodeContainPidsPath = Global.outputDirectoryPath + "recRtreeLeafNodeContainPids."  + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion + ".bin";
+	public static String recRTreeLeafNodeContainPidsPath = DBpediaGlobal.outputDirectoryPath + "recRtreeLeafNodeContainPids."  + DBpediaGlobal.pidCoordFile + DBpediaGlobal.rtreeFlag + DBpediaGlobal.rtreeFanout + DBpediaGlobal.dataVersion + ".bin";
 	
 	/*	index path	*/
 	public static String indexNIdWordDate = "nid_date_wid" + File.separator;
@@ -165,11 +165,11 @@ public class YagoGlobal {
 	public static String indexTFLabel = "tf_label" + File.separator;
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexWidPN = "wid_pn";
-	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+	public static String indexRTree = DBpediaGlobal.outputDirectoryPath + DBpediaGlobal.rTreePath + DBpediaGlobal.pidCoordFile + DBpediaGlobal.rtreeFlag + DBpediaGlobal.rtreeFanout + DBpediaGlobal.dataVersion;
 	public static int MAX_WORD_FREQUENCY = 1000;
-	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
-	public static String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
-	public static String indexWid2DateNid = Global.outputDirectoryPath + "wid_2_DateNids";
+	public static String indexWid2Pid = DBpediaGlobal.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(DBpediaGlobal.MAX_WORD_FREQUENCY) + File.separator;
+	public static String indexWid2PidBase = DBpediaGlobal.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(DBpediaGlobal.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
+	public static String indexWid2DateNid = DBpediaGlobal.outputDirectoryPath + "wid_2_DateNids";
 	
 	/* file content delimiter sign */
 	public static String delimiterLevel1 = ": ";
@@ -209,7 +209,7 @@ public class YagoGlobal {
 	
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;
-	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
+	public static String fileReachGZip = DBpediaGlobal.outputDirectoryPath + "recP2PReachable.gz";
 	public static RunRecord rr = new RunRecord();
 	
 	public static int leftMaxIndexSpan = 50;
@@ -227,8 +227,8 @@ public class YagoGlobal {
 	public static BFSWidRecoder orgBFSWidRecoder = null;
 	
 	public static void printInputOutputPath() {
-		System.out.println(Global.inputDirectoryPath);
-		System.out.println(Global.outputDirectoryPath);
+		System.out.println(DBpediaGlobal.inputDirectoryPath);
+		System.out.println(DBpediaGlobal.outputDirectoryPath);
 	}
 	
 	public static void main(String[] args) throws Exception{
