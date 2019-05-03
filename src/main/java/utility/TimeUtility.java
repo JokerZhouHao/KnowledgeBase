@@ -78,6 +78,28 @@ public class TimeUtility {
 		}
 	}
 	
+	public static int getMinDateSpan(int curDate, List<Integer> dateList, int maxDateSpan) {
+		int reIndex = Collections.binarySearch(dateList, curDate);
+		if(0 <= reIndex) // 存在相等的日期
+			return 1;
+		else {
+			reIndex = -reIndex;
+			if(0 < reIndex-1 && reIndex-1 < dateList.size()) {	// 当前日期在所有日期中间
+				if(dateList.get(reIndex -2) == Integer.MAX_VALUE && dateList.get(reIndex - 1) == Integer.MAX_VALUE)
+					return maxDateSpan;
+				if(curDate - dateList.get(reIndex -2) < dateList.get(reIndex - 1) - curDate)
+					return curDate - dateList.get(reIndex -2) + 1;
+				else
+					return dateList.get(reIndex - 1)-curDate + 1;
+			} else if(reIndex == dateList.size() + 1) {	// 当前日期晚于于当前所有日期
+				return curDate - dateList.get(dateList.size() -1) + 1;
+			} else {	// 当前时间早于所有时间
+				if(dateList.get(0) == Integer.MAX_VALUE)	return maxDateSpan;
+				return dateList.get(0) - curDate + 1;
+			}
+		}
+	}
+	
 	public static int getIntDate(Date date) {
 //		System.out.println(date.getTime()/TimeUtility.totalMillOfOneDay);
 		return (int)((date.getTime() + TimeUtility.zoomTimeOffset)/TimeUtility.totalMillOfOneDay);

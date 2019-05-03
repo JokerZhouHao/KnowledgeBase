@@ -322,11 +322,22 @@ public class W2PIndex {
 	}
 	
 	public static void batchBuildW2PIndex(List<Integer> fres) throws Exception{
+		long startTime = System.currentTimeMillis();
+		System.out.println("> 文件生成，并创建W2PIndex . . . ");
+		P2WRTreeReach.building();
+		for(Map<Integer, Short> st : P2WRTreeReach.pid2Wids) {
+			if(null!=st)	st.clear();
+		}
+		W2PReachWriter.buildingWPReach();
+//		P2WRTreeReach.deleteAllFiles();
+		
 		for(int fre : fres) {
 			Global.MAX_WORD_FREQUENCY = fre;
 			Global.indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
 			W2PIndex.buidingW2PIndex();
 		}
+		
+		System.out.println("> Over文件生成，并创建W2PIndex, 用时 ：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
 	}
 	
 	

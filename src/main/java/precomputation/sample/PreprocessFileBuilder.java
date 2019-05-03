@@ -35,15 +35,13 @@ public class PreprocessFileBuilder {
 //		RTreeService.build();
 		
 		// PN
-		int[] radius = {2};
-		int[] lens = {1000000, 2147483631};
-		for(int r : radius) {
-			for(int l : lens) {
-				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
-			}
-		}
-		
-//		WordPNIndexBuilder.batchBuildingWN(radius);
+//		int[] radius = {2};
+//		int[] lens = {1000000};
+//		for(int r : radius) {
+//			for(int l : lens) {
+//				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
+//			}
+//		}
 		
 		// TF-Label
 //		TFlabelDataFormatter.build();
@@ -52,27 +50,29 @@ public class PreprocessFileBuilder {
 //		RTreeLeafNodeContainPids.main(null);
 		
 		// 创建词频文件
-//		IndexNidKeywordsListService.buildWordFrequencyFile();
-//		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+		IndexNidKeywordsListService.buildWordFrequencyFile();
+		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		// 各节点（包括rtree node）到wid的可达性
-//		Global.numPid = AllPidWid.getAllPid().size();
-//		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
-//		List<Integer> fres = new ArrayList<>();
-//		fres.add(100);
+		Global.numPid = AllPidWid.getAllPid().size();
+		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
+		List<Integer> fres = new ArrayList<>();
+		// 必须按照从小到大添加
+		Global.MAX_WORD_FREQUENCY = 50;	// 为添加的最小值
+		fres.add(50);
 //		fres.add(250);
 //		fres.add(500);
 //		fres.add(1000);
 //		fres.add(10000);
 //		fres.add(100000);
 //		fres.add(1000000);
-//		W2PIndex.batchBuildW2PIndex(fres);
+		W2PIndex.batchBuildW2PIndex(fres);
 		
 		// rtreeNode到pid的可达情况
-		P2NRTreeReach.main(null);
+//		P2NRTreeReach.main(null);
 		
 		// MinMaxDate
-		MinMaxDateService.main(null);
+//		MinMaxDateService.main(null);
 		
 		System.out.println("> Over创建" + String.valueOf(nodeNum) + "个节点的子图所需的文件! ! ! ");
 	}

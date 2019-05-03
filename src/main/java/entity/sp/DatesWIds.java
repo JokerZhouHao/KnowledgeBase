@@ -21,6 +21,12 @@ public class DatesWIds {
 		formatDatesStr();
 	}
 	
+	public DatesWIds(Integer date, int numWids) {
+		dateList = new ArrayList<>();
+		dateList.add(date);
+		this.wids = new int[numWids];
+	}
+	
 	private void formatDatesStr() {
 		if(datesStr == null)	return;
 		String tempArr[] = this.datesStr.split(Global.delimiterDate);

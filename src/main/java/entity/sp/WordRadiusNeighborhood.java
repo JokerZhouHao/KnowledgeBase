@@ -121,6 +121,17 @@ public class WordRadiusNeighborhood {
 		return minLoose;
 	}
 	
+	public int getLoosenessByMax(int pid, int date, int maxDateSpan) {
+		int minLoose = Integer.MAX_VALUE;
+		int td = 0;
+		for(int i=0; i < radius + 1; i++) {
+			if(null != eachLayerWN[i] && null != eachLayerWN[i].get(pid) && minLoose > (td = ((i+1)*TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid), maxDateSpan)))) {
+				minLoose = td;
+			}
+		}
+		return minLoose;
+	}
+	
 	/**
 	 * 获得时间范围内的looseness
 	 * @param pid

@@ -3,8 +3,10 @@ package entity.sp.date;
 import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,12 +50,12 @@ public class Wid2DateNidPairIndex extends Index{
 		super(indexPath);
 	}
 	
-	public Map<Integer, Map<Integer, List<Integer>>> loadFile(String filePath) throws Exception{
+	public TreeMap<Integer, TreeMap<Integer, List<Integer>>> loadFile(String filePath) throws Exception{
 		System.out.println("> 开始读取文件" + filePath + ". . . " + TimeUtility.getTime());
 		Map<Integer, DWid> allDW = null;
 		allDW = AllDateWidNodes.loadFromFile(filePath);
-		Map<Integer, Map<Integer, List<Integer>>> wid2DateNid = new TreeMap<>();
-		Map<Integer, List<Integer>> map = null;
+		TreeMap<Integer, TreeMap<Integer, List<Integer>>> wid2DateNid = new TreeMap<>();
+		TreeMap<Integer, List<Integer>> map = null;
 		List<Integer> list = null;
 		int nid = 0;
 		DWid tDW = null;
@@ -143,9 +145,9 @@ public class Wid2DateNidPairIndex extends Index{
 	
 	public void createIndex(String filePath) throws Exception{
 		System.out.println("> 开始创建索引 . . . " + TimeUtility.getTime());
-		Map<Integer, Map<Integer, List<Integer>>> wid2DateNid = this.loadFile(filePath);
+		TreeMap<Integer, TreeMap<Integer, List<Integer>>> wid2DateNid = this.loadFile(filePath);
 		openIndexWriter();
-		for(Entry<Integer, Map<Integer, List<Integer>>> en : wid2DateNid.entrySet()) {
+		for(Entry<Integer, TreeMap<Integer, List<Integer>>> en : wid2DateNid.entrySet()) {
 			addDoc(en.getKey(), en.getValue());
 		}
 		closeIndexWriter();
@@ -157,14 +159,37 @@ public class Wid2DateNidPairIndex extends Index{
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
 		int size = bb.getInt();
 		int date = 0;
-		for(int i=0; i<size; i++) {
+		LinkedList<DateNidNode> dnns = new LinkedList<>();
+		int maxDate = sDate;
+		int maxSign = 1;
+		int i=0;
+		for(; i<size; i++) {
 			date = bb.getInt();
-			if(Math.abs(date - sDate) >= Global.maxDateSpan) {
-				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
+			if(date == Integer.MAX_VALUE) {	// 没有时间属性的节点的时间指定为Integer.MAX_VALUE
+				if(maxSign >= 0) {
+					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+						dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+					else dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+				} else {
+					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+						dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+					else dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+				}
 			} else {
-				sdw.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+				if(Math.abs(date - sDate) > Math.abs(maxDate - sDate)) {
+					maxDate = date;
+					maxSign = maxDate - sDate;
+				}
+				if(Math.abs(date - sDate) >= Global.maxDateSpan) {
+					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
+				} else {
+					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+				}
 			}
 		}
+		
+		sdw.dateWidList = new ArrayList<>(dnns);
+		
 		return sdw;
 	}
 	
@@ -187,10 +212,10 @@ public class Wid2DateNidPairIndex extends Index{
 		String filePath = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 //		String writeToPath = Global.outputDirectoryPath + Global.wid2DateNidPairFile;
 		Wid2DateNidPairIndex index = new Wid2DateNidPairIndex(indexPath);
-		index.createIndex(filePath);
-//		index.openIndexReader();
-//		SortedDateWidIndex sdw = index.getDateNids(8526716);
-//		index.closeIndexReader();
+//		index.createIndex(filePath);
+		index.openIndexReader();
+		SortedDateWidIndex sdw = index.getDateNids(4, TimeUtility.getIntDate(new Date()));
+		index.closeIndexReader();
 	}
 }
 

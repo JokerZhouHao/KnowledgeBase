@@ -22,7 +22,7 @@ public class SortedDateWidIndex {
 	
 	private static MComparator<DateNidNode> comparator = new MComparator<DateNidNode>();
 	
-	private ArrayList<DateNidNode> dateWidList = new ArrayList<>();
+	public ArrayList<DateNidNode> dateWidList = new ArrayList<>();
 	
 	public void addLast(DateNidNode dw) {
 		dateWidList.add(dw);

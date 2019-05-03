@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
+import entity.sp.DateNidNode;
 import entity.sp.DatesWIds;
 import entity.sp.GraphByArray;
 import entity.sp.WordRadiusNeighborhood;
@@ -204,58 +205,58 @@ public class SPBest {
 		}
 		
 		// 获得nIdDateWidMap
-		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
-		Set<Integer> tSet = new HashSet<>();
-		for(i=0; i<sortQwords.length; i++) {
-			Map<Integer, String> tempMap = null;
-			
-			if(null == (tempMap = cacheSeachedWid.get(sortQwords[i]))) {
-				tempMap = nIdWIdDateSer.searchNIDKeyListDate(sortQwords[i]);
-				// 不存在该wid
-				if(null==tempMap) {
-					Global.curRecIndex++;
-					return null;
-				}
-				
-				if(tempMap.size() > 100000) {	// 缓存命中量超过100000的节点的查询结果
-					cacheSeachedWid.put(sortQwords[i], tempMap);
-				}
-			}
-			
-			DatesWIds dws = null;
-			for(Entry<Integer, String> en : tempMap.entrySet()) {
-				if(eDate != null) {
-					// 过滤掉不在时间范围内的词
-					if(!matchSetNids.contains(en.getKey())) {
-						continue;
-					} else {
-						tSet.add(en.getKey());
-					}
-				}
-				if(null == (dws = searchedDatesWids[en.getKey()])) {
-					dws = new DatesWIds(en.getValue(), sortQwords.length);
-					dws.addWid(i, sortQwords[i]);
-					searchedDatesWids[en.getKey()] = dws;
-				} else {
-					dws.addWid(i, sortQwords[i]);
-				}
-			}
-		}
+//		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
+//		Set<Integer> tSet = new HashSet<>();
+//		for(i=0; i<sortQwords.length; i++) {
+//			Map<Integer, String> tempMap = null;
+//			
+//			if(null == (tempMap = cacheSeachedWid.get(sortQwords[i]))) {
+//				tempMap = nIdWIdDateSer.searchNIDKeyListDate(sortQwords[i]);
+//				// 不存在该wid
+//				if(null==tempMap) {
+//					Global.curRecIndex++;
+//					return null;
+//				}
+//				
+//				if(tempMap.size() > 100000) {	// 缓存命中量超过100000的节点的查询结果
+//					cacheSeachedWid.put(sortQwords[i], tempMap);
+//				}
+//			}
+//			
+//			DatesWIds dws = null;
+//			for(Entry<Integer, String> en : tempMap.entrySet()) {
+//				if(eDate != null) {
+//					// 过滤掉不在时间范围内的词
+//					if(!matchSetNids.contains(en.getKey())) {
+//						continue;
+//					} else {
+//						tSet.add(en.getKey());
+//					}
+//				}
+//				if(null == (dws = searchedDatesWids[en.getKey()])) {
+//					dws = new DatesWIds(en.getValue(), sortQwords.length);
+//					dws.addWid(i, sortQwords[i]);
+//					searchedDatesWids[en.getKey()] = dws;
+//				} else {
+//					dws.addWid(i, sortQwords[i]);
+//				}
+//			}
+//		}
 		
 		// 没有符合查询条件的点
-		if(eDate != null) {
-			if(tSet.size()==0) {
-				Global.curRecIndex++;
-				return null;
-			}
-			else {
-				for(int ii : tSet) {
-					matchNids.add(ii);
-				}
-			}
-			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
-			matchSetNids.clear();
-		}
+//		if(eDate != null) {
+//			if(tSet.size()==0) {
+//				Global.curRecIndex++;
+//				return null;
+//			}
+//			else {
+//				for(int ii : tSet) {
+//					matchNids.add(ii);
+//				}
+//			}
+//			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
+//			matchSetNids.clear();
+//		}
 		
 		if(Global.isTest) {
 			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
@@ -267,7 +268,8 @@ public class SPBest {
 			Global.rr.setFrontTime();
 		}
 		SortedDateWidIndex[] wid2DateNidPair = null;
-		if(eIntDate == Integer.MIN_VALUE) {
+		int[] maxDateSpans = new int[sortedQwordsList.size()];
+//		if(eIntDate == Integer.MIN_VALUE) {
 			wid2DateNidPair = new SortedDateWidIndex[sortedQwordsList.size()];
 			for(i=0; i<sortQwords.length; i++) {
 				wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i], TimeUtility.getIntDate(searchDate));
@@ -276,12 +278,40 @@ public class SPBest {
 					Global.curRecIndex++;
 					return null;
 				}
+				// 记录最大时间差
+				maxDateSpans[i] = Math.max(Math.abs(wid2DateNidPair[i].dateWidList.get(0).getDate() - TimeUtility.getIntDate(searchDate)), 
+						Math.abs(wid2DateNidPair[i].dateWidList.get(wid2DateNidPair[i].dateWidList.size() - 1).getDate() - TimeUtility.getIntDate(searchDate))) + 1;
+				
 				Global.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
 			}
 			if(Global.isTest) {
 				Global.rr.timeBspBuidingWid2DateNid += Global.rr.getTimeSpan();
 				Global.rr.setFrontTime();
 			}
+//		}
+		
+		// 获得nIdDateWidMap
+		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
+		DatesWIds dws = null;
+		for(i=0; i < wid2DateNidPair.length; i++) {
+			for(DateNidNode dnn : wid2DateNidPair[i].dateWidList) {
+				if(null == (dws = searchedDatesWids[dnn.getNid()])) {
+					dws = new DatesWIds(dnn.getDate(), sortQwords.length);
+					searchedDatesWids[dnn.getNid()] = dws;
+				}
+				dws.addWid(i, sortQwords[i]);
+			}
+		}
+		
+		// 没有符合查询条件的点
+//		Set<Integer> tSet = new HashSet<>();
+		if(eDate != null) {
+			for(i=0; i<searchedDatesWids.length; i++) {
+				if(null != searchedDatesWids[i])
+					matchNids.add(i);
+			}
+			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
+			matchSetNids.clear();
 		}
 		
 		// 获得W2PReachable
@@ -292,6 +322,7 @@ public class SPBest {
 				// 所有pid都不能到达该wid
 				if(null == w2pReachable[i]) {
 					Global.curRecIndex++;
+					System.out.println(sortQwords[i] + "'s w2pReachable is null");
 					return null;
 				}
 			}
@@ -324,7 +355,7 @@ public class SPBest {
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
-		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, pid2RtreeLeafNode, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, w2pReachable, wordPNMap);
+		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, pid2RtreeLeafNode, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, w2pReachable, wordPNMap, maxDateSpans);
 		if(eDate == null)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, sortQwords, searchIntDate, v);
 		else kSPExecutor.kSPComputation(k, Global.radius, matchNids, qpoint, sortQwords, searchIntDate, eIntDate, v);
 		

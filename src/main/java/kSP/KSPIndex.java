@@ -51,13 +51,15 @@ public class KSPIndex {
 	private MinMaxDateService minMaxDateSer = null;
 	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
 	private HashMap<Integer, int[]> recMinPid2WidDis = new HashMap<>();
+	private int[] maxDateSpans;
 	
 	// 记录pid到wid的最小路径距离
 	private int[] pid2WidPathDis = new int[2];
 	
 	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
-			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
+			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap,
+			int[] maxDateSpans) {
 		super();
 		this.rgi = rgi;
 		this.rtreeNode2Pid = rtreeNode2Pid;
@@ -68,6 +70,7 @@ public class KSPIndex {
 		this.minMaxDateSer = minMaxDateSer;
 		this.w2pReachable = w2pReachable;
  		this.wordPNMap = wordPNMap;
+ 		this.maxDateSpans = maxDateSpans;
 	}
 
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
@@ -218,7 +221,6 @@ public class KSPIndex {
 								}
 								continue;
 							}
-							
 							
 							if(Global.isTest) {
 								Global.rr.timeCptRTreeGetMinDateSpan += Global.rr.getTimeSpan();
@@ -774,7 +776,7 @@ public class KSPIndex {
 				alphaLoosenessBound += widMinDateSpans[i][0];
 			} else {
 				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
-				tempd2 = wordPNMap.get(sortQwords[i]).getLooseness(id, date);
+				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}
 		}
