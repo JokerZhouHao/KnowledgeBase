@@ -52,6 +52,7 @@ public class KSPIndex {
 	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
 	private HashMap<Integer, int[]> recMinPid2WidDis = new HashMap<>();
 	private int[] maxDateSpans;
+	private boolean[] signInRange = null;
 	
 	// 记录pid到wid的最小路径距离
 	private int[] pid2WidPathDis = new int[2];
@@ -59,7 +60,7 @@ public class KSPIndex {
 	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
 			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap,
-			int[] maxDateSpans) {
+			int[] maxDateSpans, boolean[] signInRange) {
 		super();
 		this.rgi = rgi;
 		this.rtreeNode2Pid = rtreeNode2Pid;
@@ -71,6 +72,7 @@ public class KSPIndex {
 		this.w2pReachable = w2pReachable;
  		this.wordPNMap = wordPNMap;
  		this.maxDateSpans = maxDateSpans;
+ 		this.signInRange = signInRange;
 	}
 
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
@@ -599,7 +601,7 @@ public class KSPIndex {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree);
+							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree, signInRange);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();

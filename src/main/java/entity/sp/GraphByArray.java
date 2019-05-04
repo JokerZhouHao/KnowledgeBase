@@ -44,6 +44,8 @@ public class GraphByArray {
 	
 	private int[] recKeyVectices = new int[3];
 	private double[] recKeyDis = new double[3];
+	private boolean[] recSigns = new boolean[3];
+	private boolean[] signInRanges = new boolean[3];
 	private int[] recCandVectices= new int[3];
 	private double[] recCandDis= new double[3];
 	private List<Integer> recCanWidIndex = new ArrayList<>();
@@ -475,7 +477,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			List<List<Integer>> semanticTree) throws Exception {
+			List<List<Integer>> semanticTree, boolean[] sIRange) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -496,18 +498,23 @@ public class GraphByArray {
 		if(sortQwords.length != recKeyVectices.length) {
 			recKeyVectices = new int[sortQwords.length];
 			recKeyDis = new double[sortQwords.length];
+			recSigns = new boolean[sortQwords.length];
+			signInRanges = new boolean[sortQwords.length];
 		}
+		
 		for(i=0; i<sortQwords.length; i++) {
 			recKeyVectices[i] = signNone;
+			recSigns[i] = Boolean.FALSE;
 			recKeyDis[i] = signNone;
+			signInRanges[i] = sIRange[i];
 		}
+		
 		recSearchWidIndex.clear();
 		recOkWidIndex.clear();
+		
 		for(i=0; i<sortQwords.length; i++)	recSearchWidIndex.add(i);
 		
-		
 		int numQwords = sortQwords.length;
-		int numFindedWid = 0;
 		
 		List<Integer> tempList = new ArrayList<>();
 		int[] tempWids = null;
@@ -522,16 +529,20 @@ public class GraphByArray {
 		double preRadius = 0;
 		int vertex = 0;
 		double currentRadius = 0;
-		double delt = 0;
+		double currentMaxDis = 0;
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
 			currentRadius = distance2Source[vertex];
 			if (currentRadius != preRadius) {
-				delt = currentRadius - preRadius;
 				preRadius = currentRadius;
 				// 计算新层下的looseness
-				looseness += delt * recSearchWidIndex.size();
+				looseness = 0;
+				for(i=0; i<sortQwords.length; i++) {
+					if(recKeyDis[i] != signNone) {
+						looseness += recKeyDis[i];
+					} else looseness += currentRadius;
+				}
 				if(looseness >= loosenessThreshold) {
 					if(Global.isTest) {
 						Global.rr.numCptPruneInSemanticTree++;
@@ -543,13 +554,48 @@ public class GraphByArray {
 			if(null != (dateWid = searchedDatesWids[vertex])) {
 				tempWids = dateWid.getWids();
 				tempList.clear();
+				int tDate = 0;
 				for(int searchWidIndex : recSearchWidIndex) {
 					if(sortQwords[searchWidIndex]==tempWids[searchWidIndex]) {
-						recKeyVectices[searchWidIndex] = vertex;
-						recKeyDis[searchWidIndex] = currentRadius;
-						recOkWidIndex.add(searchWidIndex);
-						tempList.add(searchWidIndex);
-						numFindedWid++;
+						tDate = dateWid.getDateList().get(0);
+						if(tDate >= sDate && tDate <= eDate) {	// 在时间范围内
+							currentMaxDis = currentRadius + 1;
+							
+							recKeyVectices[searchWidIndex] = vertex;
+							recKeyDis[searchWidIndex] = currentRadius;
+							recSigns[searchWidIndex] = Boolean.TRUE;
+							recOkWidIndex.add(searchWidIndex);
+							tempList.add(searchWidIndex);
+							
+							// 更新没有时间的词
+							for(i=0; i<sortQwords.length; i++) {
+								if(recKeyDis[i] != signNone && !recSigns[i])
+									recKeyDis[i] = currentRadius + 1;
+							}
+							
+							// 计算新的looseness
+							looseness = 0;
+							for(i=0; i<sortQwords.length; i++) {
+								if(recKeyDis[i] != signNone) {
+									looseness += recKeyDis[i];
+								} else looseness += currentRadius;
+							}
+							if(looseness >= loosenessThreshold) {
+								if(Global.isTest) {
+									Global.rr.numCptPruneInSemanticTree++;
+								}
+								return Double.POSITIVE_INFINITY;
+							}
+							
+						} else {	// 不在时间范围内
+							recKeyVectices[searchWidIndex] = vertex;
+							recKeyDis[searchWidIndex] = currentRadius >= currentMaxDis ? currentRadius : currentMaxDis;
+							
+							if(!signInRanges[searchWidIndex]) {
+								recOkWidIndex.add(searchWidIndex);
+								tempList.add(searchWidIndex);
+							}
+						}
 					}
 				}
 				
@@ -557,7 +603,8 @@ public class GraphByArray {
 					recSearchWidIndex.remove((Object)in);
 				}
 			}
-			if(numFindedWid == numQwords)	break;
+			
+			if(recSearchWidIndex.isEmpty())	break;
 			
 			// add the unvisited adj vertices of vertex into queue
 			int[] adjList = this.adjLists[vertex];
@@ -578,7 +625,7 @@ public class GraphByArray {
 		}
 
 		// compute semantic tree paths
-		if(numFindedWid != numQwords) {
+		if(!recSearchWidIndex.isEmpty()) {
 			return Double.POSITIVE_INFINITY;
 		}
 		

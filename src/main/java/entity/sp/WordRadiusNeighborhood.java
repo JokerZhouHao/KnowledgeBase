@@ -141,13 +141,17 @@ public class WordRadiusNeighborhood {
 	 */
 	public int getLooseness(int pid, int sDate, int eDate) {
 		List<Integer> dates = null;
+		int dis = 0;
 		for(int i=0; i < radius + 1; i++) {
 			if(null != eachLayerWN[i] && null != (dates=eachLayerWN[i].get(pid))) {
-				if(dates.get(dates.size()-1)<sDate || dates.get(0)>eDate)	continue;
-				return i+1;
+				if(dates.get(dates.size()-1)<sDate || dates.get(0)>eDate) {
+					dis = i + 1;
+					continue;
+				}
+				return i + 1;
 			}
 		}
-		return radius+2;
+		return dis;
 	}
 	
 	/**

@@ -197,12 +197,12 @@ public class SPBest {
 		}
 		
 		// 计算那些点在时间范围内
-		Set<Integer> matchSetNids = null;
-		List<Integer> matchNids = null;
-		if(eIntDate != Integer.MIN_VALUE) {
-			matchSetNids = minMaxDateSer.search(searchIntDate, eIntDate);
-			matchNids = new ArrayList<>();
-		}
+//		Set<Integer> matchSetNids = null;
+//		List<Integer> matchNids = null;
+//		if(eIntDate != Integer.MIN_VALUE) {
+//			matchSetNids = minMaxDateSer.search(searchIntDate, eIntDate);
+//			matchNids = new ArrayList<>();
+//		}
 		
 		// 获得nIdDateWidMap
 //		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
@@ -291,6 +291,7 @@ public class SPBest {
 //		}
 		
 		// 获得nIdDateWidMap
+		boolean[] signInRange = new boolean[sortQwords.length];
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		DatesWIds dws = null;
 		for(i=0; i < wid2DateNidPair.length; i++) {
@@ -300,18 +301,29 @@ public class SPBest {
 					searchedDatesWids[dnn.getNid()] = dws;
 				}
 				dws.addWid(i, sortQwords[i]);
+				
+				// 获得是否存在包含查询词，且时间在查询范围内的点
+				if(eDate != null && !signInRange[i] && dnn.getDate() >= searchIntDate && dnn.getDate() <= eIntDate) {
+					signInRange[i] = Boolean.TRUE;
+				}
+				
 			}
 		}
 		
-		// 没有符合查询条件的点
-//		Set<Integer> tSet = new HashSet<>();
+		// 判断是否至少有一个词在时间范围内
+		List<Integer> matchNids = null;
 		if(eDate != null) {
+			for(i=0; i<signInRange.length; i++)
+				if(signInRange[i])	break;
+			if(i==signInRange.length)	return null;
+			
+			// 获得符合查询条件的点
+			matchNids = new ArrayList<>();
 			for(i=0; i<searchedDatesWids.length; i++) {
-				if(null != searchedDatesWids[i])
+				if(null != searchedDatesWids[i]) {
 					matchNids.add(i);
+				}
 			}
-			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
-			matchSetNids.clear();
 		}
 		
 		// 获得W2PReachable
@@ -355,7 +367,7 @@ public class SPBest {
 		
 		IVisitor v = new KSPCandidateVisitor(k);
 		
-		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, pid2RtreeLeafNode, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, w2pReachable, wordPNMap, maxDateSpans);
+		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, pid2RtreeLeafNode, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, w2pReachable, wordPNMap, maxDateSpans, signInRange);
 		if(eDate == null)	kSPExecutor.kSPComputation(k, Global.radius, qpoint, sortQwords, searchIntDate, v);
 		else kSPExecutor.kSPComputation(k, Global.radius, matchNids, qpoint, sortQwords, searchIntDate, eIntDate, v);
 		
