@@ -31,6 +31,9 @@ public class Global {
 	public static OptMethod optMethod = OptMethod.O1;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
 	
+	public static final double WEIGHT_PATH = 0.8;
+	public static final double WEIGHT_REV_PATH = 1 - WEIGHT_PATH;
+	
 	// variable array for counting
 	public static long globalStartTime = System.currentTimeMillis();
 	/**
