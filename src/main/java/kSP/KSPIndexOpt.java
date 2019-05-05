@@ -52,13 +52,16 @@ public class KSPIndexOpt {
 	private MinMaxDateService minMaxDateSer = null;
 	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
 	private HashMap<Integer, int[]> recMinPid2WidDis = new HashMap<>();
+	private int[] maxDateSpans;
+	private boolean[] signInRange = null;
 	
 	// 记录pid到wid的最小路径距离
 	private int[] pid2WidPathDis = new int[2];
 	
 	public KSPIndexOpt(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
-			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
+			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap,
+			int[] maxDateSpans, boolean[] signInRange) {
 		super();
 		this.rgi = rgi;
 		this.rtreeNode2Pid = rtreeNode2Pid;
@@ -69,6 +72,8 @@ public class KSPIndexOpt {
 		this.minMaxDateSer = minMaxDateSer;
 		this.w2pReachable = w2pReachable;
  		this.wordPNMap = wordPNMap;
+ 		this.maxDateSpans = maxDateSpans;
+ 		this.signInRange = signInRange;
 	}
 
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
@@ -340,8 +345,8 @@ public class KSPIndexOpt {
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
@@ -561,14 +566,14 @@ public class KSPIndexOpt {
 							}
 							
 							if(Global.optMethod == OptMethod.O4) {
-								if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
-									if(Global.isTest) {
-										Global.rr.numCptRangeRNodePrune++;
-										Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
-										Global.rr.setFrontTime();
-									}
-									continue;
-								}
+//								if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
+//									if(Global.isTest) {
+//										Global.rr.numCptRangeRNodePrune++;
+//										Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
+//										Global.rr.setFrontTime();
+//									}
+//									continue;
+//								}
 							}
 							if(Global.isTest) {
 								Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
@@ -640,15 +645,15 @@ public class KSPIndexOpt {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree);
+							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree, signInRange);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
@@ -857,7 +862,7 @@ public class KSPIndexOpt {
 				alphaLoosenessBound += widMinDateSpans[i][0];
 			} else {
 				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
-				tempd2 = wordPNMap.get(sortQwords[i]).getLooseness(id, date);
+				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}
 		}

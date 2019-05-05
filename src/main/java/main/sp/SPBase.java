@@ -242,10 +242,10 @@ public class SPBase {
 //			matchSetNids.clear();
 //		}
 		
-		if(Global.isTest) {
-			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
-			Global.rr.setFrontTime();
-		}
+//		if(Global.isTest) {
+//			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+//			Global.rr.setFrontTime();
+//		}
 		
 		// 获得wid2DateNid
 		if(Global.isTest) {
@@ -275,6 +275,7 @@ public class SPBase {
 //		}
 		
 		// 获得nIdDateWidMap
+		if(Global.isTest)	Global.rr.setFrontTime();
 		boolean[] signInRange = new boolean[sortQwords.length];
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		DatesWIds dws = null;
@@ -292,6 +293,10 @@ public class SPBase {
 				}
 				
 			}
+		}
+		if(Global.isTest) {
+			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
 		
 		// 判断是否至少有一个词在时间范围内
@@ -314,6 +319,7 @@ public class SPBase {
 		}
 			
 		// 获得word 的  place neighborhood
+		if(Global.isTest)	Global.rr.setFrontTime();
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		if(Global.MAX_PN_LENGTH > 0) {
 			for(Integer in : qwords) {

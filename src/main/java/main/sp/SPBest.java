@@ -258,10 +258,10 @@ public class SPBest {
 //			matchSetNids.clear();
 //		}
 		
-		if(Global.isTest) {
-			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
-			Global.rr.setFrontTime();
-		}
+//		if(Global.isTest) {
+//			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+//			Global.rr.setFrontTime();
+//		}
 		
 		// 获得wid2DateNid
 		if(Global.isTest) {
@@ -291,6 +291,7 @@ public class SPBest {
 //		}
 		
 		// 获得nIdDateWidMap
+		if(Global.isTest)	Global.rr.setFrontTime();
 		boolean[] signInRange = new boolean[sortQwords.length];
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		DatesWIds dws = null;
@@ -308,6 +309,10 @@ public class SPBest {
 				}
 				
 			}
+		}
+		if(Global.isTest) {
+			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+			Global.rr.setFrontTime();
 		}
 		
 		// 判断是否至少有一个词在时间范围内
@@ -330,6 +335,7 @@ public class SPBest {
 		}
 		
 		// 获得W2PReachable
+		if(Global.isTest)	Global.rr.setFrontTime();
 		Map<Integer, Short>[] w2pReachable = new Map[sortQwords.length];
 		for(i=0; i<sortQwords.length; i++) {
 			if(Global.wordFrequency.get(sortQwords[i]) >= Global.MAX_WORD_FREQUENCY) {

@@ -35,13 +35,15 @@ public class PreprocessFileBuilder {
 //		RTreeService.build();
 		
 		// PN
-		int[] radius = {1, 2, 3};
-		int[] lens = {100000, 1000000, 10000000};
-		for(int r : radius) {
-			for(int l : lens) {
-				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
-			}
-		}
+//		int[] radius = {1, 2, 3};
+//		int[] lens = {100000, 1000000, 10000000};
+//		int[] radius = {2};
+//		int[] lens = {2147483631};
+//		for(int r : radius) {
+//			for(int l : lens) {
+//				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
+//			}
+//		}
 		
 		// TF-Label
 //		TFlabelDataFormatter.build();
@@ -54,19 +56,19 @@ public class PreprocessFileBuilder {
 //		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		// 各节点（包括rtree node）到wid的可达性
-//		Global.numPid = AllPidWid.getAllPid().size();
-//		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
-//		List<Integer> fres = new ArrayList<>();
-		// 必须按照从小到大添加
-//		Global.MAX_WORD_FREQUENCY = 50;	// 为添加的最小值
-//		fres.add(50);
-//		fres.add(250);
-//		fres.add(500);
-//		fres.add(1000);
-//		fres.add(10000);
-//		fres.add(100000);
-//		fres.add(1000000);
-//		W2PIndex.batchBuildW2PIndex(fres);
+		Global.numPid = AllPidWid.getAllPid().size();
+		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
+		List<Integer> fres = new ArrayList<>();
+//		 必须按照从小到大添加
+		Global.MAX_WORD_FREQUENCY = 50;	// 为添加的最小值
+		fres.add(50);
+		fres.add(250);
+		fres.add(500);
+		fres.add(1000);
+		fres.add(10000);
+		fres.add(100000);
+		fres.add(1000000);
+		W2PIndex.batchBuildW2PIndex(fres);
 		
 		// rtreeNode到pid的可达情况
 //		P2NRTreeReach.main(null);
