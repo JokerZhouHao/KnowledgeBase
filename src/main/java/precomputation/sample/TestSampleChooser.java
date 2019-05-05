@@ -162,6 +162,7 @@ public class TestSampleChooser {
 		String[] dates = null;
 		String[] wids = null;
 		Integer nid;
+		
 		br.readLine();
 		while(null != (line=br.readLine())) {
 			tIntArr = new int[2][];
@@ -212,6 +213,8 @@ public class TestSampleChooser {
 		RandomNumGenerator pidGe = new RandomNumGenerator(0, Global.numPid);
 		// 选取样本点数产生器
 		RandomNumGenerator sampNodeNumGe = new RandomNumGenerator(numSampleWids/2, numSampleWids * 2);
+		// bfs碰到多少个带有时间的点时才停止
+		RandomNumGenerator numBfsMeetDateNode = new RandomNumGenerator(1, 10);
 		
 		while(0 != numSample) {
 			while(true) {
@@ -230,6 +233,7 @@ public class TestSampleChooser {
 			}
 			
 			int sampNodeNum = sampNodeNumGe.getRandomInt();
+			int numMeetDateNode = numBfsMeetDateNode.getRandomInt();
 			allWidsSet.clear();
 			minDate = Integer.MAX_VALUE;
 			maxDate = Integer.MIN_VALUE;
@@ -247,24 +251,26 @@ public class TestSampleChooser {
 								throw new Exception("队列" + queue.size() + "太短");
 							}
 							recBfs.add(e);
-							
-							// 更新时间和词
-							if(null != (tIntArr = nidDatesWids.get(nid))) {
-								for(int ii : tIntArr[0]) {
-									if(minDate > ii)	minDate = ii;
-									if(maxDate < ii)	maxDate = ii;
-								}
-								for(int ii : tIntArr[1]) {
-									allWidsSet.add(ii);
-								}
-								if((--sampNodeNum)==0)	break;
-							}
-							
 						}
 					}
-					if(0==sampNodeNum)	break;
 				}
+				// 更新时间和词
+				if(null != (tIntArr = nidDatesWids.get(nid))) {
+					for(int ii : tIntArr[0]) {
+						if(ii == Integer.MAX_VALUE)	continue;
+						if(minDate > ii)	minDate = ii;
+						if(maxDate < ii)	maxDate = ii;
+						numMeetDateNode--;
+					}
+					for(int ii : tIntArr[1]) {
+						allWidsSet.add(ii);
+					}
+					sampNodeNum--;
+				}
+				if(numMeetDateNode <= 0 && sampNodeNum <= 0)	break;
 			}
+			
+			if(minDate == Integer.MAX_VALUE)	continue;
 			
 			// 处理生成的样本数据
 			if(allWidsSet.size()>=10) {
@@ -273,7 +279,7 @@ public class TestSampleChooser {
 				for(int ii : allWidsSet) {
 					allWidList.add(ii);
 				}
-				int wSpan = allWidList.size()/10;
+				int wSpan = allWidList.size()/numSampleWids;
 				if(0==wSpan) wSpan = 1;
 				for(i=0; i<allWidList.size(); i+=wSpan) {
 					sampWids.add(allWidList.get(i));
@@ -453,7 +459,6 @@ public class TestSampleChooser {
 	
 	
 	
-	
 	public static void main(String[] args) throws Exception{
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
@@ -466,7 +471,7 @@ public class TestSampleChooser {
 //		a[4] = 10;
 		for(int ii : a) {
 			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
-			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
+//			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
 		}
 	}
 }

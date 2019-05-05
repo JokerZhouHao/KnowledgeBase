@@ -313,17 +313,20 @@ public class SPBest {
 		// 判断是否至少有一个词在时间范围内
 		List<Integer> matchNids = null;
 		if(eDate != null) {
-			for(i=0; i<signInRange.length; i++)
-				if(signInRange[i])	break;
-			if(i==signInRange.length)	return null;
+//			for(i=0; i<signInRange.length; i++)
+//				if(signInRange[i])	break;
+//			if(i==signInRange.length) {
+//				Global.curRecIndex++;
+//				return null;
+//			}
 			
 			// 获得符合查询条件的点
-			matchNids = new ArrayList<>();
-			for(i=0; i<searchedDatesWids.length; i++) {
-				if(null != searchedDatesWids[i]) {
-					matchNids.add(i);
-				}
-			}
+//			matchNids = new ArrayList<>();
+//			for(i=0; i<searchedDatesWids.length; i++) {
+//				if(null != searchedDatesWids[i]) {
+//					matchNids.add(i);
+//				}
+//			}
 		}
 		
 		// 获得W2PReachable
@@ -508,7 +511,7 @@ public class SPBest {
 					date = TimeUtility.getDate(TimeUtility.getDateByIntDate(binIntDate));
 					spc.bsp(k, pcoords, qwords, date, null);
 				} else {
-					spc.bsp(k, pcoords, qwords, date, eDate);
+					spc.bsp(k, pcoords, qwords, date, date);
 				}
 				
 				samNum--;

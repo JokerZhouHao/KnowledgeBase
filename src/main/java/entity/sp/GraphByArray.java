@@ -540,8 +540,12 @@ public class GraphByArray {
 				looseness = 0;
 				for(i=0; i<sortQwords.length; i++) {
 					if(recKeyDis[i] != signNone) {
-						looseness += recKeyDis[i];
-					} else looseness += currentRadius;
+						if(recSigns[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
+						else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
+					} else {
+						if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
+						else looseness += currentRadius * Global.WEIGHT_PATH;
+					}
 				}
 				if(looseness >= loosenessThreshold) {
 					if(Global.isTest) {
@@ -568,24 +572,28 @@ public class GraphByArray {
 							tempList.add(searchWidIndex);
 							
 							// 更新没有时间的词
-							for(i=0; i<sortQwords.length; i++) {
-								if(recKeyDis[i] != signNone && !recSigns[i])
-									recKeyDis[i] = currentRadius + 1;
-							}
+//							for(i=0; i<sortQwords.length; i++) {
+//								if(recKeyDis[i] != signNone && !recSigns[i])
+//									recKeyDis[i] = currentRadius + 1;
+//							}
 							
 							// 计算新的looseness
-							looseness = 0;
-							for(i=0; i<sortQwords.length; i++) {
-								if(recKeyDis[i] != signNone) {
-									looseness += recKeyDis[i];
-								} else looseness += currentRadius;
-							}
-							if(looseness >= loosenessThreshold) {
-								if(Global.isTest) {
-									Global.rr.numCptPruneInSemanticTree++;
-								}
-								return Double.POSITIVE_INFINITY;
-							}
+//							looseness = 0;
+//							for(i=0; i<sortQwords.length; i++) {
+//								if(recKeyDis[i] != signNone) {
+//									if(signInRanges[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
+//									else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
+//								} else {
+//									if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
+//									else looseness += currentRadius * Global.WEIGHT_PATH;
+//								}
+//							}
+//							if(looseness >= loosenessThreshold) {
+//								if(Global.isTest) {
+//									Global.rr.numCptPruneInSemanticTree++;
+//								}
+//								return Double.POSITIVE_INFINITY;
+//							}
 							
 						} else {	// 不在时间范围内
 							recKeyVectices[searchWidIndex] = vertex;
@@ -625,8 +633,23 @@ public class GraphByArray {
 		}
 
 		// compute semantic tree paths
-		if(!recSearchWidIndex.isEmpty()) {
-			return Double.POSITIVE_INFINITY;
+//		if(!recSearchWidIndex.isEmpty()) {
+//			return Double.POSITIVE_INFINITY;
+//		}
+		for(i=0; i<numQwords; i++) {
+			if(recKeyDis[i] == signNone)	return Double.POSITIVE_INFINITY;
+		}
+		
+		// 计算looseness
+		looseness = 0;
+		for(i=0; i<sortQwords.length; i++) {
+			if(recKeyDis[i] != signNone) {
+				if(recSigns[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
+				else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
+			} else {
+				if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
+				else looseness += currentRadius * Global.WEIGHT_PATH;
+			}
 		}
 		
 		for(i=0; i<numQwords; i++) {

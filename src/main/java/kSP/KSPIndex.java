@@ -523,14 +523,15 @@ public class KSPIndex {
 								}
 								continue;
 							}
-							if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
-								if(Global.isTest) {
-									Global.rr.numCptRangeRNodePrune++;
-									Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
-									Global.rr.setFrontTime();
-								}
-								continue;
-							}
+//							if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
+//								if(Global.isTest) {
+//									Global.rr.numCptRangeRNodePrune++;
+//									Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
+//									Global.rr.setFrontTime();
+//								}
+//								continue;
+//							}
+							
 							if(Global.isTest) {
 								Global.rr.timeCptRangeRNode += Global.rr.getTimeSpan();
 								Global.rr.setFrontTime();
@@ -800,7 +801,7 @@ public class KSPIndex {
 		double alphaLoosenessBound = 0;
 		for(int i=0; i<sortQwords.length; i++) {
 			if(null == wordPNMap.get(sortQwords[i])) {
-				alphaLoosenessBound += 1;
+				alphaLoosenessBound += 1 * Global.WEIGHT_REV_PATH;
 			} else {
 				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate);
 			}

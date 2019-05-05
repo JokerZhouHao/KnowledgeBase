@@ -139,7 +139,7 @@ public class WordRadiusNeighborhood {
 	 * @param eDate
 	 * @return
 	 */
-	public int getLooseness(int pid, int sDate, int eDate) {
+	public double getLooseness(int pid, int sDate, int eDate) {
 		List<Integer> dates = null;
 		int dis = 0;
 		for(int i=0; i < radius + 1; i++) {
@@ -148,10 +148,10 @@ public class WordRadiusNeighborhood {
 					dis = i + 1;
 					continue;
 				}
-				return i + 1;
+				return (i + 1) * Global.WEIGHT_REV_PATH;
 			}
 		}
-		return dis;
+		return dis * Global.WEIGHT_PATH;
 	}
 	
 	/**
