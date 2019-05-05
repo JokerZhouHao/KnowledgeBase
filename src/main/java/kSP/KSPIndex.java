@@ -320,8 +320,8 @@ public class KSPIndex {
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
@@ -609,8 +609,8 @@ public class KSPIndex {
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords

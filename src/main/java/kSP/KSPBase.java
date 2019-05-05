@@ -48,10 +48,13 @@ public class KSPBase {
 	private MinMaxDateService minMaxDateSer = null;
 //	private HashMap<Integer, Map<Integer, Integer>> recMinDateSpanMap = new HashMap<>();
 	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
+	private int[] maxDateSpans = null;
+	private boolean[] signInRange = null;
 	
 	public KSPBase(RTreeWithGI rgi, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
-			HashMap<Integer, WordRadiusNeighborhood> wordPNMap) {
+			HashMap<Integer, WordRadiusNeighborhood> wordPNMap,
+			int[] maxDateSpans, boolean[] signInRange) {
 		super();
 		this.rgi = rgi;
 		this.cReach = cReach;
@@ -59,6 +62,8 @@ public class KSPBase {
 		this.wid2DateNidPair = wid2DateNidPair;
 		this.minMaxDateSer = minMaxDateSer;
  		this.wordPNMap = wordPNMap;
+ 		this.maxDateSpans = maxDateSpans;
+ 		this.signInRange = signInRange;
 	}
 	
 	/**
@@ -274,8 +279,8 @@ public class KSPBase {
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
@@ -510,15 +515,15 @@ public class KSPBase {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree);
+							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree, signInRange);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
 						if(Global.rr.isCptOverTime())	break;
 					}
 
-					if (looseness < 1) {
-						throw new Exception("semantic score " + looseness + " < 1, for place"
+					if (looseness < 0) {
+						throw new Exception("semantic score " + looseness + " < 0, for place"
 								+ placeData.getIdentifier());
 					}
 					// place is a valid candidate that connects to all qwords
@@ -639,7 +644,7 @@ public class KSPBase {
 				alphaLoosenessBound += widMinDateSpans[i][0];
 			} else {
 				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
-				tempd2 = wordPNMap.get(sortQwords[i]).getLooseness(id, date);
+				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
 				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 			}
 		}
