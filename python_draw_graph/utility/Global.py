@@ -1,5 +1,8 @@
 basePath = "D:\\nowMask\\KnowledgeBase\\sample_result\\"
 
+# baseYagoSamplePath = "D:\\nowMask\\KnowledgeBase\\sample_result\\\yago2s_single_date\\new1\\"
+baseYagoSamplePath = "D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\new_2019_5_6\\"
+
 TYPE_TEST = 'SPBest'
 nwlen = 1000000
 mds = 1000

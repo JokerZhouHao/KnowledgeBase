@@ -51,7 +51,7 @@ public class GraphSample {
 		
 		String line = null;
 		line = br.readLine();
-		bw.write("       \n");
+		bw.write("                                \n");
 		
 		while(null != (line = br.readLine())) {
 			String[] strArr = line.split(Global.delimiterLevel1);

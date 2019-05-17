@@ -30,8 +30,15 @@ public class ATest {
 	public static void main(String[] args) throws Exception{
 		
 		
-		OptMethod om = OptMethod.O1;
-		System.out.println(om);
+//		OptMethod om = OptMethod.O1;
+//		System.out.println(om);
+		
+		Map<Integer, Short> mp = new HashMap<>();
+		Short st = 1;
+		mp.put(1, st);
+		mp.put(2, st);
+		st = 4;
+		System.out.println(mp);
 		
 		
 //		List<Integer> li = new ArrayList<>();

@@ -18,6 +18,7 @@ import org.apache.lucene.util.ArrayUtil;
 
 import entity.BFSWidRecoder;
 import entity.OptMethod;
+import entity.sp.GraphWithWids;
 import entity.sp.RunRecord;
 
 /**
@@ -27,6 +28,9 @@ import entity.sp.RunRecord;
  *
  */
 public class YagoGlobal {
+	// 用于DBpedia创建wid2pid索引
+	public static GraphWithWids graphWithWids = null;
+	
 	// optimization method
 	public static OptMethod optMethod = OptMethod.O1;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
@@ -122,6 +126,7 @@ public class YagoGlobal {
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
+	public static String edgeReverseFile = "edgeReverseYagoVB.txt";
 	public static String degreeFile = "degreeYagoVB.txt";
 	public static String nodeIdKeywordListFile = "nidKeywordsListMapYagoVB.txt";
 	public static String nodeIdKeywordListOnDateFile = "nodeIdKeywordListOnDateMapYagoVB.txt";

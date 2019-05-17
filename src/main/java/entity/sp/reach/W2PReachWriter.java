@@ -137,6 +137,8 @@ public class W2PReachWriter extends Thread{
 		if(end >= Global.numPid)	end = start;
 		while(true) {
 			queue.take();
+			System.gc();
+			System.gc();
 			zipNum--;
 			if(zipNum == 0)	break;
 			if(end < Global.numPid) {

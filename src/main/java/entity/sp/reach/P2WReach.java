@@ -163,6 +163,8 @@ public class P2WReach implements Runnable{
 			
 			if(dealedNum%40000 == 0) {
 				System.out.println("> 已处理" + dealedNum + "个pid, 用时：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));
+				System.gc();
+				System.gc();
 			}
 		}
 		
@@ -186,7 +188,7 @@ public class P2WReach implements Runnable{
 					dos.writeInt(en.getKey());
 					dos.writeShort(en.getValue());
 				}
-				pid2Wids[tc.pid] = tc.widDis;
+				if(Global.graphWithWids == null)	pid2Wids[tc.pid] = tc.widDis;
 			}
 			dos.flush();
 			dos.close();
@@ -225,7 +227,7 @@ public class P2WReach implements Runnable{
 			start = end;
 			end += span;
 			if(end > Global.numPid)	end = Global.numPid;
-			ArrayBlockingQueue<TempClass> bQueue = new ArrayBlockingQueue<>(1);
+			ArrayBlockingQueue<TempClass> bQueue = new ArrayBlockingQueue<>(50);
 			P2WReach pwd1 = new P2WReach(1, bQueue, start, end);
 			P2WReach pwd2 = new P2WReach(2, bQueue, start, end);
 			new Thread(pwd1).start();

@@ -153,7 +153,7 @@ public class GraphSampleNeighChooser extends GraphSample{
 		sampleNums.add(2000000);
 		sampleNums.add(4000000);
 		sampleNums.add(6000000);
-		GraphSampleNeighChooser gsnc =  new GraphSampleNeighChooser(Boolean.FALSE);
+		GraphSampleNeighChooser gsnc =  new GraphSampleNeighChooser(Boolean.TRUE);
 //		gsnc.buildGraphSample(sampleNums);
 		gsnc.adjustSampleGraph(sampleNums);
 	}

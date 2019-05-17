@@ -130,6 +130,11 @@ public class AllPidWid {
 		return li;
 	}
 	
+	
+	public static Set<Integer> getAllPidSet(){
+		return new HashSet<>(getAllPid());
+	}
+	
 	/**
 	 * 获得所有wid
 	 * @return

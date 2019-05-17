@@ -6,6 +6,7 @@ import java.util.List;
 
 import entity.BFSWidRecoder;
 import entity.sp.AllPidWid;
+import entity.sp.GraphWithWids;
 import entity.sp.date.MinMaxDateService;
 import entity.sp.date.Wid2DateNidPairIndex;
 import entity.sp.reach.P2NRTreeReach;
@@ -36,9 +37,7 @@ public class PreprocessFileBuilder {
 		
 		// PN
 //		int[] radius = {1, 2, 3};
-//		int[] lens = {100000, 1000000, 10000000};
-//		int[] radius = {2};
-//		int[] lens = {2147483631};
+//		int[] lens = {100000, 1000000, 10000000, 2147483631};
 //		for(int r : radius) {
 //			for(int l : lens) {
 //				WordPNIndexBuilder.main(new String[] {String.valueOf(r), String.valueOf(l)});
@@ -52,22 +51,26 @@ public class PreprocessFileBuilder {
 //		RTreeLeafNodeContainPids.main(null);
 		
 		// 创建词频文件
-//		IndexNidKeywordsListService.buildWordFrequencyFile();
-//		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+		IndexNidKeywordsListService.buildWordFrequencyFile();
+		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		// 各节点（包括rtree node）到wid的可达性
+//		Global.graphWithWids = new GraphWithWids();	// 该变量仅用于DBpedia，因为DBpedia的pid2wid文件太大了，如果是yago
+//													// 请设置为null
 		Global.numPid = AllPidWid.getAllPid().size();
 		Global.orgBFSWidRecoder = new BFSWidRecoder(AllPidWid.getAllWid());
 		List<Integer> fres = new ArrayList<>();
-//		 必须按照从小到大添加
-		Global.MAX_WORD_FREQUENCY = 50;	// 为添加的最小值
-		fres.add(50);
-		fres.add(250);
-		fres.add(500);
+////		 必须按照从小到大添加
+		Global.MAX_WORD_FREQUENCY = 1000;	// 为添加的最小值
+//		fres.add(0);
+//		fres.add(50);
+//		fres.add(100);
+//		fres.add(250);
+//		fres.add(500);
 		fres.add(1000);
 		fres.add(10000);
 		fres.add(100000);
-		fres.add(1000000);
+//		fres.add(1000000);
 		W2PIndex.batchBuildW2PIndex(fres);
 		
 		// rtreeNode到pid的可达情况

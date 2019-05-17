@@ -5,6 +5,9 @@ import random
 from matplotlib import interactive
 from Data.StatisticData import Data
 from utility import PathUtility
+from utility import Global
+
+BAR_FONT_SIZE = 25
 
 class Bar:
     width = 0.148
@@ -32,7 +35,7 @@ class Bar:
         if title==None: self.fig.canvas.set_window_title('Test')
         else:   self.fig.canvas.set_window_title(title)
         self.f_type = f_type
-        plt.rcParams['font.size'] = 20
+        plt.rcParams['font.size'] = 25
         self.ax = self.fig.add_subplot(111)
         self.fpath = fpath
 
@@ -76,9 +79,13 @@ class Bar:
         if self.is_stack:
             self.ax.fill([-1, 0, 0, -1], [-1, -1, -1.1, -1.1], label='Other Time', fc='white', ec='black')
             self.ax.fill([-1, 0, 0, -1], [-1, -1, -1.1, -1.1], hatch=Bar.hatchx, label='Semantic Time', fc='#CCCCCC', ec='black')
-            self.ax.legend(loc=2, frameon=False, prop={'size': 9})
-        elif self.f_type.startswith('alpha'):
-            self.ax.legend(loc=2, frameon=False, prop={'size': 20})
+            self.ax.legend(loc=2, frameon=False)
+        elif self.f_type.startswith('alpha_len_SPTD'):
+            # self.ax.legend(loc=2, frameon=False, prop={'size': 25})
+            self.ax.legend(loc=1, frameon=False)
+        elif self.f_type.startswith('alpha_len_SPTR'):
+            # self.ax.legend(loc=2, frameon=False, prop={'size': 25})
+            self.ax.legend(loc=1, frameon=False)
 
         # 设置X、Y限制
         self.ax.tick_params(axis='x', direction='in', width=3, length=8, which='major')
@@ -112,9 +119,9 @@ class Bar:
         if self.xLabel != None:  self.ax.set_xlabel(self.xLabel)
 
         # 隐藏下方x轴的label
-        yPos = None
+        yPos = -0.008
         if self.f_type.startswith('radius_len'):
-            yPos = -0.015
+            yPos = -0.1
         xaxis = self.ax.get_xaxis()
         x_labels = xaxis.get_ticklabels()
         for i in range(len(x_labels)):
@@ -177,6 +184,10 @@ class Bar:
         #         x_lines[i].set_visible(False)
 
         # self.ax.grid('on')
+
+        # 设置字体大小
+        # plt.xticks(fontsize=25)
+        # plt.yticks(fontsize=25)
 
         interactive(True)
         plt.show()
@@ -284,9 +295,9 @@ class Bar:
         x_txts = [r'$10^5$', r'$10^6$', r'$10^7$']
 
         if search_type==0:
-            ys = [base_y+i*40 for i in range(0, 6)]
+            ys = [5000+i*500 for i in range(0, 5)]
         elif search_type==1:
-            ys = [base_y+i*40 for i in range(0, 7)]
+            ys = [1000+i*1000 for i in range(0, 5)]
 
         if search_type==0:
             title = 'SPTD*'
@@ -295,7 +306,7 @@ class Bar:
 
         timeBar = Bar(xLabel=r'$\mathit{l}$', yLabel='Runtime (ms)', is_stack=False, title=title, ys=ys, xs=xs, x_txts=x_txts, yscale='linear', y_type='NW', f_type=ftype, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\radius_len\\'
+        base_dir = Global.baseYagoSamplePath + 'radius_len_nw=3\\'
         radius = [1, 2, 3]
         radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
         lens = (100000, 1000000, 10000000)
@@ -303,7 +314,7 @@ class Bar:
         for radiu_i in range(len(radius)):
             runtimes = []
             for len_i in range(len(lens)):
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=5, wf=50, dr=7), time_total_threshold=12000000)
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7), time_total_threshold=12000000)
                 print(data)
                 runtimes.append(data.timeTotal)
             timeBar.draw_bar(radiu_i, runtimes, hatch=Bar.hatchxes[radiu_i], label=radius_txt[radiu_i], )
@@ -411,13 +422,17 @@ class LineChart:
         self.line_type_index += 1
 
     def show(self):
+        plt.rcParams['font.size'] = 25
         if self.yLabel.find('TQTSP') != -1:
             # self.ax.legend(loc=1, prop={'size': 15}, bbox_to_anchor=(0.97, 0.84))
             self.ax.legend(loc=2, prop={'size': 15})
+        if self.yLabel.find('Runtime') != -1 and self.xLabel.find('top') != -1:
+            self.ax.legend(loc=1, prop={'size': 13}, bbox_to_anchor=(0.18, 1.018))
+            # self.ax.legend(loc=1, prop={'size': 15}, bbox_to_anchor=(0.2, 1.1))
         elif self.xLabel.find('top') != -1 and self.yLabel.find('Runtime') != -1:
             self.ax.legend(loc=2, prop={'size': 15})
         elif self.xLabel.find('psi') != -1:
-            self.ax.legend(loc=1, prop={'size': 15})
+            self.ax.legend(loc=1, prop={'size': 13}, bbox_to_anchor=(0.4, 1.01))
         else:
             self.ax.legend(loc=2, prop={'size': 15})
 
@@ -489,15 +504,15 @@ class LineChart:
         if show_type==0:
             yLabel = 'Runtime (ms)'
             yscale = 'log'
-            ylim = (100, 100000)
+            ylim = (1000, 100000)
         elif show_type==1:
             yLabel = '# of TQTSP Computations'
             yscale='log'
-            ylim = (100, 10000)
+            ylim = (100, 100000)
             ys = [base_y+i*100 for i in range(0, 11)]
         elif show_type==2:
             yLabel = '# of R-tree nodes accessed'
-            ys = [i*500 for i in range(5)]
+            ys = [500 + i*500 for i in range(5)]
 
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
         xs=[i for  i in  range(len(x_txts))]
@@ -509,7 +524,7 @@ class LineChart:
         type = None
 
         ks = [1, 3, 5, 8, 10, 15, 20]
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
+        base_dir = Global.baseYagoSamplePath + 'k_nw_dr\\'
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
@@ -520,7 +535,7 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for k in ks:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=k, nw=5, wf=50, dr=7))
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=10000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=k, nw=3, wf=1000, dr=7))
                     print(data)
                     if 0==show_type: runtimes.append(data.timeTotal)
                     elif 1==show_type: runtimes.append(data.numTQSP)
@@ -534,19 +549,19 @@ class LineChart:
         ys = None
         if base_y != None:
             ys = [base_y+i*100 for i in range(0, 11)]
-        x_txts = [1.0, 3.0, 5.0, 8.0, 10.0]
+        x_txts = [1.0, 2.0, 3.0, 4.0, 5.0]
         xs=[i for  i in  range(len(x_txts))]
 
         yLabel = 'Runtime (ms)'
 
-        chart = LineChart(xs, x_txts, ys=ys, ylim=(100, 100000), xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|', fpath=fpath)
+        chart = LineChart(xs, x_txts, ys=ys, ylim=(1000, 100000), xLabel=r'|$q.\psi$|', yLabel=yLabel, title=r'|$q.\psi$|', fpath=fpath)
 
         alg_types = ['SPBase', 'SPBest']
         search_types = [0, 1]
         type = None
 
-        nws = [1, 3, 5, 8, 10]
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\nw_k_dr\\'
+        nws = [1, 2, 3, 4, 5]
+        base_dir = Global.baseYagoSamplePath + "k_nw_dr\\"
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
@@ -557,7 +572,7 @@ class LineChart:
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for nw in nws:
-                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=1000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=50, dr=7))
+                    data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_types[alg_index], nwlen=10000000, mds=50000000, t=search_types[search_index], ns=200, r=2, k=5, nw=nw, wf=1000, dr=7))
                     print(data)
                     runtimes.append(data.timeTotal)
                 chart.draw_line(runtimes, type)
@@ -714,11 +729,11 @@ class LineChart:
     def draw_word_frequency(title=r'$\tau$', search_type=0, base_y=None, rotation=0, fpath='test.pdf'):
         if base_y!=None:
             if search_type==0:
-                ys = [base_y+i*1000 for i in range(0, 5)]
+                ys = [base_y+i*2000 for i in range(0, 7)]
             elif search_type==1:
-                ys = [base_y+i*50 for i in range(0, 7)]
-        xs=[i for  i in  range(0, 9)]
-        x_txts = ['0', r'$5\times10^1$', r'$1\times10^2$', r'$2.5\times10^2$',
+                ys = [base_y+i*2000 for i in range(0, 7)]
+        xs=[i for  i in  range(0, 8)]
+        x_txts = [r'$5\times10^1$', r'$1\times10^2$', r'$2.5\times10^2$',
                      r'$5\times10^2$', r'$1\times10^3$',
                      r'$1\times10^4$',r'$1\times10^5$',
                      r'$1\times10^6$'
@@ -728,9 +743,9 @@ class LineChart:
 
         # chart.ax.grid('on')
 
-        wfs = [0, 50, 100, 250, 500, 1000, 10000, 100000, 1000000]
+        wfs = [50, 100, 250, 500, 1000, 10000, 100000, 1000000]
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\word_frequency\\'
+        base_dir = Global.baseYagoSamplePath + 'word_frequency\\'
         search_name = None
         if search_type==0:
             search_name = r'$SPTD^*$'
@@ -743,7 +758,7 @@ class LineChart:
         for search_type_index in range(len(search_types)):
             runtimes = []
             for wf in wfs:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=search_types[search_type_index], ns=200, r=3, k=5, nw=5, wf=wf, dr=7), time_total_threshold=120000)
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=search_types[search_type_index], ns=200, r=2, k=5, nw=3, wf=wf, dr=7), time_total_threshold=12000000)
                 runtimes.append(data.timeTotal)
             chart.draw_line(runtimes, search_names[search_type_index])
         chart.show()
@@ -781,24 +796,25 @@ class LineChart:
     @staticmethod
     def draw_date_range(label=r'$|q.\delta|$', base_y=None, x_rotation=0, fpath='test.pdf'):
         if base_y!=None: ys = [base_y+i*100 for i in range(0, 17)]
+
         # x_txts = [r'$5\times10^8$', r'$1\times10^8$', r'$5\times10^7$', r'$1\times10^7$',
         #           r'$5\times10^6$', r'$1\times10^6$', r'$5\times10^5$', r'$1\times10^5$',
         #           r'$1\times10^4$', '0']
         # x_txts = [0,3,7,15,30,50,100,150,300,600]
         # drs = [0,3,7,15,30,50,100,150,300,600]
         drs = [0,3,7,15,30,50,100,150]
-        x_txts = [0,6,14,30,60,100,200,300]
+        x_txts = [1,7,14,30,60,100,200,300]
         xs=[i for  i in  range(len(drs))]
 
         if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath = fpath)
-        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, ylim=(100, 10000), yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
+        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, ylim=(1000, 100000), yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\KnowledgeBase\\sample_result\\yago2s_single_date\\new1\\dr\\'
+        base_dir = Global.baseYagoSamplePath + "k_nw_dr\\"
         alg_types=['SPBase', 'SPBest']
         for alg_type in alg_types:
             runtimes = []
             for dr in drs:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=1000000, mds=50000000, t=1, ns=200, r=2, k=5, nw=5, wf=50, dr=dr))
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp=alg_type, nwlen=10000000, mds=50000000, t=1, ns=200, r=2, k=5, nw=3, wf=1000, dr=dr))
                 # print(data)
                 runtimes.append(data.timeTotal)
             print(runtimes)
@@ -870,13 +886,13 @@ class LineChart:
         plt.pause(1200)
 
 ######## 画WORD_FREQUENCY折线图 ##############
-# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_SPTRStar1.pdf')
 
 
 ######### 画radius_len柱状图 ################
-Bar.draw_radius_len(0, 780, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
-Bar.draw_radius_len(1, 400, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
+# Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######### 画top-k柱状图 #################
 # Bar.draw_topK()
@@ -886,9 +902,9 @@ Bar.draw_radius_len(1, 400, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_pa
 # Bar.draw_topK(0, 2)
 # Bar.draw_topK(1, 2)
 # 折线图
-# LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'topK_RuntimeYagoVB_Date.pdf')
-# LineChart.draw_k(1, base_y=0, fpath=PathUtility.figure_path() + 'topK_TQTSPYagoVB_Date.pdf')
-# LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'topK_RTreeNodeYagoVB_Date.pdf')
+LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'topK_RuntimeYagoVB_Date.pdf')
+LineChart.draw_k(1, base_y=0, fpath=PathUtility.figure_path() + 'topK_TQTSPYagoVB_Date.pdf')
+LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'topK_RTreeNodeYagoVB_Date.pdf')
 
 
 ######### 画不同数keywords柱状图 #########

@@ -159,7 +159,7 @@ public class W2PIndex {
 	
 	
 	public static void buidingW2PIndex() throws Exception{
-		System.out.println("> 开始创建W2PIndex . . . " + TimeUtility.getTime());
+		System.out.println("> 开始创建 " + Global.indexWid2Pid + " . . . " + TimeUtility.getTime());
 		int start = 0, end = 0;
 		int span = P2WReach.zipContianNodeNum;
 		int zipNum = P2WReach.zipNum;
@@ -282,7 +282,8 @@ public class W2PIndex {
 			if(tPidDis != W2PReachReader.signReadOver)	break;
 		}
 		if(i != widQueues.length) {
-			System.err.println("> 发送的结束信号未正常收到");
+//			System.err.println("> 发送的结束信号未正常收到");
+			throw new Exception("> 应收到" + String.valueOf(widQueues.length) + "个结束信号, " + "但实际收到" + String.valueOf(i) + "个结束信号");
 		} else {
 			System.err.println("> 发送的结束信号正常收到 ！！！");
 		}
@@ -323,7 +324,7 @@ public class W2PIndex {
 	
 	public static void batchBuildW2PIndex(List<Integer> fres) throws Exception{
 		long startTime = System.currentTimeMillis();
-		System.out.println("> 文件生成，并创建W2PIndex . . . ");
+//		System.out.println("> 文件生成，并创建W2PIndex . . . ");
 //		P2WRTreeReach.building();
 //		for(Map<Integer, Short> st : P2WRTreeReach.pid2Wids) {
 //			if(null!=st)	st.clear();
@@ -335,6 +336,8 @@ public class W2PIndex {
 			Global.MAX_WORD_FREQUENCY = fre;
 			Global.indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
 			W2PIndex.buidingW2PIndex();
+			System.gc();
+			System.gc();
 		}
 		
 		System.out.println("> Over文件生成，并创建W2PIndex, 用时 ：" + TimeUtility.getSpendTimeStr(startTime, System.currentTimeMillis()));

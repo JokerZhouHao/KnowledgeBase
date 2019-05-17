@@ -70,21 +70,31 @@ public class P2WRTreeReach extends RTree {
 		Map<Integer, Short> widDis = new HashMap<>();
 		Map<Integer, Short> tSet = null;
 		if(node.isLeaf()) {
-			for(int child = 0; child < node.m_children; child++) {
-				tSet = pid2Wids[node.m_pIdentifier[child]];
-				if(null != tSet) {
-					for(Entry<Integer, Short> en : tSet.entrySet()) {
-						if(widDis.containsKey(en.getKey())) {
-							if(widDis.get(en.getKey()) > en.getValue()) {
+			if(null == Global.graphWithWids) {
+				for(int child = 0; child < node.m_children; child++) {
+					tSet = pid2Wids[node.m_pIdentifier[child]];
+					if(null != tSet) {
+						for(Entry<Integer, Short> en : tSet.entrySet()) {
+							if(widDis.containsKey(en.getKey())) {
+								if(widDis.get(en.getKey()) > en.getValue()) {
+									widDis.put(en.getKey(), en.getValue());
+								}
+							} else {
 								widDis.put(en.getKey(), en.getValue());
 							}
-						} else {
-							widDis.put(en.getKey(), en.getValue());
 						}
+						tSet.clear();
+						pid2Wids[node.m_pIdentifier[child]] = null;
 					}
-					tSet.clear();
-					pid2Wids[node.m_pIdentifier[child]] = null;
 				}
+			} else {
+				Set<Integer> tInts = new HashSet<>();
+				for(int child = 0; child < node.m_children; child++) {
+					tInts.add(node.m_pIdentifier[child]);
+				}
+				tInts = Global.graphWithWids.getConnectWids(tInts);
+				for(int wid : tInts)
+					widDis.put(wid, (short)-1);
 			}
 		} else {
 			for(int child = 0; child < node.m_children; child++) {
@@ -104,7 +114,7 @@ public class P2WRTreeReach extends RTree {
 			}
 		}
 		if(!widDis.isEmpty())	write(-nid-1, widDis);	// -nid-1是为了与pid区分开
-		if((++count)%1000 == 0) {
+		if((++count)%100 == 0) {
 			System.out.println("> 已处理" + count + "个rtree node，用时：" + TimeUtility.getSpendTimeStr(Global.globalStartTime, System.currentTimeMillis()));
 		}
 		return widDis;
@@ -152,14 +162,14 @@ public class P2WRTreeReach extends RTree {
 	}
 	
 	public static void building() throws Exception{
-		System.out.println("> 开始处理pid . . . " + TimeUtility.getTime());
-		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2WReach.zipNum);
-		P2WReach.buildingPidToWidReachFile(endSignQueue);
-		int i = 0;
-		for(i=0; i<P2WReach.zipNum; i++) {
-			endSignQueue.take();
-		}
-		System.out.println("\n\n> 已处理完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
+//		System.out.println("> 开始处理pid . . . " + TimeUtility.getTime());
+//		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2WReach.zipNum);
+//		P2WReach.buildingPidToWidReachFile(endSignQueue);
+//		int i = 0;
+//		for(i=0; i<P2WReach.zipNum; i++) {
+//			endSignQueue.take();
+//		}
+//		System.out.println("\n\n> 已处理完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
 		
 		P2WRTreeReach.pid2Wids = P2WReach.pid2Wids;
 		P2WRTreeReach rtree = P2WRTreeReach.getInstance(Global.indexRTree);

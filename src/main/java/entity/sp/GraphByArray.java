@@ -35,7 +35,7 @@ import utility.Utility;
  * @author jmshi 
  */
 public class GraphByArray {
-	protected int[][] adjLists;
+	public int[][] adjLists;
 	protected int numVertices;
 	protected int[] preceder;
 	protected int[] distance2Source;
@@ -702,11 +702,12 @@ public class GraphByArray {
 		int countEdges = 0;
 		String[] adjListStr;
 		String[] adjVerticesStr;
+		
 		while ((line = reader.readLine()) != null) {
 			cntlines++;
-			if (cntlines % 1000000 == 0) {
-				System.out.println("adding vertex with edges " + cntlines);
-			}
+//			if (cntlines % 1000000 == 0) {
+//				System.out.println("adding vertex with edges " + cntlines);
+//			}
 			if (line.contains(Global.delimiterPound)) {
 				continue;
 			}
