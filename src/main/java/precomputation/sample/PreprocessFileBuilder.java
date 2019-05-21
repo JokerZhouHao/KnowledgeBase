@@ -68,8 +68,8 @@ public class PreprocessFileBuilder {
 //		fres.add(250);
 //		fres.add(500);
 		fres.add(1000);
-		fres.add(10000);
-		fres.add(100000);
+//		fres.add(10000);
+//		fres.add(100000);
 //		fres.add(1000000);
 		W2PIndex.batchBuildW2PIndex(fres);
 		

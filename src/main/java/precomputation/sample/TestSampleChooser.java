@@ -41,7 +41,6 @@ public class TestSampleChooser {
 		int id = 0;
 		int recSamNum = 1;
 		
-		
 		// 将坐标信息读入内存
 		while(null != (line = br.readLine())) {
 			strArr = line.split(Global.delimiterLevel1);
@@ -212,9 +211,11 @@ public class TestSampleChooser {
 		// pid随机随机产生器
 		RandomNumGenerator pidGe = new RandomNumGenerator(0, Global.numPid);
 		// 选取样本点数产生器
-		RandomNumGenerator sampNodeNumGe = new RandomNumGenerator(numSampleWids/2, numSampleWids * 2);
+//		RandomNumGenerator sampNodeNumGe = new RandomNumGenerator(numSampleWids/2, numSampleWids * 2);
+//		RandomNumGenerator sampNodeNumGe = new RandomNumGenerator(numSampleWids/3, numSampleWids/3 + 3);
 		// bfs碰到多少个带有时间的点时才停止
-		RandomNumGenerator numBfsMeetDateNode = new RandomNumGenerator(1, 10);
+//		RandomNumGenerator numBfsMeetDateNode = new RandomNumGenerator(1, 10);
+//		RandomNumGenerator numBfsMeetDateNode = new RandomNumGenerator(1, 2);
 		
 		while(0 != numSample) {
 			while(true) {
@@ -232,8 +233,10 @@ public class TestSampleChooser {
 				}
 			}
 			
-			int sampNodeNum = sampNodeNumGe.getRandomInt();
-			int numMeetDateNode = numBfsMeetDateNode.getRandomInt();
+//			int sampNodeNum = sampNodeNumGe.getRandomInt();
+//			int numMeetDateNode = numBfsMeetDateNode.getRandomInt();
+			int sampNodeNum = 1;
+			int numMeetDateNode = 1;
 			allWidsSet.clear();
 			minDate = Integer.MAX_VALUE;
 			maxDate = Integer.MIN_VALUE;
@@ -261,13 +264,14 @@ public class TestSampleChooser {
 						if(minDate > ii)	minDate = ii;
 						if(maxDate < ii)	maxDate = ii;
 						numMeetDateNode--;
+						for(int kk : tIntArr[1]) {
+							allWidsSet.add(kk);
+						}
+						sampNodeNum--;
+						break;
 					}
-					for(int ii : tIntArr[1]) {
-						allWidsSet.add(ii);
-					}
-					sampNodeNum--;
 				}
-				if(numMeetDateNode <= 0 && sampNodeNum <= 0)	break;
+				if(sampNodeNum <= 0)	break;
 			}
 			
 			if(minDate == Integer.MAX_VALUE)	continue;

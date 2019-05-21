@@ -36,6 +36,7 @@ import kSP.KSPIndex;
 import kSP.KSPIndexOpt;
 import kSP.candidate.KSPCandidateVisitor;
 import neustore.base.LRUBuffer;
+import precomputation.sample.TestInputDataBuilder;
 import precomputation.sp.IndexNidKeywordsListService;
 import precomputation.sp.IndexWordPNService;
 import spatialindex.spatialindex.IVisitor;
@@ -61,16 +62,16 @@ public class SPBestOpt {
 	private IndexWordPNService wIdPnSer = null;
 	private IndexWordPNService wIdInfinitePnSer = null;
 	private LRUBuffer buffer = null;
-	private RTreeWithGI rgi = null;
+	private static RTreeWithGI rgi = null;
 	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
-	private Set<Integer>[] rtreeNode2Pid = null;
+	private static Set<Integer>[] rtreeNode2Pid = null;
 	private W2PReachService w2pReachSer = null;
-	private CReach cReach = null;
-	private MinMaxDateService minMaxDateSer = null;
+	private static CReach cReach = null;
+	private static MinMaxDateService minMaxDateSer = null;
 	
 	private Map<Integer, Map<Integer, String>> cacheSeachedWid = new HashMap<>();	// 缓存关键词的查询结果
 	
-	private int[] pid2RtreeLeafNode = null;
+	private static int[] pid2RtreeLeafNode = null;
 	
 	public static RandomNumGenerator dateSpanGen = new RandomNumGenerator(0, 7);
 	
@@ -102,17 +103,17 @@ public class SPBestOpt {
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
 		
-		rtreeNode2Pid = P2WRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
+		if(null == rtreeNode2Pid)	rtreeNode2Pid = P2WRTreeReach.loadRTreeNode2Pids(Global.recRTreeNode2NidReachPath);
 		
 		Global.indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
 		w2pReachSer = new W2PReachService(Global.indexWid2PidBase);
 		w2pReachSer.openIndexs();
 		
-		cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
+		if(null == cReach)	cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
 		
-		pid2RtreeLeafNode = RTreeLeafNodeContainPids.loadPid2RTreeLeafNode(Global.recRTreeLeafNodeContainPidsPath);
+		if(null == pid2RtreeLeafNode)	pid2RtreeLeafNode = RTreeLeafNodeContainPids.loadPid2RTreeLeafNode(Global.recRTreeLeafNodeContainPidsPath);
 		
-		minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
+		if(null == minMaxDateSer)	minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
 		
 		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
@@ -129,21 +130,23 @@ public class SPBestOpt {
 		
 		//the data index structure of RDF data with R-tree, RDF Graph, and Inverted index of keywords
 		try {
-			PropertySet psRTree = new PropertySet();
-			String indexRTree = Global.indexRTree;
-			psRTree.setProperty("FileName", indexRTree);
-			psRTree.setProperty("PageSize", Global.rtreePageSize);
-			psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
-			psRTree.setProperty("fanout", Global.rtreeFanout);
-			
-			IStorageManager diskfile = new DiskStorageManager(psRTree);
-			IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
-			
-			Integer i = new Integer(1); 
-			psRTree.setProperty("IndexIdentifier", i);
-			
-			rgi = new RTreeWithGI(psRTree, file);
-			rgi.buildSimpleGraphInMemory();
+			if(rgi == null) {
+				PropertySet psRTree = new PropertySet();
+				String indexRTree = Global.indexRTree;
+				psRTree.setProperty("FileName", indexRTree);
+				psRTree.setProperty("PageSize", Global.rtreePageSize);
+				psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
+				psRTree.setProperty("fanout", Global.rtreeFanout);
+				
+				IStorageManager diskfile = new DiskStorageManager(psRTree);
+				IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+				
+				Integer i = new Integer(1); 
+				psRTree.setProperty("IndexIdentifier", i);
+				
+				rgi = new RTreeWithGI(psRTree, file);
+				rgi.buildSimpleGraphInMemory();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -424,7 +427,7 @@ public class SPBestOpt {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception{
+	public static void test(String[] args) throws Exception{
 		// 输入的检索参数，依次是检索类型(0为单个时间，1为时间范围), 样本数, radius, k, 检索词数
 		Global.TYPE_TEST = "SPBest";
 		int searchType = 0;
@@ -590,6 +593,17 @@ public class SPBestOpt {
 					"dr=" + String.valueOf(Global.DATE_RANGE) + " " + 
 					"，用时：" + TimeUtility.getTailTime());
 			System.out.println();
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		if(args.length == 1) {	// 从文件输入测试参数
+			List<String[]> testStrs = TestInputDataBuilder.loadTestString(Global.inputDirectoryPath + File.separator + 
+					"sample_result" + File.separator + args[0]);
+			for(String[] sts : testStrs)
+				test(sts);
+		} else {
+			test(args);
 		}
 	}
 }

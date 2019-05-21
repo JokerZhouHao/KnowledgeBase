@@ -28,6 +28,9 @@ import entity.sp.RunRecord;
  *
  */
 public class YagoGlobal {
+	
+	public static int defaultMaxDateSpan = 1000;
+	
 	// 用于DBpedia创建wid2pid索引
 	public static GraphWithWids graphWithWids = null;
 	

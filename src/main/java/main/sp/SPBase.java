@@ -34,6 +34,7 @@ import kSP.KSPBase;
 import kSP.KSPIndex;
 import kSP.candidate.KSPCandidateVisitor;
 import neustore.base.LRUBuffer;
+import precomputation.sample.TestInputDataBuilder;
 import precomputation.sp.IndexNidKeywordsListService;
 import precomputation.sp.IndexWordPNService;
 import spatialindex.spatialindex.IVisitor;
@@ -57,10 +58,10 @@ public class SPBase {
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private IndexWordPNService wIdPnSer = null;
 	private LRUBuffer buffer = null;
-	private RTreeWithGI rgi = null;
+	private static RTreeWithGI rgi = null;
 	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
-	private CReach cReach = null;
-	private MinMaxDateService minMaxDateSer = null;
+	private static CReach cReach = null;
+	private static MinMaxDateService minMaxDateSer = null;
 	
 	private Map<Integer, Map<Integer, String>> cacheSeachedWid = new HashMap<>();	// 缓存关键词的查询结果
 	
@@ -88,9 +89,9 @@ public class SPBase {
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
 		
-		cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
+		if(null == cReach)	cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
 		
-		minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
+		if(null == minMaxDateSer)	minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
 		
 		if(Global.isDebug) {
 			System.out.println("> 初始化RTreeWithGI . . . . ");
@@ -105,21 +106,23 @@ public class SPBase {
 		
 		//the data index structure of RDF data with R-tree, RDF Graph, and Inverted index of keywords
 		try {
-			PropertySet psRTree = new PropertySet();
-			String indexRTree = Global.indexRTree;
-			psRTree.setProperty("FileName", indexRTree);
-			psRTree.setProperty("PageSize", Global.rtreePageSize);
-			psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
-			psRTree.setProperty("fanout", Global.rtreeFanout);
-			
-			IStorageManager diskfile = new DiskStorageManager(psRTree);
-			IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
-			
-			Integer i = new Integer(1); 
-			psRTree.setProperty("IndexIdentifier", i);
-			
-			rgi = new RTreeWithGI(psRTree, file);
-			rgi.buildSimpleGraphInMemory();
+			if(rgi == null) {
+				PropertySet psRTree = new PropertySet();
+				String indexRTree = Global.indexRTree;
+				psRTree.setProperty("FileName", indexRTree);
+				psRTree.setProperty("PageSize", Global.rtreePageSize);
+				psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
+				psRTree.setProperty("fanout", Global.rtreeFanout);
+				
+				IStorageManager diskfile = new DiskStorageManager(psRTree);
+				IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
+				
+				Integer i = new Integer(1); 
+				psRTree.setProperty("IndexIdentifier", i);
+				
+				rgi = new RTreeWithGI(psRTree, file);
+				rgi.buildSimpleGraphInMemory();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -370,7 +373,7 @@ public class SPBase {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception{
+	public static void test(String[] args) throws Exception{
 		// 输入的检索参数，依次是检索类型(0为单个时间，1为时间范围), 样本数, radius, k, 检索词数
 		Global.TYPE_TEST = "SPBase";
 		int searchType = 0;
@@ -513,6 +516,17 @@ public class SPBase {
 					"dr=" + String.valueOf(Global.DATE_RANGE) + " " + 
 					"，用时：" + TimeUtility.getTailTime());
 			System.out.println();
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		if(args.length == 1) {	// 从文件输入测试参数
+			List<String[]> testStrs = TestInputDataBuilder.loadTestString(Global.inputDirectoryPath + File.separator + 
+					"sample_result" + File.separator + args[0]);
+			for(String[] sts : testStrs)
+				test(sts);
+		} else {
+			test(args);
 		}
 	}
 }

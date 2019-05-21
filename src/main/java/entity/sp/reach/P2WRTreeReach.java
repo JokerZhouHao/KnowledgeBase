@@ -162,14 +162,14 @@ public class P2WRTreeReach extends RTree {
 	}
 	
 	public static void building() throws Exception{
-//		System.out.println("> 开始处理pid . . . " + TimeUtility.getTime());
-//		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2WReach.zipNum);
-//		P2WReach.buildingPidToWidReachFile(endSignQueue);
-//		int i = 0;
-//		for(i=0; i<P2WReach.zipNum; i++) {
-//			endSignQueue.take();
-//		}
-//		System.out.println("\n\n> 已处理完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
+		System.out.println("> 开始处理pid . . . " + TimeUtility.getTime());
+		ArrayBlockingQueue<Integer> endSignQueue = new ArrayBlockingQueue<>(P2WReach.zipNum);
+		P2WReach.buildingPidToWidReachFile(endSignQueue);
+		int i = 0;
+		for(i=0; i<P2WReach.zipNum; i++) {
+			endSignQueue.take();
+		}
+		System.out.println("\n\n> 已处理完pid，开始处理RTree节点 . . . " + TimeUtility.getTailTime() + "\n");
 		
 		P2WRTreeReach.pid2Wids = P2WReach.pid2Wids;
 		P2WRTreeReach rtree = P2WRTreeReach.getInstance(Global.indexRTree);

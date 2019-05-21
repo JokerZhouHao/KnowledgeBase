@@ -324,12 +324,12 @@ public class W2PIndex {
 	
 	public static void batchBuildW2PIndex(List<Integer> fres) throws Exception{
 		long startTime = System.currentTimeMillis();
-//		System.out.println("> 文件生成，并创建W2PIndex . . . ");
-//		P2WRTreeReach.building();
-//		for(Map<Integer, Short> st : P2WRTreeReach.pid2Wids) {
-//			if(null!=st)	st.clear();
-//		}
-//		W2PReachWriter.buildingWPReach();
+		System.out.println("> 文件生成，并创建W2PIndex . . . ");
+		P2WRTreeReach.building();
+		for(Map<Integer, Short> st : P2WRTreeReach.pid2Wids) {
+			if(null!=st)	st.clear();
+		}
+		W2PReachWriter.buildingWPReach();
 //		P2WRTreeReach.deleteAllFiles();
 		
 		for(int fre : fres) {

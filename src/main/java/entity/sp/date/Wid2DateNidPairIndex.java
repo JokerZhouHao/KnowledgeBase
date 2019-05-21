@@ -186,12 +186,46 @@ public class Wid2DateNidPairIndex extends Index{
 					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
 				}
 			}
+			
+//			date = bb.getInt();
+//			if(date == Integer.MAX_VALUE) {	// 没有时间属性的节点的时间指定为Integer.MAX_VALUE
+//				if(maxSign >= 0) {
+//					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+//						dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+//					else dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+//				} else {
+//					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+//						dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+//					else dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+//				}
+//			} else {
+//				if(Math.abs(date - sDate) > Math.abs(maxDate - sDate)) {
+//					if(Math.abs(date - sDate) >= Global.defaultMaxDateSpan) {
+//						maxSign = date - sDate;
+//						date = maxSign * Global.defaultMaxDateSpan + sDate;
+//						maxDate = date;
+//					} else {
+//						maxDate = date;
+//						maxSign = maxDate - sDate;
+//					}
+//				}
+//				if(Math.abs(date - sDate) >= Global.maxDateSpan) {
+//					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
+//				} else {
+//					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+//				}
+//			}
 		}
 		
 		sdw.dateWidList = new ArrayList<>(dnns);
 		
 		return sdw;
 	}
+	
+	
+	
+	
+	
 	
 	public SortedDateWidIndex getDateNids(int wid, int sDate){
 		try {
