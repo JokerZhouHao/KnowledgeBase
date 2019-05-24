@@ -295,7 +295,7 @@ class Bar:
 
         timeBar = Bar(xLabel=r'$\mathit{l}$', yLabel='Runtime (ms)', is_stack=False, title=title, ys=ys, xs=xs, x_txts=x_txts, yscale='linear', y_type='NW', f_type=ftype, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190517\\old_sample_r_len\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190522\\r_len\\'
         radius = [1, 2, 3]
         radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
         lens = (100000, 1000000, 10000000)
@@ -738,7 +738,7 @@ class LineChart:
         # wfs = [100, 250, 500, 1000, 10000, 100000, 1000000]
         wfs = [1000, 10000, 100000, 1000000]
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190517\\fr\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190522\\fr\\'
         search_name = None
         if search_type==0:
             search_name = r'$SPTD^*$'
@@ -751,7 +751,7 @@ class LineChart:
         for search_type_index in range(len(search_types)):
             runtimes = []
             for wf in wfs:
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=search_types[search_type_index], ns=200, r=2, k=5, nw=3, wf=wf, dr=7), time_total_threshold=120000)
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=1000000, mds=50000000, t=search_types[search_type_index], ns=200, r=2, k=5, nw=3, wf=wf, dr=7), time_total_threshold=1200000)
                 runtimes.append(data.timeTotal/1000)
             chart.draw_line(runtimes, search_names[search_type_index])
         chart.show()

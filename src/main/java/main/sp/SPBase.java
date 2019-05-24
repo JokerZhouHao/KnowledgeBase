@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -183,109 +184,55 @@ public class SPBase {
 			sortQwords[i] = sortedQwordsList.get(i);
 		}
 		
-		// 计算那些点在时间范围内
-//		Set<Integer> matchSetNids = null;
-//		List<Integer> matchNids = null;
-//		if(eIntDate != Integer.MIN_VALUE) {
-//			matchSetNids = minMaxDateSer.search(searchIntDate, eIntDate);
-//			matchNids = new ArrayList<>();
-//		}
-//		
-//		// 获得nIdDateWidMap
-//		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
-//		Set<Integer> tSet = new HashSet<>();
-//		for(i=0; i<sortQwords.length; i++) {
-//			Map<Integer, String> tempMap = null;
-//			
-//			if(null == (tempMap = cacheSeachedWid.get(sortQwords[i]))) {
-//				tempMap = nIdWIdDateSer.searchNIDKeyListDate(sortQwords[i]);
-//				// 不存在该wid
-//				if(null==tempMap) {
-//					Global.curRecIndex++;
-//					return null;
-//				}
-//				
-//				if(tempMap.size() > 100000) {	// 缓存命中量超过100000的节点的查询结果
-//					cacheSeachedWid.put(sortQwords[i], tempMap);
-//				}
-//			}
-//			
-//			DatesWIds dws = null;
-//			for(Entry<Integer, String> en : tempMap.entrySet()) {
-//				if(eDate != null) {
-//					// 过滤掉不在时间范围内的词
-//					if(!matchSetNids.contains(en.getKey())) {
-//						continue;
-//					} else {
-//						tSet.add(en.getKey());
-//					}
-//				}
-//				if(null == (dws = searchedDatesWids[en.getKey()])) {
-//					dws = new DatesWIds(en.getValue(), sortQwords.length);
-//					dws.addWid(i, sortQwords[i]);
-//					searchedDatesWids[en.getKey()] = dws;
-//				} else {
-//					dws.addWid(i, sortQwords[i]);
-//				}
-//			}
-//		}
-		
-		// 没有符合查询条件的点
-//		if(eDate != null) {
-//			if(tSet.size()==0) {
-//				Global.curRecIndex++;
-//				return null;
-//			}
-//			else {
-//				for(int ii : tSet) {
-//					matchNids.add(ii);
-//				}
-//			}
-//			if(Global.isOutputTestInfo)	System.out.println(searchIntDate + " " + " " + eIntDate + " " + matchSetNids.size() + " " + matchNids.size() + " " + searchedDatesWids.length);
-//			matchSetNids.clear();
-//		}
-		
-//		if(Global.isTest) {
-//			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
-//			Global.rr.setFrontTime();
-//		}
-		
-		// 获得wid2DateNid
+		// 获得wid2DateNid和nIdDateWidMap
 		if(Global.isTest) {
 			Global.rr.setFrontTime();
 		}
-		SortedDateWidIndex[] wid2DateNidPair = null;
-		int[] maxDateSpans = new int[sortedQwordsList.size()];
-//		if(eIntDate == Integer.MIN_VALUE) {
-			wid2DateNidPair = new SortedDateWidIndex[sortedQwordsList.size()];
-			for(i=0; i<sortQwords.length; i++) {
-				wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i], TimeUtility.getIntDate(searchDate));
-				// 不存在该wid
-				if(null==wid2DateNidPair[i]) {
-					Global.curRecIndex++;
-					return null;
-				}
-				// 记录最大时间差
-				maxDateSpans[i] = Math.max(Math.abs(wid2DateNidPair[i].dateWidList.get(0).getDate() - TimeUtility.getIntDate(searchDate)), 
-						Math.abs(wid2DateNidPair[i].dateWidList.get(wid2DateNidPair[i].dateWidList.size() - 1).getDate() - TimeUtility.getIntDate(searchDate))) + 1;
-				
-				Global.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
-			}
-			if(Global.isTest) {
-				Global.rr.timeBspBuidingWid2DateNid += Global.rr.getTimeSpan();
-				Global.rr.setFrontTime();
-			}
-//		}
-		
-		// 获得nIdDateWidMap
-		if(Global.isTest)	Global.rr.setFrontTime();
 		boolean[] signInRange = new boolean[sortQwords.length];
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		DatesWIds dws = null;
-		for(i=0; i < wid2DateNidPair.length; i++) {
-			for(DateNidNode dnn : wid2DateNidPair[i].dateWidList) {
+		
+		SortedDateWidIndex[] wid2DateNidPair = new SortedDateWidIndex[sortedQwordsList.size()];
+		int[] maxDateSpans = new int[sortedQwordsList.size()];
+		ArrayList<DateNidNode> dnList = null;
+		int tDateSpan = 0;
+		int sDate = TimeUtility.getIntDate(searchDate);
+		
+		for(i=0; i<sortQwords.length; i++) {
+			// 检索
+			wid2DateNidPair[i] = wid2DateNidPairIndex.getDateNids(sortQwords[i], TimeUtility.getIntDate(searchDate));
+			// 不存在该wid
+			if(null==wid2DateNidPair[i]) {
+				Global.curRecIndex++;
+				return null;
+			}
+			
+			// init
+			dnList = wid2DateNidPair[i].dateWidList;
+			wid2DateNidPair[i] = new SortedDateWidIndex();
+			int maxDate = sDate;	// 如果不存在包含查询词w并且带有时间的节点，则那些没有时间的节点默认使用查询时间
+			
+			// 遍历
+			for(DateNidNode dnn : dnList) {
+				
+				// 获得wid2DateNid
+				if(eDate == null && dnn.getDate() != Integer.MAX_VALUE) {
+					tDateSpan = Math.abs(dnn.getDate() - sDate);
+					if(tDateSpan  >= Global.maxDateSpan)
+						dnn.isMax = Boolean.TRUE;
+					if(tDateSpan > maxDateSpans[i]) {
+						maxDateSpans[i] = tDateSpan;
+						maxDate = dnn.getDate();
+					}
+					wid2DateNidPair[i].addDateWid(dnn);
+				}
+				
+				// 获得nIdDateWidMap
 				if(null == (dws = searchedDatesWids[dnn.getNid()])) {
-					dws = new DatesWIds(dnn.getDate(), sortQwords.length);
+					if(dnn.getDate() == Integer.MAX_VALUE){
+						dws = new DatesWIds(maxDate, sortQwords.length);
+					}
+					else	dws = new DatesWIds(dnn.getDate(), sortQwords.length);
 					searchedDatesWids[dnn.getNid()] = dws;
 				}
 				dws.addWid(i, sortQwords[i]);
@@ -294,11 +241,23 @@ public class SPBase {
 				if(eDate != null && !signInRange[i] && dnn.getDate() >= searchIntDate && dnn.getDate() <= eIntDate) {
 					signInRange[i] = Boolean.TRUE;
 				}
-				
 			}
+			
+			
+//			System.out.print(maxDate + "  ");
+			
+			
+			Global.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
 		}
+		
+		
+//		System.out.println("<" + Global.curRecIndex + ">");
+		
+		
+		
+		
 		if(Global.isTest) {
-			Global.rr.timeBspSearchWid2DateNid += Global.rr.getTimeSpan();
+			Global.rr.timeBspBuidingWid2DateNid += Global.rr.getTimeSpan();
 			Global.rr.setFrontTime();
 		}
 		

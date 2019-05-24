@@ -75,6 +75,7 @@ public class SortedDateWidIndex {
 	
 	
 	public int getMinDateSpan(int sDate) {
+		if(dateWidList.isEmpty())	return 1;
 		int reIndex = Collections.binarySearch(this.dateWidList, new DateNidNode(sDate, -1), comparator);
 		if(0 <= reIndex) // 存在相等的日期
 			return 1;
@@ -104,44 +105,19 @@ public class SortedDateWidIndex {
 	 * @return
 	 * @throws Exception
 	 */
-	public int[] getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer, int initSpan, int widMinDateSpan[]) throws Exception{
-//		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
-//		int left = 0;
-//		int right = 0;
-//		int i = mid;
-//		DateNidNode tempNode = null;
-//		if(i >= 0) {
-//			tempNode = dateWidList.get(i);
-//			if(!rec.contains(tempNode.getNid()) && rsSer.queryReachable(p, tempNode.getNid())) {
-//				return 1;
-//			} else {
-//				rec.add(tempNode.getNid());
-//			}
-//			mid = i;
-//			left = i - 1;
-//			right = i + 1;
-//		} else {
-//			left = (-i) - 2;
-//			mid = left;
-//			right = (-i) - 1;
-//		}
+	public int[] getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer, int initSpan, int widMinDateSpan[], int maxDateSpan) throws Exception{
+//		if(dateWidList.isEmpty() || widMinDateSpan[1]==-1 || widMinDateSpan[2]==-1) {
+		if(dateWidList.isEmpty()) {
+			widMinDateSpan[0] = 1;
+			return widMinDateSpan;
+		}
 		
-//		while(left >= 0) {
-//			if(sDate - dateWidList.get(left).getDate() >= initSpan)	break;
-//			left--;
-//		}
-//		while(right < dateWidList.size()) {
-//			if(dateWidList.get(right).getDate() - sDate >= initSpan)	break;
-//			right++;
-//		}
-//		
-//		if(left==-1 && right==dateWidList.size()) {
-//			System.out.println("> 异常退出");
-//		}
-//		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
-//		DateNidNode dnn = null;
-//		int size = dateWidList.size();
+		if(widMinDateSpan[0] == maxDateSpan) return widMinDateSpan;	// 已经遍历完了
 		
+//		if(widMinDateSpan[1]==-1 || widMinDateSpan[2]==-1) {
+//			System.out.println(widMinDateSpan[0] + " " + widMinDateSpan[1] + " " + widMinDateSpan[2]);
+//			System.exit(0);
+//		}		
 		
 		int left = widMinDateSpan[1];
 		int right = widMinDateSpan[2];
@@ -298,41 +274,20 @@ public class SortedDateWidIndex {
 		}
 		widMinDateSpan[1] = left;
 		widMinDateSpan[2] = right;
-		widMinDateSpan[0] =  (leftSpan<=rightSpan?leftSpan:rightSpan);
+		if(left < 0 && right >= size) {	// 该pid不可达带有该词且有时间的节点
+			widMinDateSpan[0] = maxDateSpan;
+		} else widMinDateSpan[0] = leftSpan<=rightSpan?leftSpan:rightSpan;
 		
-//		if(leftSpan == Integer.MAX_VALUE) {
-//			if(rightSpan == Integer.MAX_VALUE)	throw new Exception("未获得PidGetMinDateSpan");
-//			else widMinDateSpan[0] = rightSpan;
-//		} else {
-//			if(rightSpan == Integer.MAX_VALUE)	widMinDateSpan[0] = leftSpan;
-//			else widMinDateSpan[0] =  (leftSpan<=rightSpan?leftSpan:rightSpan);
-//		}
 		return widMinDateSpan;
 	}
 	
-	public int[] getMinDateSpan(Set<Integer> rec, int sDate, int widMinDateSpan[]) throws Exception{
-//		int mid = Collections.binarySearch(dateWidList, new DateNidNode(sDate, -1), comparator);
-//		int left = 0;
-//		int right = 0;
-//		int i = mid;
-//		DateNidNode tempNode = null;
-//		if(i >= 0) {
-//			tempNode = dateWidList.get(i);
-//			if(rec.contains(tempNode.getNid())) {
-//				return 1;
-//			}
-//			mid = i;
-//			left = i - 1;
-//			right = i + 1;
-//		} else {
-//			left = (-i) - 2;
-//			mid = left;
-//			right = (-i) - 1;
-//		}
-//		
-//		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
-//		DateNidNode dnn;
-//		int size = dateWidList.size();
+	public int[] getMinDateSpan(Set<Integer> rec, int sDate, int widMinDateSpan[], int maxDateSpan) throws Exception{
+		if(dateWidList.isEmpty()) {	// 不存在带时间的节点
+			widMinDateSpan[0] = 1;
+			return widMinDateSpan;
+		} 
+		
+		if(widMinDateSpan[0] == maxDateSpan) return widMinDateSpan;	// 已经遍历完了
 		
 		int mid=0, left=0, right=0, i=0;
 		DateNidNode tempNode = null;
@@ -475,15 +430,16 @@ public class SortedDateWidIndex {
 //			if(rightSpan == Integer.MAX_VALUE)	return leftSpan;
 //			else return leftSpan<=rightSpan?leftSpan:rightSpan;
 //		}
-		if(leftSpan==Integer.MAX_VALUE && rightSpan==Integer.MAX_VALUE) {
-//			throw new Exception("未找到RTreeNode GetMinDateSpan");
-			return null;
-		}
-		widMinDateSpan[0] = leftSpan<=rightSpan?leftSpan:rightSpan;
+		
 		widMinDateSpan[1] = left;
 		widMinDateSpan[2] = right;
-		return widMinDateSpan;
+		if(left < 0 && right >= size) {	// 该rtree不可达带有该词且有时间的节点
+			widMinDateSpan[0] = maxDateSpan;
+//			throw new Exception("未找到RTreeNode GetMinDateSpan");
+//			return null;
+		} else widMinDateSpan[0] = leftSpan<=rightSpan?leftSpan:rightSpan;
 		
+		return widMinDateSpan;
 	}
 	
 	public void clear() {

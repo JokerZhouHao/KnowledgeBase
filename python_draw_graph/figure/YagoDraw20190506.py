@@ -891,8 +891,8 @@ class LineChart:
 
 
 ######### 画radius_len柱状图 ################
-# Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
-# Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
+Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
+Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######### 画top-k柱状图 #################
 # Bar.draw_topK()
@@ -922,8 +922,8 @@ class LineChart:
 # Bar.draw_differ_size(1, 0)
 # Bar.draw_differ_size(1, 2)
 # 画折线图
-LineChart.draw_differ_size(0, fpath=PathUtility.figure_path() + 'DiffSize_RuntimeYagoVB_Date.pdf')
-LineChart.draw_differ_size(1, fpath=PathUtility.figure_path() + 'DiffSize_RTreeNodeYagoVB_Date.pdf')
+# LineChart.draw_differ_size(0, fpath=PathUtility.figure_path() + 'DiffSize_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_differ_size(1, fpath=PathUtility.figure_path() + 'DiffSize_RTreeNodeYagoVB_Date.pdf')
 
 
 

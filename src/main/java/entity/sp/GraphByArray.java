@@ -348,6 +348,11 @@ public class GraphByArray {
 							k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
 						}
 						disMSpan = currentRadius * k;
+						
+//						System.out.println(date + "  " + dateWid.getDateList().toString());
+//						System.out.println("currentRadius * k = " + currentRadius + " " + k);
+						
+						
 						if(wordMinDateSpans[searchedWidIndex][0] == k) {
 							recKeyVectices[searchedWidIndex] = vertex;
 							recKeyDis[searchedWidIndex] = disMSpan;
@@ -451,8 +456,18 @@ public class GraphByArray {
 		looseness = 0;
 		for(i=0; i<qwordsNum; i++) {
 			looseness += recKeyDis[i];
+			
+			
+			
+//			System.out.print(recKeyDis[i] + " ");
+			
+			
+			
+			
 			semanticTree.add(this.getPath(source, recKeyVectices[i]));
 		}
+		
+//		System.out.println();
 		
 		////////////////////////////////////////////////////////
 //		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {

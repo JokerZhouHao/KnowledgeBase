@@ -235,7 +235,7 @@ public class TestSampleChooser {
 			
 //			int sampNodeNum = sampNodeNumGe.getRandomInt();
 //			int numMeetDateNode = numBfsMeetDateNode.getRandomInt();
-			int sampNodeNum = 1;
+			int sampNodeNum = 3;
 			int numMeetDateNode = 1;
 			allWidsSet.clear();
 			minDate = Integer.MAX_VALUE;
@@ -260,18 +260,17 @@ public class TestSampleChooser {
 				// 更新时间和词
 				if(null != (tIntArr = nidDatesWids.get(nid))) {
 					for(int ii : tIntArr[0]) {
+						if(ii != Integer.MAX_VALUE && TimeUtility.noLegedDate(ii))	continue;
+						for(int kk : tIntArr[1]) {
+							allWidsSet.add(kk);
+						}
 						if(ii == Integer.MAX_VALUE)	continue;
 						if(minDate > ii)	minDate = ii;
 						if(maxDate < ii)	maxDate = ii;
 						numMeetDateNode--;
-						for(int kk : tIntArr[1]) {
-							allWidsSet.add(kk);
-						}
-						sampNodeNum--;
-						break;
 					}
 				}
-				if(sampNodeNum <= 0)	break;
+				if(--sampNodeNum <= 0)	break;
 			}
 			
 			if(minDate == Integer.MAX_VALUE)	continue;

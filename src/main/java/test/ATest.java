@@ -24,21 +24,54 @@ import entity.OptMethod;
 import utility.Global;
 import utility.IOUtility;
 import utility.LoopQueue;
+import utility.RandomNumGenerator;
 import utility.TimeUtility;
 
 public class ATest {
+	
+	
+	
+	public static void set(int[] a) {
+		a[0] = 100;
+	}
+	
+	
 	public static void main(String[] args) throws Exception{
+		
+		int a[][] = new int[1][3];
+		set(a[0]);
+		for(int i=0; i<a.length; i++) {
+			for(int j=0; j<a[i].length; j++) {
+				System.out.print(a[i][j] + " ");
+			}
+			System.out.println();
+		}
 		
 		
 //		OptMethod om = OptMethod.O1;
 //		System.out.println(om);
 		
-		Map<Integer, Short> mp = new HashMap<>();
-		Short st = 1;
-		mp.put(1, st);
-		mp.put(2, st);
-		st = 4;
-		System.out.println(mp);
+//		Map<Integer, Short> mp = new HashMap<>();
+//		Short st = 1;
+//		mp.put(1, st);
+//		mp.put(2, st);
+//		st = 4;
+//		System.out.println(mp);
+		
+//		System.out.println(TimeUtility.getDateByIntDate(1106685));
+//		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("1-1-1")));
+//		System.out.println(TimeUtility.getIntDate(TimeUtility.getDate("9999-12-30")));
+//		System.out.println(TimeUtility.getDateByIntDate(73059854));
+		
+//		ArrayList<Integer> list = new ArrayList<>();
+//		System.out.println(list.get(100));
+		
+		
+//		RandomNumGenerator pidGe = new RandomNumGenerator(0, Global.numPid);
+//		for(int i=0; i<10; i++) {
+//			System.out.println(pidGe.getRandomInt());
+//		}
+		
 		
 		
 //		List<Integer> li = new ArrayList<>();

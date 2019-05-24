@@ -730,7 +730,7 @@ public class KSPIndex {
 		HashSet<Integer> rec = new HashSet<>();
 		for(i=0; i<sortQwords.length; i++) {
 			if(widMinDateSpans[i][0]>=Global.maxDateSpan)	continue;
-			wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, widMinDateSpans[i][0], widMinDateSpans[i]);
+			wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, widMinDateSpans[i][0], widMinDateSpans[i], maxDateSpans[i]);
 		}
 		rec.clear();
 		return widMinDateSpans;
@@ -753,8 +753,19 @@ public class KSPIndex {
 		}
 		
 		for(i=0; i<sortQwords.length; i++) {
-			wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date, widMinDateSpans[i]);
+			wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date, widMinDateSpans[i], maxDateSpans[i]);
 		}
+		
+//		for(i=0; i<sortQwords.length; i++) {
+//			if(widMinDateSpans[i][0] == -1 && widMinDateSpans[i][1] == -1 && widMinDateSpans[i][2] == -1) {
+//				for(int i1=0; i<sortQwords.length; i++) {
+//					System.out.println(widMinDateSpans[i1][0] + " " + widMinDateSpans[i1][1] + " " +
+//							widMinDateSpans[i1][2]);
+//				}
+//				System.exit(0);
+//			}
+//		}
+		
 		return widMinDateSpans;
 	}
 	

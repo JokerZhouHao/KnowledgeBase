@@ -159,34 +159,48 @@ public class Wid2DateNidPairIndex extends Index{
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
 		int size = bb.getInt();
 		int date = 0;
-		LinkedList<DateNidNode> dnns = new LinkedList<>();
+//		LinkedList<DateNidNode> dnns = new LinkedList<>();
+		ArrayList<DateNidNode> dnns = new ArrayList<>();
 		int maxDate = sDate;
 		int maxSign = 1;
 		int i=0;
 		for(; i<size; i++) {
+//			按顺序添加
 			date = bb.getInt();
-			if(date == Integer.MAX_VALUE) {	// 没有时间属性的节点的时间指定为Integer.MAX_VALUE
-				if(maxSign >= 0) {
-					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
-						dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
-					else dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
-				} else {
-					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
-						dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
-					else dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
-				}
-			} else {
-				if(Math.abs(date - sDate) > Math.abs(maxDate - sDate)) {
-					maxDate = date;
-					maxSign = maxDate - sDate;
-				}
-				if(Math.abs(date - sDate) >= Global.maxDateSpan) {
-					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
-				} else {
-					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
-				}
+			
+			if(TimeUtility.noLegedDate(date)) {
+				bb.getInt();
+				continue;
 			}
 			
+			
+			dnns.add(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+			
+//			对于没有时间的节点，选择有时间的节点的最大时间差
+//			date = bb.getInt();
+//			if(date == Integer.MAX_VALUE) {	// 没有时间属性的节点的时间指定为Integer.MAX_VALUE
+//				if(maxSign >= 0) {
+//					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+//						dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+//					else dnns.addLast(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+//				} else {
+//					if(Math.abs(maxDate - sDate) >= Global.maxDateSpan)
+//						dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.TRUE));
+//					else dnns.addFirst(new DateNidNode(maxDate, bb.getInt(), Boolean.FALSE));
+//				}
+//			} else {
+//				if(Math.abs(date - sDate) > Math.abs(maxDate - sDate)) {
+//					maxDate = date;
+//					maxSign = maxDate - sDate;
+//				}
+//				if(Math.abs(date - sDate) >= Global.maxDateSpan) {
+//					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.TRUE));
+//				} else {
+//					dnns.addLast(new DateNidNode(date, bb.getInt(), Boolean.FALSE));
+//				}
+//			}
+			
+//			对于没有时间的节点默认个一个值
 //			date = bb.getInt();
 //			if(date == Integer.MAX_VALUE) {	// 没有时间属性的节点的时间指定为Integer.MAX_VALUE
 //				if(maxSign >= 0) {
@@ -217,13 +231,13 @@ public class Wid2DateNidPairIndex extends Index{
 //			}
 		}
 		
-		sdw.dateWidList = new ArrayList<>(dnns);
+		if(dnns.isEmpty())	return null;
+		
+//		sdw.dateWidList = new ArrayList<>(dnns);
+		sdw.dateWidList = dnns;
 		
 		return sdw;
 	}
-	
-	
-	
 	
 	
 	

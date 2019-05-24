@@ -8,6 +8,14 @@ import java.util.List;
 
 public class TimeUtility {
 	
+	public final static int minDate = -719164;	// 1-1-1
+	public final static int maxDate = 2932895;	// 5000-1-1  2932895
+	public static Boolean noLegedDate(int date) {
+		if(date >= minDate && date <= maxDate) return Boolean.FALSE;
+		else return Boolean.TRUE;
+	}
+	
+	
 	// 一天的毫秒数
 	public final static long totalMillOfOneDay = 86400000;
 	
