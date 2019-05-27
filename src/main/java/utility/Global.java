@@ -35,7 +35,6 @@ public class Global {
 	public static GraphWithWids graphWithWids = null;
 	
 	// optimization method
-	public static OptMethod optMethod = OptMethod.O0;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
 	
 	public static final double WEIGHT_PATH = 0.8;
@@ -54,8 +53,6 @@ public class Global {
 	//The statistic for runtime
 	public static long[] runtime = new long[10];
 	
-	// radius
-	public static int radius = 1;
 	
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
@@ -146,6 +143,16 @@ public class Global {
 	public static String minMaxDatesFile = "minMaxDates.bin";
 	public static String wordFrequencyFile = "wordFrequency.txt";
 	
+	/*	与查询相关的一些参数		*/
+	public static int testOrgSampleNum = 500;
+	public static int testSampleNum = testOrgSampleNum;
+	public static int radius = 1;
+	public static int testK = 10;
+	public static int maxDateSpan = 1000;
+	public static int DATE_RANGE = 7;
+	public static OptMethod optMethod = OptMethod.O1;
+	public static RunRecord rr = new RunRecord();
+	public static int curRecIndex = 0;
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "testIndex" + File.separator;
@@ -202,14 +209,10 @@ public class Global {
 	
 	public static Boolean isTest = Boolean.TRUE;
 	public static Boolean isOutputTestInfo = Boolean.FALSE;
-	public static int testK = 10;
-	public static int testOrgSampleNum = 500;
-	public static int testSampleNum = testOrgSampleNum;
 	
 	public static String testSampleFile =  "sample" + File.separator + "testSample";
 	public static String testSampleResultFile =  "sample_result" + File.separator + "testSampleResultFile";
 	
-	public static int curRecIndex = 0;
 	public static boolean isFirstReadPn = false;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
@@ -221,16 +224,13 @@ public class Global {
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;
 	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
-	public static RunRecord rr = new RunRecord();
 	
 	public static int leftMaxIndexSpan = 50;
 	public static int rightMaxIndexSpan = 50;
-	public static int maxDateSpan = 1000;
 	
 	public static Boolean isTestRangeDate = Boolean.FALSE;
 	
 	public static Map<Integer, Integer> wordFrequency = null;
-	public static int DATE_RANGE = 7;	
 //	public static int[] WORD_FREQUENCYS = {0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000};
 	public static int[] WORD_FREQUENCYS = null;
 	public static String recordPid2WidSizePath = "recordPid2WidSize.txt";

@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import entity.sp.QueryParams;
 import utility.Global;
 import utility.IOUtility;
 
@@ -242,21 +243,40 @@ public class TestInputDataBuilder {
 		return testStrs;
 	}
 	
+	public static List<QueryParams> loadTestQuery(String path) throws Exception {
+		List<QueryParams> list = new ArrayList<>();
+		BufferedReader br = IOUtility.getBR(path);
+		String line = null;
+		while(null != (line = br.readLine())) {
+			if(line.trim().isEmpty() || line.startsWith("#"))	continue;
+			list.add(new QueryParams(line.trim()));
+		}
+		if(list.isEmpty())	return null;
+		return list;
+	}
+	
 	public static void main(String[] args) throws Exception{
 //		generateRLen();
 //		generateWf();
 //		generateK();
 //		generateNW();
-		generateDr();
+//		generateDr();
 //		System.out.println(generateOpt());
 		
-//		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";
+		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "opt.txt";
 //		for(String[] sts : loadTestString(path)) {
 //			for(String st : sts) {
 //				System.out.print(st + " ");
 //			}
 //			System.out.println();
 //		}
+		
+		List<QueryParams> qps = TestInputDataBuilder.loadTestQuery(path);
+		for(QueryParams q : qps) {
+			System.out.println(q);
+		}
+		
+		
 	}
 	
 }

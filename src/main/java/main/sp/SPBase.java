@@ -17,10 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.zip.GZIPOutputStream;
 
 import entity.sp.DateNidNode;
 import entity.sp.DatesWIds;
+import entity.sp.QueryParams;
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.date.MinMaxDateService;
 import entity.sp.date.Wid2DateNidPairIndex;
@@ -56,19 +58,35 @@ import utility.TimeUtility;
  */
 public class SPBase {
 	
-	private IndexNidKeywordsListService nIdWIdDateSer = null;
-	private IndexWordPNService wIdPnSer = null;
-	private LRUBuffer buffer = null;
-	private static RTreeWithGI rgi = null;
-	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
+	// 静态变量
 	private static CReach cReach = null;
 	private static MinMaxDateService minMaxDateSer = null;
 	
+	// 非静态变量
+	private IndexNidKeywordsListService nIdWIdDateSer = null;
+	private IndexWordPNService wIdPnSer = null;
+	private LRUBuffer buffer = null;
+	private RTreeWithGI rgi = null;
+	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
 	private Map<Integer, Map<Integer, String>> cacheSeachedWid = new HashMap<>();	// 缓存关键词的查询结果
-	
 	private int[] pid2RtreeLeafNode = null;
-	
 	private DatesWIds searchedDatesWids[] = new DatesWIds[Global.numNodes];
+	
+	private QueryParams qp = null;
+	private ArrayBlockingQueue<QueryParams> qpQueue = null;
+	
+	
+	/**
+	 * 释放空间
+	 * @throws Exception
+	 */
+	public void free() throws Exception{
+		nIdWIdDateSer.closeIndexReader();
+		if(Global.MAX_PN_LENGTH > 0)	wIdPnSer.closeIndexReader();
+		wid2DateNidPairIndex.closeIndexReader();
+		if(Global.isDebug)	Global.recReachBW.close();
+	}
+	
 	
 	/**
 	 * 初始化
@@ -77,7 +95,7 @@ public class SPBase {
 	public SPBase() throws Exception{
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
-		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.INFINITE_PN_LENGTH_STR) + File.separator;
+		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_PN_LENGTH) + File.separator;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
 		nIdWIdDateSer.openIndexReader();
@@ -141,17 +159,6 @@ public class SPBase {
 			Global.rr.timeBuildSPCompleteDisk = System.nanoTime() - Global.rr.startTime;
 			Global.rr.setFrontTime();
 		}
-	}
-	
-	/**
-	 * 释放空间
-	 * @throws Exception
-	 */
-	public void free() throws Exception{
-		nIdWIdDateSer.closeIndexReader();
-		if(Global.MAX_PN_LENGTH > 0)	wIdPnSer.closeIndexReader();
-		wid2DateNidPairIndex.closeIndexReader();
-		if(Global.isDebug)	Global.recReachBW.close();
 	}
 	
 	/**
@@ -482,10 +489,8 @@ public class SPBase {
 		if(args.length == 1) {	// 从文件输入测试参数
 			List<String[]> testStrs = TestInputDataBuilder.loadTestString(Global.inputDirectoryPath + File.separator + 
 					"sample_result" + File.separator + args[0]);
-			for(String[] sts : testStrs) {
-				Global.curRecIndex = 0;
+			for(String[] sts : testStrs)
 				test(sts);
-			}
 		} else {
 			test(args);
 		}

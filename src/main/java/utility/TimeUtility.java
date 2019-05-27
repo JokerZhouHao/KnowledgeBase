@@ -16,7 +16,6 @@ public class TimeUtility {
 		else return Boolean.TRUE;
 	}
 	
-	
 	// 一天的毫秒数
 	public final static long totalMillOfOneDay = 86400000;
 	

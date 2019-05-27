@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
-import neustore.base.LRUBuffer;
 import spatialindex.spatialindex.IData;
 import spatialindex.spatialindex.IEntry;
 import spatialindex.spatialindex.INearestNeighborComparator;
@@ -1116,8 +1115,6 @@ public class RTree implements ISpatialIndex
 
 		rtree.flush();
 		
-		
-		
 //		if (cntLines != Global.numPlaces) {
 //			throw new Exception("actual num places in file is " + cntLines + " but config is "
 //					+ Global.numPlaces);
@@ -1220,61 +1217,29 @@ public class RTree implements ISpatialIndex
 		hasInitGetNext = Boolean.FALSE;
 		return null;
 	}
-	
-	public static RTree getInstance() throws Exception {
-		//buffer for alpha WN inverted index 
-		 LRUBuffer buffer = new LRUBuffer(Global.alphaIindexRTNodeBufferSize, Global.rtreePageSize);
 		
-		//the data index structure of RDF data with R-tree, RDF Graph, and Inverted index of keywords
-		PropertySet psRTree = new PropertySet();
-		String indexRTree = Global.indexRTree;
-		psRTree.setProperty("FileName", indexRTree);
-		psRTree.setProperty("PageSize", Global.rtreePageSize);
-		psRTree.setProperty("BufferSize", Global.rtreeBufferSize);
-		psRTree.setProperty("fanout", Global.rtreeFanout);
-		
-		IStorageManager diskfile = new DiskStorageManager(psRTree);
-		IBuffer file = new TreeLRUBuffer(diskfile, Global.rtreeBufferSize, false);
-		
-		Integer i = new Integer(1); 
-		psRTree.setProperty("IndexIdentifier", i);
-		
-		return new RTree(psRTree, file);
-	}
-	
-	
-	
 	// 主函数
 	public static void main(String[] args) throws Exception{
 		
-		RTree tree = RTree.getInstance();
-		IStatistics stat = tree.getStatistics();
-		System.out.println(stat.getNumberOfNodes());
-		System.out.println(stat.getNumberOfData());
-		System.out.println(stat.getReads());
-		System.out.println(stat.getWrites());
-		System.out.println(tree.getTreeHeight());
+		if (args.length != 1)
+		{
+			System.err.println("Usage: runnable configFile");
+			System.exit(-1);
+		}
 		
+		Utility.loadInitialConfig(args[0]);
 		
-//		if (args.length != 1)
-//		{
-//			System.err.println("Usage: runnable configFile");
-//			System.exit(-1);
-//		}
-//		
-//		Utility.loadInitialConfig(args[0]);
-//		
-//		String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
-//		String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
-//		int fanout = Global.rtreeFanout;
-//		int buffersize = Global.rtreeBufferSize;
-//		int pagesize = Global.rtreePageSize;
-//		
-//		build(inputfile, treefile, fanout, buffersize, pagesize);
-//		
-//		double[] pCoord = new double[2];
-//		pCoord[0] = 3;
-//		pCoord[1] = 2;
+		String inputfile = Global.inputDirectoryPath + Global.pidCoordFile + Global.dataVersion;
+		String treefile = Global.outputDirectoryPath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
+		int fanout = Global.rtreeFanout;
+		int buffersize = Global.rtreeBufferSize;
+		int pagesize = Global.rtreePageSize;
+		
+		build(inputfile, treefile, fanout, buffersize, pagesize);
+		
+		double[] pCoord = new double[2];
+		pCoord[0] = 3;
+		pCoord[1] = 2;
 //			IEntry ie = null;
 //			rTree.initGetNext(new Point(pCoord));
 //			while(null != (ie = rTree.getNext())) {

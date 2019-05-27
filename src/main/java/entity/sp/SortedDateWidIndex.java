@@ -10,7 +10,6 @@ import org.tukaani.xz.lz.Matches;
 
 import entity.sp.reach.CReach;
 import precomputation.rechable.ReachableQueryService;
-import utility.Global;
 import utility.MComparator;
 
 /**
@@ -105,14 +104,14 @@ public class SortedDateWidIndex {
 	 * @return
 	 * @throws Exception
 	 */
-	public int[] getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer, int initSpan, int widMinDateSpan[], int maxDateSpan) throws Exception{
+	public int[] getMinDateSpan(HashSet<Integer> rec, int sDate, int p, CReach rsSer, int initSpan, int widMinDateSpan[], int maxDateSpan, QueryParams qp) throws Exception{
 //		if(dateWidList.isEmpty() || widMinDateSpan[1]==-1 || widMinDateSpan[2]==-1) {
 		if(dateWidList.isEmpty()) {
 			widMinDateSpan[0] = 1;
 			return widMinDateSpan;
 		}
 		
-		if(widMinDateSpan[0] == maxDateSpan) return widMinDateSpan;	// 已经遍历完了
+		if(widMinDateSpan[0] == maxDateSpan || widMinDateSpan[0]==qp.maxDateSpan) return widMinDateSpan;	// 已经遍历完了
 		
 //		if(widMinDateSpan[1]==-1 || widMinDateSpan[2]==-1) {
 //			System.out.println(widMinDateSpan[0] + " " + widMinDateSpan[1] + " " + widMinDateSpan[2]);
@@ -132,7 +131,7 @@ public class SortedDateWidIndex {
 			while(left >= 0) {
 				dnn = dateWidList.get(left);
 				if(dnn.isMax) {
-					leftSpan = Global.maxDateSpan;
+					leftSpan = qp.maxDateSpan;
 					break;
 				}
 
@@ -166,7 +165,7 @@ public class SortedDateWidIndex {
 			while(right < size) {
 				dnn = dateWidList.get(right);
 				if(dnn.isMax) {
-					rightSpan = Global.maxDateSpan;
+					rightSpan = qp.maxDateSpan;
 					break;
 				}
 				rightSpan = tempSpan = dnn.getDate() - sDate + 1;
@@ -204,7 +203,7 @@ public class SortedDateWidIndex {
 			while(right < size) {
 				dnn = dateWidList.get(right);
 				if(dnn.isMax) {
-					rightSpan = Global.maxDateSpan;
+					rightSpan = qp.maxDateSpan;
 					break;
 				}
 
@@ -240,7 +239,7 @@ public class SortedDateWidIndex {
 			while(left >= 0) {
 				dnn = dateWidList.get(left);
 				if(dnn.isMax) {
-					leftSpan = Global.maxDateSpan;
+					leftSpan = qp.maxDateSpan;
 					break;
 				}
 				leftSpan = tempSpan = sDate - dnn.getDate() + 1;
@@ -281,7 +280,7 @@ public class SortedDateWidIndex {
 		return widMinDateSpan;
 	}
 	
-	public int[] getMinDateSpan(Set<Integer> rec, int sDate, int widMinDateSpan[], int maxDateSpan) throws Exception{
+	public int[] getMinDateSpan(Set<Integer> rec, int sDate, int widMinDateSpan[], int maxDateSpan, QueryParams qp) throws Exception{
 		if(dateWidList.isEmpty()) {	// 不存在带时间的节点
 			widMinDateSpan[0] = 1;
 			return widMinDateSpan;
@@ -326,7 +325,7 @@ public class SortedDateWidIndex {
 			while(left >= 0) {
 				dnn = dateWidList.get(left);
 				if(dnn.isMax) {
-					leftSpan = Global.maxDateSpan;
+					leftSpan = qp.maxDateSpan;
 					break;
 				}
 				
@@ -344,13 +343,13 @@ public class SortedDateWidIndex {
 				} else left--;
 			}
 			
-			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
+			qp.rr.numCptGetMinDateSpanLeftSpan  = qp.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:qp.rr.numCptGetMinDateSpanLeftSpan;
 			
 			i = -1;
 			while(right < size) {
 				dnn = dateWidList.get(right);
 				if(dnn.isMax) {
-					rightSpan = Global.maxDateSpan;
+					rightSpan = qp.maxDateSpan;
 					break;
 				}
 				rightSpan = tempSpan = dnn.getDate() - sDate + 1;
@@ -370,14 +369,14 @@ public class SortedDateWidIndex {
 				}	else right++;
 			}
 			
-			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+			qp.rr.numCptGetMinDateSpanRightSpan  = qp.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:qp.rr.numCptGetMinDateSpanRightSpan;
 			
 		} else {
 			i = -1;
 			while(right < size) {
 				dnn = dateWidList.get(right);
 				if(dnn.isMax) {
-					rightSpan = Global.maxDateSpan;
+					rightSpan = qp.maxDateSpan;
 					break;
 				}
 
@@ -394,13 +393,13 @@ public class SortedDateWidIndex {
 					break;
 				} else right++;
 			}
-			Global.rr.numCptGetMinDateSpanRightSpan  = Global.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:Global.rr.numCptGetMinDateSpanRightSpan;
+			qp.rr.numCptGetMinDateSpanRightSpan  = qp.rr.numCptGetMinDateSpanRightSpan < right-mid?right-mid:qp.rr.numCptGetMinDateSpanRightSpan;
 			
 			i = -1;
 			while(left >= 0) {
 				dnn = dateWidList.get(left);
 				if(dnn.isMax) {
-					rightSpan = Global.maxDateSpan;
+					rightSpan = qp.maxDateSpan;
 					break;
 				}
 				leftSpan = tempSpan = sDate - dnn.getDate() + 1;
@@ -420,7 +419,7 @@ public class SortedDateWidIndex {
 				} else left--;
 			}
 			
-			Global.rr.numCptGetMinDateSpanLeftSpan  = Global.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:Global.rr.numCptGetMinDateSpanLeftSpan;
+			qp.rr.numCptGetMinDateSpanLeftSpan  = qp.rr.numCptGetMinDateSpanLeftSpan < mid - left?mid-left:qp.rr.numCptGetMinDateSpanLeftSpan;
 			
 		}
 //		if(leftSpan == Integer.MAX_VALUE) {

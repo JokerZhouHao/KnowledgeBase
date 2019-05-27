@@ -1,10 +1,8 @@
 package entity.sp;
 
-import utility.Global;
-
 // 记录运行的相关情况
 public class RunRecord {
-	public static long startTime = System.nanoTime();
+	public long startTime = System.nanoTime();
 	public static long timeBase = 1000000000;	// s
 	
 	public long frontTime = 0;
@@ -20,8 +18,8 @@ public class RunRecord {
 	public long timeBuildRGI = 0;
 	public long timeBuildSPCompleteDisk = 0;
 	
-	public String getInitInfo() {
-		return  String.valueOf(Global.testOrgSampleNum) + "#\n" +
+	public String getInitInfo(int testOrgSampleNum) {
+		return  String.valueOf(testOrgSampleNum) + "#\n" +
 				"timeLoadTFLable : " + String.valueOf(timeLoadTFLable/timeBase) + "\n" + 
 				"timeBuildRGI : " + String.valueOf(timeBuildRGI/timeBase) + "\n" + 
 				"timeBuildSPCompleteDisk : " + String.valueOf(timeBuildSPCompleteDisk/timeBase) + "\n";

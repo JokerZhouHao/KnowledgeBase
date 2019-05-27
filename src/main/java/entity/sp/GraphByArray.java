@@ -214,7 +214,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree) throws Exception {
+			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree, QueryParams qp) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -295,7 +295,7 @@ public class GraphByArray {
 					
 					if(looseness >= loosenessThreshold) {
 						if(Global.isTest) {
-							Global.rr.numCptPruneInSemanticTree++;
+							qp.rr.numCptPruneInSemanticTree++;
 						}
 						return Double.POSITIVE_INFINITY;
 					}
@@ -492,7 +492,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			List<List<Integer>> semanticTree, boolean[] sIRange) throws Exception {
+			List<List<Integer>> semanticTree, boolean[] sIRange, QueryParams qp) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -564,7 +564,7 @@ public class GraphByArray {
 				}
 				if(looseness >= loosenessThreshold) {
 					if(Global.isTest) {
-						Global.rr.numCptPruneInSemanticTree++;
+						qp.rr.numCptPruneInSemanticTree++;
 					}
 					return Double.POSITIVE_INFINITY;
 				}

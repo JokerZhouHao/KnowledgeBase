@@ -223,7 +223,7 @@ public class KSPIndexOpt {
 								Global.rr.setFrontTime();
 							}
 							
-							if(Global.optMethod == OptMethod.O4) {
+							if(Global.optMethod == OptMethod.O1) {
 								if(null==rtreeNode2Pid[nid]) {
 									if(Global.isTest) {
 										Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
@@ -257,7 +257,6 @@ public class KSPIndexOpt {
 						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
-						
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
 								Global.rr.numCptBoundPidPrune++;
@@ -343,7 +342,7 @@ public class KSPIndexOpt {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), null, semanticTree);
+							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), recMinPid2WidDis.get(nid), semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -766,7 +765,7 @@ public class KSPIndexOpt {
 				} else this.pid2WidPathDis[i] = -1;
 			} else if(null == (distance=w2pReachable[i].get(place))) {
 				return this.pid2WidPathDis;
-			} else {
+			} else	{
 				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
 				else	this.pid2WidPathDis[i] = distance;
 			}

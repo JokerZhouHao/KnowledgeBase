@@ -33,7 +33,7 @@ public class PreprocessFileBuilder {
 //		indexWDNP.createIndex(filePath);
 		
 		// 创建RTree
-		RTreeService.build();
+//		RTreeService.build();
 		
 		// PN
 //		int[] radius = {1, 2, 3};
