@@ -55,7 +55,7 @@ public class KSPIndex {
 	private boolean[] signInRange = null;
 	
 	// 记录pid到wid的最小路径距离
-	private int[] pid2WidPathDis = new int[2];
+	private int[] pid2WidPathDis = {-1, -1};
 	
 	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
@@ -232,6 +232,13 @@ public class KSPIndex {
 						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
+						
+//						if(alphaRankingScoreBound > 1000000000) {
+//							System.out.println("minSpatialDist * alphaLoosenessBound = " + 
+//										String.valueOf(minSpatialDist) + " " + String.valueOf(alphaLoosenessBound) + 
+//										String.valueOf(alphaRankingScoreBound));
+//						}
+						
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
 								Global.rr.numCptBoundPidPrune++;
@@ -697,7 +704,10 @@ public class KSPIndex {
 				} else this.pid2WidPathDis[i] = -1;
 			} else if(null == (distance=w2pReachable[i].get(place))) {
 				return this.pid2WidPathDis;
-			} else	this.pid2WidPathDis[i] = distance;
+			} else	{
+				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
+				else	this.pid2WidPathDis[i] = distance;
+			}
 		}
 		this.pid2WidPathDis[sortQwords.length] = 0;
 		return this.pid2WidPathDis;
@@ -811,7 +821,9 @@ public class KSPIndex {
 	public double getAlphaLoosenessBound(int id, int alphaRadius, int[] sortQwords, int sDate, int eDate) throws IOException {
 		double alphaLoosenessBound = 0;
 		for(int i=0; i<sortQwords.length; i++) {
-			if(null == wordPNMap.get(sortQwords[i])) {
+			if(this.pid2WidPathDis[i] != -1) {
+				alphaLoosenessBound += this.pid2WidPathDis[i] * Global.WEIGHT_REV_PATH;
+			} else if(null == wordPNMap.get(sortQwords[i])) {
 				alphaLoosenessBound += 1 * Global.WEIGHT_REV_PATH;
 			} else {
 				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate);

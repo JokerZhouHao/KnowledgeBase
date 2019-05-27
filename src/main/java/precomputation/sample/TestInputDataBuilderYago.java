@@ -191,25 +191,31 @@ public class TestInputDataBuilderYago {
 	 */
 	public static List<String> generateOpt(){
 		int types[] = {0, 1};
-		int ns = 200;
+		int ns = 100;
 		int r = 2;
-		int k = 5;
-		int nw = 3;;
-		int rLen = 100000;
-		int maxDataSpan = 200000;
-		int wf = 50;
+		int ks[] = {1, 3, 5, 8, 10, 15, 20};
+		int nw = 3;
+		int rLen = 10000000;
+		int maxDataSpan = 50000000;
+		int wf = 1000;
 		int dr = 7;
-		String opts[] = {"O1", "O2", "O3", "O4"};
+		String opts[] = {"1", "2", "3", "4", "0"};
 		
 		List<String> lines = new ArrayList<>();
-		for(int type : types) {
-			for(String opt : opts) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+		for(int k : ks) {
+			for(int type : types) {
+				for(String opt : opts) {
+					if(type==0 || !opt.equals("1")) {
+						lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+						System.out.println(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+					}
+				}
 			}
+			System.out.println();
 		}
 		
-		for(String line : lines)
-			System.out.println(line);
+//		for(String line : lines)
+//			System.out.println(line);
 		
 		return lines;
 	}
@@ -244,12 +250,12 @@ public class TestInputDataBuilderYago {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		generateRLen();
-		generateWf();
+		generateRLen();
+//		generateWf();
 //		generateK();
 //		generateNW();
 //		generateDr();
-//		System.out.println(generateOpt());
+//		generateOpt();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";
 //		for(String[] sts : loadTestString(path)) {

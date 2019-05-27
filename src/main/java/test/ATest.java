@@ -8,6 +8,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,14 +39,24 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		
-		int a[][] = new int[1][3];
-		set(a[0]);
-		for(int i=0; i<a.length; i++) {
-			for(int j=0; j<a[i].length; j++) {
-				System.out.print(a[i][j] + " ");
-			}
-			System.out.println();
-		}
+//		int a[][] = new int[1][3];
+//		set(a[0]);
+//		for(int i=0; i<a.length; i++) {
+//			for(int j=0; j<a[i].length; j++) {
+//				System.out.print(a[i][j] + " ");
+//			}
+//			System.out.println();
+//		}
+		
+//		-34333
+//		[-267715, -43829, 2147483647]
+
+		
+		List<Integer> li = new ArrayList<>();
+		li.add(-267715);
+		li.add(-43829);
+		li.add(2147483647);
+		System.out.println(TimeUtility.getMinDateSpan(-34333, li, 683827));
 		
 		
 //		OptMethod om = OptMethod.O1;

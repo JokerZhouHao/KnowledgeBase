@@ -56,7 +56,7 @@ public class KSPIndexOpt {
 	private boolean[] signInRange = null;
 	
 	// 记录pid到wid的最小路径距离
-	private int[] pid2WidPathDis = new int[2];
+	private int[] pid2WidPathDis = {-1, -1};
 	
 	public KSPIndexOpt(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
@@ -223,7 +223,7 @@ public class KSPIndexOpt {
 								Global.rr.setFrontTime();
 							}
 							
-							if(Global.optMethod == OptMethod.O1) {
+							if(Global.optMethod == OptMethod.O4) {
 								if(null==rtreeNode2Pid[nid]) {
 									if(Global.isTest) {
 										Global.rr.timeCptRTree2Wids += Global.rr.getTimeSpan();
@@ -257,6 +257,7 @@ public class KSPIndexOpt {
 						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
+						
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
 								Global.rr.numCptBoundPidPrune++;
@@ -268,13 +269,17 @@ public class KSPIndexOpt {
 						
 						if(n.m_level==0) {	// pid
 							recMinDateSpanMap.put(nid, minDateSpans);
-							int[] dis = new int[this.pid2WidPathDis.length];
-							for(int s=0; s<this.pid2WidPathDis.length; s++) {
-								dis[s] = this.pid2WidPathDis[s];
+							if(Global.optMethod == OptMethod.O2) {
+								int[] dis = new int[this.pid2WidPathDis.length];
+								for(int s=0; s<this.pid2WidPathDis.length; s++) {
+									dis[s] = this.pid2WidPathDis[s];
+								}
+								recMinPid2WidDis.put(nid, dis);
 							}
-							recMinPid2WidDis.put(nid, dis);
 						} else { // rtree node
-							recMinDateSpanMap.put(-nid-1, minDateSpans);
+							if(Global.optMethod == OptMethod.O1) {
+								recMinDateSpanMap.put(-nid-1, minDateSpans);
+							}
 						}
 						
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
@@ -338,7 +343,7 @@ public class KSPIndexOpt {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), recMinPid2WidDis.get(nid), semanticTree);
+							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), null, semanticTree);
 					
 					if(Global.isTest) {
 						Global.rr.timeCptGetSemanticTree += Global.rr.getTimeSpan();
@@ -761,7 +766,10 @@ public class KSPIndexOpt {
 				} else this.pid2WidPathDis[i] = -1;
 			} else if(null == (distance=w2pReachable[i].get(place))) {
 				return this.pid2WidPathDis;
-			} else	this.pid2WidPathDis[i] = distance;
+			} else {
+				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
+				else	this.pid2WidPathDis[i] = distance;
+			}
 		}
 		this.pid2WidPathDis[sortQwords.length] = 0;
 		return this.pid2WidPathDis;
@@ -883,8 +891,10 @@ public class KSPIndexOpt {
 	public double getAlphaLoosenessBound(int id, int alphaRadius, int[] sortQwords, int sDate, int eDate) throws IOException {
 		double alphaLoosenessBound = 0;
 		for(int i=0; i<sortQwords.length; i++) {
-			if(null == wordPNMap.get(sortQwords[i])) {
-				alphaLoosenessBound += 1;
+			if(this.pid2WidPathDis[i] != -1) {
+				alphaLoosenessBound += this.pid2WidPathDis[i] * Global.WEIGHT_REV_PATH;
+			} else if(null == wordPNMap.get(sortQwords[i])) {
+				alphaLoosenessBound += 1 * Global.WEIGHT_REV_PATH;
 			} else {
 				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate);
 			}

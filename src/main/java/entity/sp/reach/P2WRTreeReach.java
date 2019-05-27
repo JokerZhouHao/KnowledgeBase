@@ -94,7 +94,7 @@ public class P2WRTreeReach extends RTree {
 				}
 				tInts = Global.graphWithWids.getConnectWids(tInts);
 				for(int wid : tInts)
-					widDis.put(wid, (short)-1);
+					widDis.put(wid, (short)-1);	// -1对应SPBest的getAlphaLoosenessBound的无效路径长度
 			}
 		} else {
 			for(int child = 0; child < node.m_children; child++) {

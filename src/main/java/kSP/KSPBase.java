@@ -666,7 +666,7 @@ public class KSPBase {
 		double alphaLoosenessBound = 0;
 		for(int wid : sortQwords) {
 			if(null == wordPNMap.get(wid)) {
-				alphaLoosenessBound += 1;
+				alphaLoosenessBound += 1 * Global.WEIGHT_REV_PATH;
 			} else {
 				alphaLoosenessBound += wordPNMap.get(wid).getLooseness(id, sDate, eDate);
 			}

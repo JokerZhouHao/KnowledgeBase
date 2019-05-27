@@ -543,6 +543,64 @@ class LineChart:
                 chart.draw_line(runtimes, type)
         chart.show()
 
+    # 画k的折线图
+    @staticmethod
+    def draw_opt(show_type, base_y=None, fpath='test.pdf'):
+        xLabel = None
+        ys = None
+        yLabel = None
+        yscale = 'liner'
+        # yscale = 'log'
+        ylim = (1000, 1000000)
+        xLabel = r'$k$'
+        if show_type==0:
+            # xLabel = r'opt-$SPTD$'
+            ys = [10 + i*10 for i in range(10)]
+        elif show_type==1:
+            # xLabel = r'opt-$SPTR$'
+            # ys = [10000 + i * 5000 for i in range(5)]
+            ys = [0 + i * 5 for i in range(8)]
+
+
+        x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
+        xs=[i for  i in  range(len(x_txts))]
+
+        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=xLabel, yLabel="Runtime (s)", title=r'opt', fpath=fpath)
+
+        alg_types = ['SPBase', 'SPBest']
+        search_types = [0, 1]
+        type = None
+
+        ks = [1, 3, 5, 8, 10, 15, 20]
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190525\\opt20190526_2\\'
+
+        opts = None
+        opts_sign = None
+        if show_type==0:
+            opts = ['O0', 'O1', 'O2', 'O3', 'O4']
+            opts_sign = [r'$O0$', r'$O1$', r'$O2$', r'$O3$', r'$O4$']
+        else:
+            opts = ['O0', 'O2', 'O3', 'O4', ]
+            opts_sign = [r'$O0$', r'$O2$', r'$O3$', r'$O4$']
+
+
+        for opt_i in range(len(opts)):
+            runtimes = []
+            for k in ks:
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=50000000, t=show_type, ns=100, r=2, k=k, nw=3, wf=1000, dr=7, opt=opts[opt_i]))
+                runtimes.append(data.timeTotal / 1000)
+            if opts_sign[opt_i] == r'$O0$':
+                if show_type == 0:
+                    type = r'$SPTD$'
+                else:
+                    type = r'$SPTR$'
+            else:
+                type = opts_sign[opt_i]
+            chart.draw_line(runtimes, type)
+            if opts[opt_i] == 'O0' and type == r'$SPTR$':
+                chart.line_type_index += 1
+        chart.show()
+
     # 画nw的折线图
     @staticmethod
     def draw_nw(base_y=None, fpath='test.pdf'):
@@ -886,13 +944,13 @@ class LineChart:
         plt.pause(1200)
 
 ######## 画WORD_FREQUENCY折线图 ##############
-LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_word_frequency(base_y=400, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_SPTRStar1.pdf')
 
 
 ######### 画radius_len柱状图 ################
-Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
-Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
+# Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######### 画top-k柱状图 #################
 # Bar.draw_topK()
@@ -905,6 +963,11 @@ Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path
 # LineChart.draw_k(0, fpath=PathUtility.figure_path() + 'topK_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_k(1, base_y=0, fpath=PathUtility.figure_path() + 'topK_TQTSPYagoVB_Date.pdf')
 # LineChart.draw_k(2, fpath=PathUtility.figure_path() + 'topK_RTreeNodeYagoVB_Date.pdf')
+
+
+# opt折线图
+LineChart.draw_opt(0, fpath=PathUtility.figure_path() + 'opt_SPTD_RuntimeYagoVB_Date.pdf')
+LineChart.draw_opt(1, fpath=PathUtility.figure_path() + 'opt_SPTR_RuntimeYagoVB_Date.pdf')
 
 
 ######### 画不同数keywords柱状图 #########

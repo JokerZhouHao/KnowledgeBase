@@ -35,7 +35,7 @@ public class Global {
 	public static GraphWithWids graphWithWids = null;
 	
 	// optimization method
-	public static OptMethod optMethod = OptMethod.O1;
+	public static OptMethod optMethod = OptMethod.O0;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
 	
 	public static final double WEIGHT_PATH = 0.8;
@@ -79,51 +79,49 @@ public class Global {
 	
 	/* graph statistic info */
 	/******************      yago2s       ***************/
-//	public static int numPlaces = 4774796;
-////	public static int numNodes = 12;//include nodes that are places
-//	public static int numNodes0 = 8091179;	//include nodes that are places
-//	public static int numNodes = 8091179;	//include nodes that are places
-////	public static int numKeywords = 18;
-//	public static int numKeywords = 3778457;
-//	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
-//	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
-////	public static int numSCCs = 30;
-////	public static int numContainCoordWordDate = 12;
-//	public static int numContainCoordWordDate = 812532;
-//	public static int numPid = 4774796;
-//	public static int numWid = 518314;
-	
-	/*******************     DBpedia      ***************/
-	public static int numPlaces = 883665;
+	public static int numPlaces = 4774796;
 //	public static int numNodes = 12;//include nodes that are places
-	public static int numNodes0 = 8099955;	//include nodes that are places
-	public static int numNodes = 8099955;	//include nodes that are places
-	public static int numKeywords = 2927050; // 准确2927024
+	public static int numNodes0 = 8091179;	//include nodes that are places
+	public static int numNodes = 8091179;	//include nodes that are places
+//	public static int numKeywords = 18;
+	public static int numKeywords = 3778457;
+	public static int numEdges = 50415307;
 	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
 	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
-	public static int numContainCoordWordDate = 1138751;	// 不确定
-	public static int numPid = 883665;
+//	public static int numSCCs = 30;
+//	public static int numContainCoordWordDate = 12;
+	public static int numContainCoordWordDate = 812532;
+	public static int numPid = 4774796;
 	public static int numWid = 518314;
-	public static int numEdges = 72193833;
+	
+	/*******************     DBpedia      ***************/
+//	public static int numPlaces = 883665;
+////	public static int numNodes = 12;//include nodes that are places
+//	public static int numNodes0 = 8099955;	//include nodes that are places
+//	public static int numNodes = 8099955;	//include nodes that are places
+//	public static int numKeywords = 2927050; // 准确2927024
+//	public static int numSCCs = numNodes + numKeywords;// # of vertx SCCs + # of keywords
+//	public static long numSCCs0 = (long)numSCCs;// # of vertx SCCs + # of keywords
+//	public static int numContainCoordWordDate = 1138751;	// 不确定
+//	public static int numPid = 883665;
+//	public static int numWid = 518314;
 	
 	/* rtree index setting parameters */
 	public static int rtreeBufferSize = 4096000;
-//	public static int rtreePageSize = 16384;	// 200
-//	public static int rtreePageSize = 32768;	// 400
-	public static int rtreePageSize = 65536;	// 800
+	public static int rtreePageSize = 32768;	// 400
+//	public static int rtreePageSize = 65536;	// 800
 //	public static int rtreeFanout = 5;
 //	public static int rtreeFanout = 1500;
-//	public static int rtreeFanout = 200; // 200
-//	public static int rtreeFanout = 400; // 400
-	public static int rtreeFanout = 800; // 800
+	public static int rtreeFanout = 400;
+//	public static int rtreeFanout = 800;
 	public static int iindexBufferSize = 4096000;
 	public static int iindexPageSize = 128;
 	public static boolean iindexIsCreate = false;
 	public static boolean iindexIsWeighted = false;
 	
 	/* input file path */
-//	public static String dateSetType = "yago2s" + File.separator;
-	public static String dateSetType = "DBpedia" + File.separator;
+	public static String dateSetType = "yago2s" + File.separator;
+//	public static String dateSetType = "DBpedia" + File.separator;
 	
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
 	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;

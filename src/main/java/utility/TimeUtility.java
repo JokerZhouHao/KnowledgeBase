@@ -10,8 +10,9 @@ public class TimeUtility {
 	
 	public final static int minDate = -719164;	// 1-1-1
 	public final static int maxDate = 2932895;	// 5000-1-1  2932895
-	public static Boolean noLegedDate(int date) {
-		if(date >= minDate && date <= maxDate) return Boolean.FALSE;
+	
+	public static Boolean noLegedDate(int date) {	// 限制时间在1-1-1 ----- 9999-12-30
+		if(date >= minDate && date <= maxDate || date == Integer.MAX_VALUE) return Boolean.FALSE;
 		else return Boolean.TRUE;
 	}
 	
@@ -95,6 +96,8 @@ public class TimeUtility {
 			if(0 < reIndex-1 && reIndex-1 < dateList.size()) {	// 当前日期在所有日期中间
 				if(dateList.get(reIndex -2) == Integer.MAX_VALUE && dateList.get(reIndex - 1) == Integer.MAX_VALUE)
 					return maxDateSpan;
+				if(dateList.get(reIndex - 1) == Integer.MAX_VALUE)	return curDate - dateList.get(reIndex -2) + 1;
+				
 				if(curDate - dateList.get(reIndex -2) < dateList.get(reIndex - 1) - curDate)
 					return curDate - dateList.get(reIndex -2) + 1;
 				else

@@ -77,7 +77,7 @@ public class SPBase {
 	public SPBase() throws Exception{
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
-		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.MAX_PN_LENGTH) + File.separator;
+		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(Global.radius) + "_" + String.valueOf(Global.INFINITE_PN_LENGTH_STR) + File.separator;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
 		nIdWIdDateSer.openIndexReader();
@@ -482,8 +482,10 @@ public class SPBase {
 		if(args.length == 1) {	// 从文件输入测试参数
 			List<String[]> testStrs = TestInputDataBuilder.loadTestString(Global.inputDirectoryPath + File.separator + 
 					"sample_result" + File.separator + args[0]);
-			for(String[] sts : testStrs)
+			for(String[] sts : testStrs) {
+				Global.curRecIndex = 0;
 				test(sts);
+			}
 		} else {
 			test(args);
 		}

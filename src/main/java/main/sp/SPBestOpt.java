@@ -317,6 +317,12 @@ public class SPBestOpt {
 			if(Global.optMethod == OptMethod.O3) {	// O3优化
 				for(Integer in : qwords) {
 					byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
+					
+					
+					
+//					System.out.println("pn_len : " + bs.length);
+					
+					
 					if(null != bs) {
 						wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
 					}
@@ -324,11 +330,22 @@ public class SPBestOpt {
 			} else {
 				for(Integer in : qwords) {
 					byte[] bs =  wIdInfinitePnSer.getPlaceNeighborhoodBin(in);
+					
+					
+//					System.out.println("pn_len : " + bs.length);
+					
+					
 					if(null != bs) {
 						wordPNMap.put(in, new WordRadiusNeighborhood(Global.radius, bs));
 					}
 				}
 			}
+			
+			
+			System.out.println();
+			
+			
+			
 		}
 		
 		if(Global.isDebug) {
@@ -417,6 +434,9 @@ public class SPBestOpt {
 			if(args.length > 9) {
 				int sign = Integer.parseInt(args[9]);
 				switch (sign) {
+				case 0:
+					Global.optMethod = OptMethod.O0;
+					break;
 				case 1:
 					Global.optMethod = OptMethod.O1;
 					break;
@@ -430,6 +450,7 @@ public class SPBestOpt {
 					Global.optMethod = OptMethod.O4;
 					break;
 				default:
+					Global.optMethod = OptMethod.O0;
 					break;
 				}
 			}
@@ -544,8 +565,10 @@ public class SPBestOpt {
 		if(args.length == 1) {	// 从文件输入测试参数
 			List<String[]> testStrs = TestInputDataBuilder.loadTestString(Global.inputDirectoryPath + File.separator + 
 					"sample_result" + File.separator + args[0]);
-			for(String[] sts : testStrs)
+			for(String[] sts : testStrs) {
+				Global.curRecIndex = 0;
 				test(sts);
+			}
 		} else {
 			test(args);
 		}
