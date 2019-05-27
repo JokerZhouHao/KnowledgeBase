@@ -1,4 +1,4 @@
-package precomputation.sample;
+package processor.sp;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

@@ -1,4 +1,4 @@
-package precomputation.sample;
+package precomputation.subgraph;
 
 import java.io.BufferedWriter;
 import java.util.ArrayList;
@@ -20,14 +20,14 @@ import utility.RandomNumGenerator;
  * @author Monica
  *
  */
-public class GraphSampleNeighChooser extends GraphSample{
+public class GraphSampleBuilder extends GraphSample{
 	private GraphByArray graph = null;
 	
 	private RandomNumGenerator numGen = new RandomNumGenerator(1, 100);
 	
 	private double jumpProbability = 0.15;
 	
-	public GraphSampleNeighChooser(Boolean init) throws Exception{
+	public GraphSampleBuilder(Boolean init) throws Exception{
 		if(init)	init();
 	}
 	
@@ -153,7 +153,7 @@ public class GraphSampleNeighChooser extends GraphSample{
 		sampleNums.add(2000000);
 		sampleNums.add(4000000);
 		sampleNums.add(6000000);
-		GraphSampleNeighChooser gsnc =  new GraphSampleNeighChooser(Boolean.TRUE);
+		GraphSampleBuilder gsnc =  new GraphSampleBuilder(Boolean.TRUE);
 //		gsnc.buildGraphSample(sampleNums);
 		gsnc.adjustSampleGraph(sampleNums);
 	}

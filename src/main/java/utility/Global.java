@@ -29,6 +29,8 @@ import entity.sp.RunRecord;
  */
 public class Global {
 	
+	public final static int TIME_INAVAILABLE = Integer.MAX_VALUE; 
+	
 	public static int defaultMaxDateSpan = 1000;
 	
 	// 用于DBpedia创建wid2pid索引

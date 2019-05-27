@@ -1,4 +1,4 @@
-package precomputation.sample;
+package precomputation.subgraph;
 
 import java.io.BufferedWriter;
 import java.util.ArrayList;

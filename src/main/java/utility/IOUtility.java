@@ -6,10 +6,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.RandomAccessFile;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -45,5 +47,23 @@ public class IOUtility {
 	
 	public static DataInputStream getDGZis(String fp) throws Exception{
 		return new DataInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(fp))));
+	}
+	
+	/**
+	 * 写第一行
+	 * @param path
+	 * @param line
+	 * @throws Exception
+	 */
+	public static void writeFirstLine(String path, String line) throws Exception {
+		RandomAccessFile raf = new RandomAccessFile(path, "rw");
+		raf.seek(0);
+		raf.write(line.getBytes());
+		raf.close();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		String path = Global.inputDirectoryPath + "test.txt";
+		writeFirstLine(path, "zhouh");
 	}
 }
