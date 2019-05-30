@@ -32,7 +32,7 @@ import utility.Utility;
  * @author jmshi
  *
  */
-public class WordPNIndexBuilder {
+public class WordPNNoDateIndexBuilder {
 	
 	// 临时存放alph place neighborhood
 	class TempAlphaPN{
@@ -75,21 +75,29 @@ public class WordPNIndexBuilder {
 				if(null == pIdToDateMap || pIdToDateMap.isEmpty()) {
 					continue;
 				}
-				for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
-					len++;
-					len++;
-					len += en.getValue().split(Global.delimiterDate).length;
-					if(len*4 >= Global.MAX_PN_LENGTH) {
-						
+				len += pIdToDateMap.size();
+				
+				if(len*4 >= Global.MAX_PN_LENGTH) {
+					long pidNum = 0;
+					for(HashMap<Integer, String> pIdToDateMap1 : eachLayerWN) {
+						pidNum += pIdToDateMap1.size();
+					}
+					System.out.println("> W_PN_NODATE too long > pidNum = " + pidNum + " MAX_PN_LENGTH = " + Global.MAX_PN_LENGTH);
+					return null;
+				}
+//				for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
+//					len++;
+//					len++;
+//					len += en.getValue().split(Global.delimiterDate).length;
+//					if(len*4 >= Global.MAX_PN_LENGTH) {
 //						long pidNum = 0;
 //						for(HashMap<Integer, String> pIdToDateMap1 : eachLayerWN) {
 //							pidNum += pIdToDateMap1.size();
 //						}
 //						System.out.println("> W_PN too long > pidNum = " + pidNum + " MAX_PN_LENGTH = " + Global.MAX_PN_LENGTH);
-						
-						return null;
-					}
-				}
+//						return null;
+//					}
+//				}
 			}
 			
 			// 转化为bytes
@@ -104,11 +112,11 @@ public class WordPNIndexBuilder {
 				bb.putInt(pIdToDateMap.size());
 				for(Entry<Integer, String> en : pIdToDateMap.entrySet()) {
 					bb.putInt(en.getKey());
-					strArr = en.getValue().split(Global.delimiterDate);
-					bb.putInt(strArr.length);
-					for(String st : strArr) {
-						bb.putInt(Integer.parseInt(st));
-					}
+//					strArr = en.getValue().split(Global.delimiterDate);
+//					bb.putInt(strArr.length);
+//					for(String st : strArr) {
+//						bb.putInt(Integer.parseInt(st));
+//					}
 				}
 			}
 			return bb.array();
@@ -133,15 +141,15 @@ public class WordPNIndexBuilder {
 		if(!new File(Global.outputDirectoryPath).exists()) {
 			throw new DirectoryNotEmptyException("目录outputDirectoryPath ： " + Global.outputDirectoryPath + "不存在");
 		}
-		if(!new File(Global.outputDirectoryPath + Global.indexWidPN ).exists()) {
-			throw new DirectoryNotEmptyException("存放wPN索引的目录 ： " + Global.outputDirectoryPath + Global.indexWidPN + "不存在");
+		if(!new File(Global.outputDirectoryPath + Global.indexWidPNNodate).exists()) {
+			throw new DirectoryNotEmptyException("存放wPNNodate索引的目录 ： " + Global.outputDirectoryPath + Global.indexWidPNNodate + "不存在");
 		}
 		
 		long start = System.currentTimeMillis();
 		System.out.println("> 开始创建widPN索引 . . .");
 		
-		String inputDocFile = Global.placeWNFile;
-		String outputIindexFile = Global.wordPNFile;
+		String inputDocFile = Global.placeWNNodateFile;
+		String outputIindexFile = Global.wordPNNodateFile;
 		int startKeyword = Global.numNodes;
 		int endKeyword = Global.numNodes + Global.numKeywords;
 		int interval = (endKeyword - startKeyword - 1)/5;
@@ -154,8 +162,8 @@ public class WordPNIndexBuilder {
 		int iindexSize = 0;
 		int iindexTotalLength = 0;
 		
-		WordPNIndexBuilder alphaPNBuilder = new WordPNIndexBuilder();
-		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN);
+		WordPNNoDateIndexBuilder alphaPNBuilder = new WordPNNoDateIndexBuilder();
+		IndexWordPNService alphaIndexSer = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPNNodate);
 		alphaIndexSer.openIndexWriter();
 		
 		TempAlphaPN radiusPN = null;
@@ -280,7 +288,7 @@ public class WordPNIndexBuilder {
 			}
 			Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 			if(!new File(Global.placeWNFile).exists())	PlaceWNPrecomputation.BuildingPlaceWN(Global.placeWNFile, Boolean.FALSE);
-			WordPNIndexBuilder.buildingWordPN();
+			WordPNNoDateIndexBuilder.buildingWordPN();
 //			new File(Global.placeWNFile).delete();
 			bw.write(String.valueOf(radius) + " : " + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()) + '\n');
 			bw.flush();
@@ -303,18 +311,21 @@ public class WordPNIndexBuilder {
 		Global.MAX_PN_LENGTH = len;
 		
 		Global.radius = radius;
-		System.out.println("> 开始创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPN . . . ");
+		System.out.println("> 开始创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPNNodate . . . ");
 		
-		Global.placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
-		if(!new File(Global.placeWNFile).exists())	PlaceWNPrecomputation.BuildingPlaceWN(Global.placeWNFile, Boolean.TRUE);
+		Global.placeWNNodateFile = Global.outputDirectoryPath + "placeWNNodate" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+		if(!new File(Global.placeWNNodateFile).exists())	PlaceWNPrecomputation.BuildingPlaceWN(Global.placeWNNodateFile, Boolean.FALSE);
 		
-		Global.indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + "_" + String.valueOf(len) + File.separator;
+		Global.indexWidPNNodate = "wid_pn_nodate_" + String.valueOf(Global.radius) + "_" + String.valueOf(len) + File.separator;
 		if(!(new File(Global.outputDirectoryPath + Global.indexWidPN).exists())) {
-			new File(Global.outputDirectoryPath + Global.indexWidPN).mkdir();
+			new File(Global.outputDirectoryPath + Global.indexWidPNNodate).mkdir();
 		}
 		
-		WordPNIndexBuilder.buildingWordPN();
-		System.out.println("> Over创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPN, 用时：" + TimeUtility.getTailTime());
+		Global.wordPNNodateFile = Global.outputDirectoryPath + "wordPNNodate"+ Global.rtreeFlag
+				+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+		
+		WordPNNoDateIndexBuilder.buildingWordPN();
+		System.out.println("> Over创建radius=" + String.valueOf(radius) + " len=" + String.valueOf(len) + "的WordPNNodate, 用时：" + TimeUtility.getTailTime());
 	}
 	
 	/**
@@ -324,7 +335,7 @@ public class WordPNIndexBuilder {
 	 */
 	public static void main(String[] args) throws Exception {
 		Global.printInputOutputPath();
-		WordPNIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+		WordPNNoDateIndexBuilder.buildingWN(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		
 //		List<Integer> lens = new ArrayList<>();
 //		lens.add(100000);

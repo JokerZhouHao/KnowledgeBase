@@ -21,10 +21,12 @@ import org.tartarus.snowball.ext.LovinsStemmer;
 
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
+import entity.sp.reach.CReach;
 import queryindex.VertexQwordsMap;
 import utility.Global;
 import utility.IOUtility;
 import utility.MComparator;
+import utility.MLog;
 import utility.TimeUtility;
 import utility.Utility;
 
@@ -71,8 +73,8 @@ public class GraphByArray {
 	/**
 	 * compute the alpha doc of vertex in BFS mode.
 	 * */
-	public PlaceRadiusNeighborhood alphaRadiusOfVertex(int vid, Integer radius, NidToDateWidIndex nidToDateWidIndex)
-			throws IOException {
+	public PlaceRadiusNeighborhood alphaRadiusOfVertex(int vid, Integer radius, NidToDateWidIndex nidToDateWidIndex, 
+			Boolean isAvailableTime) throws IOException {
 		PlaceRadiusNeighborhood radiusWN = new PlaceRadiusNeighborhood(radius);
 		Queue<Integer> queue = new LinkedList<Integer>();
 		int source = vid;
@@ -88,7 +90,13 @@ public class GraphByArray {
 			containedDateWid = nidToDateWidIndex.getDateWid(vertex);
 
 			if (containedDateWid != null) {
-				radiusWN.addDateWid(distance2Source[vertex], containedDateWid);;
+				if(isAvailableTime) {
+					if(containedDateWid.getDateList().getHead().getValue() != Global.TIME_INAVAILABLE)
+						radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
+				} else if(containedDateWid.getDateList().getHead().getValue() == Global.TIME_INAVAILABLE) {
+					radiusWN.addDateWid(distance2Source[vertex], containedDateWid);
+				}
+				
 			}
 			
 			// add the unvisited adj vertices of vertex into queue only
@@ -214,7 +222,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int date, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree, QueryParams qp) throws Exception {
+			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree, QueryParams qp, boolean[] signInDate) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -344,48 +352,60 @@ public class GraphByArray {
 				for(int searchedWidIndex : recSearchWidIndex) {
 					t = sortQwords[searchedWidIndex];
 					if(t == tempWids[searchedWidIndex]) {
-						if(k == Integer.MIN_VALUE) {
-							k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
-						}
-						disMSpan = currentRadius * k;
-						
-//						System.out.println(date + "  " + dateWid.getDateList().toString());
-//						System.out.println("currentRadius * k = " + currentRadius + " " + k);
-						
-						
-						if(wordMinDateSpans[searchedWidIndex][0] == k) {
+						if(signInDate[searchedWidIndex]) {	// 该关键词带有时间
+							if(k == Integer.MIN_VALUE) {
+								k = TimeUtility.getMinDateSpan(date, dateWid.getDateList());
+							}
+							disMSpan = currentRadius * k;
+							
+//							System.out.println(date + "  " + dateWid.getDateList().toString());
+//							System.out.println("currentRadius * k = " + currentRadius + " " + k);
+							
+							
+							if(wordMinDateSpans[searchedWidIndex][0] == k) {
+								recKeyVectices[searchedWidIndex] = vertex;
+								recKeyDis[searchedWidIndex] = disMSpan;
+								recOkWidIndex.add(searchedWidIndex);
+								numCurFindedWid++;
+								
+								if(recCandVectices[searchedWidIndex] != signNone) {
+									recCandVectices[searchedWidIndex] = signNone;
+									recCandDis[searchedWidIndex] = signNone;
+									recCanWidIndex.remove((Object)searchedWidIndex);
+									numCandWid--;
+									
+								}
+								
+								tempList.add(searchedWidIndex);
+								
+								if(numCurFindedWid == qwordsNum) {
+									isFound = Boolean.TRUE;
+									break;
+								}
+							} else {
+								if(signNone != (d1 = recCandDis[searchedWidIndex])) {
+									if(d1 > disMSpan) {
+										recCandVectices[searchedWidIndex] = vertex;
+										recCandDis[searchedWidIndex] = disMSpan;
+									}
+								} else {
+									recCandVectices[searchedWidIndex] = vertex;
+									recCandDis[searchedWidIndex] = disMSpan;
+									recCanWidIndex.add(searchedWidIndex);
+									numCandWid++;
+								}
+							} 
+						} else {	// 该关键词不带有时间
 							recKeyVectices[searchedWidIndex] = vertex;
-							recKeyDis[searchedWidIndex] = disMSpan;
+							recKeyDis[searchedWidIndex] = currentRadius * qp.DEFAULT_DATE_SPAN;
 							recOkWidIndex.add(searchedWidIndex);
 							numCurFindedWid++;
-							
-							if(recCandVectices[searchedWidIndex] != signNone) {
-								recCandVectices[searchedWidIndex] = signNone;
-								recCandDis[searchedWidIndex] = signNone;
-								recCanWidIndex.remove((Object)searchedWidIndex);
-								numCandWid--;
-								
-							}
-							
 							tempList.add(searchedWidIndex);
-							
 							if(numCurFindedWid == qwordsNum) {
 								isFound = Boolean.TRUE;
 								break;
 							}
-						} else {
-							if(signNone != (d1 = recCandDis[searchedWidIndex])) {
-								if(d1 > disMSpan) {
-									recCandVectices[searchedWidIndex] = vertex;
-									recCandDis[searchedWidIndex] = disMSpan;
-								}
-							} else {
-								recCandVectices[searchedWidIndex] = vertex;
-								recCandDis[searchedWidIndex] = disMSpan;
-								recCanWidIndex.add(searchedWidIndex);
-								numCandWid++;
-							}
-						} 
+						}
 					}
 				}
 				for(int in : tempList)	recSearchWidIndex.remove((Object)in);
@@ -492,7 +512,7 @@ public class GraphByArray {
 	 * @throws Exception
 	 */
 	public double getSemanticPlaceP(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
-			List<List<Integer>> semanticTree, boolean[] sIRange, QueryParams qp) throws Exception {
+			List<List<Integer>> semanticTree, boolean[] sIRange, QueryParams qp, List<Integer>[] nidsInDate, CReach cReach) throws Exception {
 
 		if (sortQwords.length == 0) {
 			throw new IllegalArgumentException("must provide at least one query keyword");
@@ -529,8 +549,6 @@ public class GraphByArray {
 		
 		for(i=0; i<sortQwords.length; i++)	recSearchWidIndex.add(i);
 		
-		int numQwords = sortQwords.length;
-		
 		List<Integer> tempList = new ArrayList<>();
 		int[] tempWids = null;
 		DatesWIds dateWid = null;
@@ -544,22 +562,26 @@ public class GraphByArray {
 		double preRadius = 0;
 		int vertex = 0;
 		double currentRadius = 0;
-		double currentMaxDis = 0;
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
 			currentRadius = distance2Source[vertex];
+			if(currentRadius > Global.MAX_BFS_LEVEL)	break;	// 超出了最大bfs层数
+			
 			if (currentRadius != preRadius) {
 				preRadius = currentRadius;
 				// 计算新层下的looseness
 				looseness = 0;
 				for(i=0; i<sortQwords.length; i++) {
-					if(recKeyDis[i] != signNone) {
-						if(recSigns[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
-						else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
-					} else {
-						if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
-						else looseness += currentRadius * Global.WEIGHT_PATH;
+					if(recSigns[i])	looseness += recKeyDis[i];
+					else {
+						if(signInRanges[i]) {
+							if(recKeyDis[i] != signNone)	
+								looseness += recKeyDis[i] > currentRadius * Global.WEIGHT_REV_PATH ? currentRadius * Global.WEIGHT_REV_PATH : recKeyDis[i];
+							else looseness += currentRadius * Global.WEIGHT_REV_PATH;
+						} else {
+							looseness += currentRadius * Global.WEIGHT_PATH;
+						}
 					}
 				}
 				if(looseness >= loosenessThreshold) {
@@ -577,47 +599,25 @@ public class GraphByArray {
 				for(int searchWidIndex : recSearchWidIndex) {
 					if(sortQwords[searchWidIndex]==tempWids[searchWidIndex]) {
 						tDate = dateWid.getDateList().get(0);
-						if(tDate >= sDate && tDate <= eDate) {	// 在时间范围内
-							currentMaxDis = currentRadius + 1;
-							
+						if(signInRanges[searchWidIndex]) {
+							if(tDate >= sDate && tDate <= eDate) {	// 在时间范围内
+								recKeyVectices[searchWidIndex] = vertex;
+								recKeyDis[searchWidIndex] = currentRadius * Global.WEIGHT_REV_PATH;
+								recSigns[searchWidIndex] = Boolean.TRUE;
+								recOkWidIndex.add(searchWidIndex);
+								tempList.add(searchWidIndex);
+							} else {	// 不在时间范围内
+								if(recKeyDis[searchWidIndex] == signNone) {
+									recKeyVectices[searchWidIndex] = vertex;
+									recKeyDis[searchWidIndex] = currentRadius * Global.WEIGHT_PATH;
+								}
+							}
+						} else {	// 不带有时时间的词
 							recKeyVectices[searchWidIndex] = vertex;
-							recKeyDis[searchWidIndex] = currentRadius;
+							recKeyDis[searchWidIndex] = currentRadius * Global.WEIGHT_PATH;
 							recSigns[searchWidIndex] = Boolean.TRUE;
 							recOkWidIndex.add(searchWidIndex);
 							tempList.add(searchWidIndex);
-							
-							// 更新没有时间的词
-//							for(i=0; i<sortQwords.length; i++) {
-//								if(recKeyDis[i] != signNone && !recSigns[i])
-//									recKeyDis[i] = currentRadius + 1;
-//							}
-							
-							// 计算新的looseness
-//							looseness = 0;
-//							for(i=0; i<sortQwords.length; i++) {
-//								if(recKeyDis[i] != signNone) {
-//									if(signInRanges[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
-//									else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
-//								} else {
-//									if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
-//									else looseness += currentRadius * Global.WEIGHT_PATH;
-//								}
-//							}
-//							if(looseness >= loosenessThreshold) {
-//								if(Global.isTest) {
-//									Global.rr.numCptPruneInSemanticTree++;
-//								}
-//								return Double.POSITIVE_INFINITY;
-//							}
-							
-						} else {	// 不在时间范围内
-							recKeyVectices[searchWidIndex] = vertex;
-							recKeyDis[searchWidIndex] = currentRadius >= currentMaxDis ? currentRadius : currentMaxDis;
-							
-							if(!signInRanges[searchWidIndex]) {
-								recOkWidIndex.add(searchWidIndex);
-								tempList.add(searchWidIndex);
-							}
 						}
 					}
 				}
@@ -646,29 +646,37 @@ public class GraphByArray {
 				}
 			}
 		}
-
-		// compute semantic tree paths
-//		if(!recSearchWidIndex.isEmpty()) {
-//			return Double.POSITIVE_INFINITY;
-//		}
-		for(i=0; i<numQwords; i++) {
-			if(recKeyDis[i] == signNone)	return Double.POSITIVE_INFINITY;
-		}
 		
 		// 计算looseness
-		looseness = 0;
 		for(i=0; i<sortQwords.length; i++) {
-			if(recKeyDis[i] != signNone) {
-				if(recSigns[i])	looseness += recKeyDis[i] * Global.WEIGHT_REV_PATH;
-				else looseness += recKeyDis[i] * Global.WEIGHT_PATH;
-			} else {
-				if(signInRanges[i])	looseness += currentRadius * Global.WEIGHT_REV_PATH;
-				else looseness += currentRadius * Global.WEIGHT_PATH;
+			if(recSigns[i])	looseness += recKeyDis[i];
+			else {
+				if(signInRanges[i]) {	// 关键词带有时间
+					if(recKeyDis[i] != signNone)	looseness += recKeyDis[i];
+					else {
+						recKeyVectices[i] = source;
+						if(null == nidsInDate[i]) {
+							looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_PATH;
+						} else {
+							Boolean isReacContainDate = Boolean.FALSE;
+							for(Integer nid : nidsInDate[i]) {
+								if(cReach.queryReachable(source, nid)) {
+									isReacContainDate = Boolean.TRUE;
+									break;
+								}
+							}
+							if(isReacContainDate)	looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_REV_PATH;
+							else looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_PATH;
+						}
+					}
+				} else {	// 关键词不带时间
+					if(recKeyDis[i] != signNone)	looseness += recKeyDis[i];
+					else {
+						recKeyVectices[i] = source;
+						looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_PATH;
+					}
+				}
 			}
-		}
-		
-		for(i=0; i<numQwords; i++) {
-			semanticTree.add(this.getPath(source, recKeyVectices[i]));
 		}
 		
 		if(looseness <= loosenessThreshold)	return looseness;

@@ -21,9 +21,9 @@ public class AlgTest {
 	
 	public static synchronized void decreaseTask() {
 		numTask--;
-		if(numTask==0) {
-			MLog.log("numTask = 0");
-		}
+//		if(numTask==0) {
+//			MLog.log("numTask = 0");
+//		}
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -46,7 +46,7 @@ public class AlgTest {
 		numThread = numThread <= qps.size() ? numThread : qps.size();
 		
 		MLog.log("开始测试" + args[0] + "    线程数: " + numThread + "    组数: " + qps.size());
-		for(QueryParams q : qps)	System.out.println(q);
+		QueryParams.print(qps);
 		
 		ArrayBlockingQueue<QueryParams> queue = new ArrayBlockingQueue<>(numThread);
 		SPInterface sps[] = null;

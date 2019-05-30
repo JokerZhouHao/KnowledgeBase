@@ -22,6 +22,10 @@ public class RandomNumGenerator {
 		return startNum + (int)(random.nextFloat() * span);
 	}
 	
+	public static int getRandomInt(int start, int end) {
+		return start + (int)(new Random().nextFloat() * (end - start + 1));
+	}
+	
 	public static float getRandomFloat() {
 		return random.nextFloat();
 	}
@@ -40,9 +44,17 @@ public class RandomNumGenerator {
 	
 	public static void main(String[] args) {
 		
-		for(int i=0; i<10; i++) {
-			System.out.println(RandomNumGenerator.getRInt(6));
+//		for(int i=0; i<5; i++) {
+//			System.out.println(RandomNumGenerator.getRandomInt(1, 1));
+//		}
+		
+		for(int i=0; i<5; i++) {
+			System.out.println(RandomNumGenerator.getRandomFloat());
 		}
+		
+//		for(int i=0; i<10; i++) {
+//			System.out.println(RandomNumGenerator.getRInt(6));
+//		}
 		
 		
 //		RandomNumGenerator rand = new RandomNumGenerator(0, 10);

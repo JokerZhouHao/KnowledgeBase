@@ -14,7 +14,7 @@ import java.util.TreeMap;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 
 import entity.freebase.Pair;
-import utility.FileLoader;
+import utility.FileMakeOrLoader;
 import utility.Global;
 import utility.IOUtility;
 import utility.MLog;
@@ -38,7 +38,7 @@ public class OrgFilePreprocessor {
 	 * @throws Exception
 	 */
 	public static void filterCoord(String pathInput, String pathOutput) throws Exception {
-		Map<Integer, Pair<Double, Double>> id2Coord = FileLoader.loadCoord(pathInput);
+		Map<Integer, Pair<Double, Double>> id2Coord = FileMakeOrLoader.loadCoord(pathInput);
 		List<Integer> invalidId = new ArrayList<>();
 		for(Entry<Integer, Pair<Double, Double>> en : id2Coord.entrySet()) {
 			Pair<Double, Double> coord = en.getValue();

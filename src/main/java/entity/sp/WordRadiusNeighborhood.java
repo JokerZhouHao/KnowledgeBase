@@ -36,11 +36,18 @@ public class WordRadiusNeighborhood {
 	}
 	
 	public WordRadiusNeighborhood(int radius, byte[] binPlaceNeigh) {
-		this.radius = radius;
-		eachLayerWN = new HashMap[this.radius  + 1];
-		this.formateBin(binPlaceNeigh);
+//		this.radius = radius;
+//		eachLayerWN = new HashMap[this.radius  + 1];
+//		this.formateBin(binPlaceNeigh);
+		this(radius, binPlaceNeigh, Boolean.TRUE);
 	}
 	
+	public WordRadiusNeighborhood(int radius, byte[] binPlaceNeigh, Boolean hasDate) {
+		this.radius = radius;
+		eachLayerWN = new HashMap[this.radius  + 1];
+		if(hasDate)	this.formateBin(binPlaceNeigh);
+		else this.formateBinNodate(binPlaceNeigh);
+	}
 	
 	/**
 	 * 格式化
@@ -105,6 +112,29 @@ public class WordRadiusNeighborhood {
 	}
 	
 	/**
+	 * 格式化不带时间的二进制串
+	 * @param binPlaceNeigh
+	 */
+	private void formateBinNodate(byte[] binPlaceNeigh) {
+		ArrayList<Integer> tempList = null;
+		int numWD = 0;
+		int i, j, pid, k;
+		int numDates = 0;
+		ByteBuffer bb = ByteBuffer.wrap(binPlaceNeigh);
+		bb.rewind();
+		for(i=0; i<this.radius+1; i++) {
+			numWD = bb.getInt();
+			if(0==numWD) 	continue;
+			eachLayerWN[i] = new HashMap<>();
+			for(j=0; j<numWD; j++) {
+				pid = bb.getInt();
+				tempList = new ArrayList<>();
+				tempList.add(Global.TIME_INAVAILABLE);
+			}
+		}
+	}
+	
+	/**
 	 * 获得节点id为pid的looseness
 	 * @param pid
 	 * @param date
@@ -121,6 +151,30 @@ public class WordRadiusNeighborhood {
 		return minLoose;
 	}
 	
+	public int getLooseness(int pid, int date, int minPathDis, int minDateSpan, Boolean inDate) {
+		int minLoose = Integer.MAX_VALUE;
+		int td = 0, i;
+		for(i=0; i < radius + 1; i++) {
+			if(null != eachLayerWN[i] && null != eachLayerWN[i].get(pid)) {
+				if(inDate) {
+					if(minLoose > (td = ((i+1) * TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid))))) {
+						minLoose = td;
+					}
+				} else return (i + 1) * minDateSpan;
+			}
+		}
+		
+		if(minLoose == Integer.MAX_VALUE) {
+			if(minPathDis == -1)	minLoose = (i + 1) * minDateSpan;
+			else minLoose = minPathDis * minDateSpan;
+		} else {
+			int temp = (i + 1) * minDateSpan;
+			minLoose = minLoose <= temp ? minLoose : temp;
+		}
+		return minLoose;
+	}
+	
+	
 	public int getLoosenessByMax(int pid, int date, int maxDateSpan) {
 		int minLoose = Integer.MAX_VALUE;
 		int td = 0;
@@ -132,6 +186,8 @@ public class WordRadiusNeighborhood {
 		return minLoose;
 	}
 	
+	
+	
 	/**
 	 * 获得时间范围内的looseness
 	 * @param pid
@@ -139,18 +195,27 @@ public class WordRadiusNeighborhood {
 	 * @param eDate
 	 * @return
 	 */
-	public double getLooseness(int pid, int sDate, int eDate) {
+	public double getLooseness(int pid, int sDate, int eDate, boolean inDate) {
 		List<Integer> dates = null;
 		int i = 0;
+		double dis = Double.MAX_VALUE;
 		for(i=0; i < radius + 1; i++) {
 			if(null != eachLayerWN[i] && null != (dates=eachLayerWN[i].get(pid))) {
-				return (i+1) * Global.WEIGHT_REV_PATH;
+				if(dates.get(0) >= sDate && dates.get(0) <= eDate)	return (i+1) * Global.WEIGHT_REV_PATH;
+				else dis = dis <= (i+1) * Global.WEIGHT_PATH ? dis : (i+1) * Global.WEIGHT_PATH;
+				if(!inDate)	return dis;
 //				if(dates.get(dates.size()-1)<sDate || dates.get(0)>eDate) {
 //					temp = temp <= (i+1) * Global.WEIGHT_PATH ? temp : (i+1) * Global.WEIGHT_PATH;
 //				} else temp = temp <= (i + 1) * Global.WEIGHT_REV_PATH ? temp : (i + 1) * Global.WEIGHT_REV_PATH;
 			}
 		}
-		return (i+1) * Global.WEIGHT_REV_PATH;
+		if(dis != Double.MAX_VALUE) {
+			return dis <= (i+1) * Global.WEIGHT_REV_PATH ? dis : (i+1) * Global.WEIGHT_REV_PATH;
+		}
+		else {
+			if(inDate)	return (i+1) * Global.WEIGHT_REV_PATH;
+			else return (i+1) * Global.WEIGHT_PATH; 
+		}
 	}
 	
 	/**

@@ -11,6 +11,7 @@ import utility.Global;
 import utility.TimeUtility;
 
 public class QueryParams {
+	public int DEFAULT_DATE_SPAN = 300; 	// 对于不带时间的关键词，默认时间差
 	public int searchType = 0;
 	public int testSampleNum = 500;
 	public int radius = 1;
@@ -135,7 +136,7 @@ public class QueryParams {
 	
 	
 	public String toString() {
-		String st = String.format("%-2d%-4d%-3d%-3d%-2d%-9d%-9d%-9d%-6d", 
+		String st = String.format("%-2d%-4d%-3d%-3d%-2d%-11d%-9d%-9d%-6d", 
 				searchType, testSampleNum, testK, numWid, 
 				radius, MAX_PN_LENGTH, MAX_WORD_FREQUENCY,
 				maxDateSpan, DATE_RANGE);
@@ -145,7 +146,7 @@ public class QueryParams {
 	
 	public static void print(Collection<QueryParams> qps) {
 		String out = "";
-		out += String.format("%-2s%-4s%-3s%-3s%-2s%-9s%-9s%-9s%-6s%-3s", 
+		out += String.format("%-2s%-4s%-3s%-3s%-2s%-11s%-9s%-9s%-6s%-3s", 
 				"t", "ns", "k", "nw", 
 				"r", "rlen", "wf",
 				"mds", "dr", "O") + "\n";

@@ -39,9 +39,16 @@ public class RTreeWithGI extends RTree {
 	// this RTree: disk
 	// graph: in memory
 	protected GraphByArray graph;
-
+	
+	private Boolean isAvailableTime = Boolean.TRUE;
+	
 	public RTreeWithGI(PropertySet psRTree, IStorageManager sm) throws Exception {
+		this(psRTree, sm, Boolean.FALSE);
+	}
+	
+	public RTreeWithGI(PropertySet psRTree, IStorageManager sm, Boolean isAvailableTime) throws Exception {
 		super(psRTree, sm);
+		this.isAvailableTime = isAvailableTime;
 	}
 
 	/**
@@ -59,7 +66,7 @@ public class RTreeWithGI extends RTree {
 		return this.graph;
 	}
 
-	public void precomputeAlphaWN(NidToDateWidIndex nidToDateWidIndex, int radius) throws Exception {
+	public void precomputeAlphaWN(String pathOutput, NidToDateWidIndex nidToDateWidIndex, int radius) throws Exception {
 		/*
 		 * add all the leaf nodes of Rtree into graph for each keyword, read its
 		 * postinglist add the keyword into graph run Bellman-Ford algorithm to
@@ -67,7 +74,7 @@ public class RTreeWithGI extends RTree {
 		 * result remove the keyword from graph remove all the leaf nodes of
 		 * Rtree from graph
 		 */
-		PrintWriter writer = new PrintWriter(Global.placeWNFile);
+		PrintWriter writer = new PrintWriter(pathOutput);
 //		DataOutputStream dos = IOUtility.getDos(Global.placeWNFile);
 
 		int[] count = new int[3];// numNodes and sumDocLength
@@ -97,7 +104,7 @@ public class RTreeWithGI extends RTree {
 				// get and output the alpha document of places in the leaf node
 				int pid = n.m_pIdentifier[child];
 				count[2]++;
-				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
+				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex, isAvailableTime);
 				this.outputAlphaWN(writer, radius, pid, radiusWN, count);
 
 				// merge the alpha document of places to get the alpha document of the leaf node
@@ -177,7 +184,7 @@ public class RTreeWithGI extends RTree {
 				// get and output the alpha document of places in the leaf node
 				int pid = n.m_pIdentifier[child];
 				count[2]++;
-				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex);
+				PlaceRadiusNeighborhood radiusWN = graph.alphaRadiusOfVertex(pid, radius, nidToDateWidIndex, isAvailableTime);
 				this.outputAlphaWN(dos, radius, pid, radiusWN, count);
 
 				// merge the alpha document of places to get the alpha document of the leaf node

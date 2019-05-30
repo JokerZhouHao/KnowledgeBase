@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.util.Map;
 
 import precomputation.sp.IndexNidKeywordsListService;
-import utility.FileLoader;
+import utility.FileMakeOrLoader;
 import utility.Global;
 
 /**
@@ -23,7 +23,7 @@ public class FileViewer {
 		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + 
 						String.valueOf(Global.testOrgSampleNum) + ".t=0.wn=10"));
-		Map<Integer, String> wid2Word = FileLoader.loadWid2Word();
+		Map<Integer, String> wid2Word = FileMakeOrLoader.loadWid2Word();
 		String lineStr = null;
 		String[] arr = null;
 		int num = 1;

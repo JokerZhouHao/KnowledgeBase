@@ -121,7 +121,7 @@ public class SortedDateWidIndex {
 		int left = widMinDateSpan[1];
 		int right = widMinDateSpan[2];
 		int i=0;
-		int leftSpan = widMinDateSpan[0], rightSpan = Integer.MAX_VALUE, tempSpan = 0;
+		int leftSpan = Integer.MAX_VALUE, rightSpan = Integer.MAX_VALUE, tempSpan = 0;
 		DateNidNode dnn = null;
 		int size = dateWidList.size();
 		

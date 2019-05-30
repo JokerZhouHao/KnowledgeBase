@@ -26,7 +26,7 @@ public class PlaceWNPrecomputation {
 	private static RTreeWithGI rgi = null;
 	private static NidToDateWidIndex nidToDateWidIndex = null;
 	
-	private static void init() throws Exception{
+	private static void init(Boolean isAvailableTime) throws Exception{
 		if(null == rgi) {
 			PropertySet psRTree = new PropertySet();
 			String indexRTree = Global.indexRTree;
@@ -41,7 +41,7 @@ public class PlaceWNPrecomputation {
 			Integer i = new Integer(1); 
 			psRTree.setProperty("IndexIdentifier", i);
 			
-			rgi = new RTreeWithGI(psRTree, file);
+			rgi = new RTreeWithGI(psRTree, file, isAvailableTime);
 			rgi.buildSimpleGraphInMemory();
 			
 			String nidToDateWidFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
@@ -49,7 +49,7 @@ public class PlaceWNPrecomputation {
 		}
 	}
 	
-	public static void BuildingPlaceWN() throws Exception{
+	public static void BuildingPlaceWN(String pathOutput, Boolean isAvailableTime) throws Exception{
 		if(!new File(Global.inputDirectoryPath).exists()) {
 			throw new DirectoryNotEmptyException("目录inputDirectoryPath ： " + Global.inputDirectoryPath + "不存在");
 		}
@@ -61,17 +61,17 @@ public class PlaceWNPrecomputation {
 		}
 		
 		long start = System.currentTimeMillis();
-		String pidWNFile = Global.placeWNFile;
+		String pidWNFile = pathOutput;
 		System.out.println("> 开始构造" + pidWNFile + "文件 . . .");
 		
 		// 初始化
-		PlaceWNPrecomputation.init();
+		PlaceWNPrecomputation.init(isAvailableTime);
 		
-		rgi.precomputeAlphaWN(nidToDateWidIndex, Global.radius);
+		rgi.precomputeAlphaWN(pidWNFile, nidToDateWidIndex, Global.radius);
 		System.out.println("> 结束构造" + pidWNFile + "，用时：" + TimeUtility.getSpendTimeStr(start, System.currentTimeMillis()));
 	}
 	
 	public static void main(String[] args) throws Exception {
-		PlaceWNPrecomputation.BuildingPlaceWN();
+		PlaceWNPrecomputation.BuildingPlaceWN(Global.placeWNFile, Boolean.FALSE);
 	}
 }

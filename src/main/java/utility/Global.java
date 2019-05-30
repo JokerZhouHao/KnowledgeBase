@@ -31,6 +31,8 @@ public class Global {
 	
 	public final static int TIME_INAVAILABLE = Integer.MAX_VALUE; 
 	
+	public final static int MAX_BFS_LEVEL = 10;
+	
 	public static int defaultMaxDateSpan = 1000;
 	
 	// 用于DBpedia创建wid2pid索引
@@ -168,6 +170,9 @@ public class Global {
 	public static String placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 	public static String wordPNFile = Global.outputDirectoryPath + "wordPN"+ Global.rtreeFlag
 			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String placeWNNodateFile = Global.outputDirectoryPath + "placeWNNodate" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String wordPNNodateFile = Global.outputDirectoryPath + "wordPNNodate"+ Global.rtreeFlag
+			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 	public static String alphaIindexFile = null;
 	public static int alphaIindexRTNodeBufferSize = -1;
 	public static String tfindexDirectoryPath = null;
@@ -185,6 +190,7 @@ public class Global {
 	public static String indexTFLabel = "tf_label" + File.separator;
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexWidPN = "wid_pn";
+	public static String indexWidPNNodate = "wid_pn_nodate";
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 	public static int MAX_WORD_FREQUENCY = 1000;
 	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;

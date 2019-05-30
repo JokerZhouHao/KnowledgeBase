@@ -46,6 +46,7 @@ import spatialindex.storagemanager.IBuffer;
 import spatialindex.storagemanager.IStorageManager;
 import spatialindex.storagemanager.PropertySet;
 import spatialindex.storagemanager.TreeLRUBuffer;
+import utility.FileMakeOrLoader;
 import utility.Global;
 import utility.MComparator;
 import utility.MLog;
@@ -64,10 +65,13 @@ public class SPBest implements SPInterface{
 	private static CReach cReach = null;
 	private static MinMaxDateService minMaxDateSer = null;
 	private static int[] pid2RtreeLeafNode = null;
+	private static Set<Integer> widHasDate = null;
 	
 	// 非静态变量
 	private IndexNidKeywordsListService nIdWIdDateSer = null;
 	private IndexWordPNService wIdPnSer = null;
+	private IndexWordPNService wIdPnInfSer = null;
+	private IndexWordPNService wIdPnNodateSer = null;
 	private LRUBuffer buffer = null;
 	private RTreeWithGI rgi = null;
 	private Wid2DateNidPairIndex wid2DateNidPairIndex = null;
@@ -78,19 +82,6 @@ public class SPBest implements SPInterface{
 	
 	private QueryParams qp = null;
 	private ArrayBlockingQueue<QueryParams> qpQueue = null;
-	
-	/**
-	 * 释放资源
-	 * @throws Exception
-	 */
-	public void free() throws Exception{
-		nIdWIdDateSer.closeIndexReader();
-		if(qp.MAX_PN_LENGTH> 0)	wIdPnSer.closeIndexReader();
-		wid2DateNidPairIndex.closeIndexReader();
-		w2pReachSer.closeIndexs();
-		if(Global.isDebug)	Global.recReachBW.close();
-	}
-	
 	
 	/**
 	 * 初始化
@@ -104,6 +95,7 @@ public class SPBest implements SPInterface{
 		if(null == cReach)	cReach = new CReach(Global.outputDirectoryPath + Global.sccFile, Global.outputDirectoryPath + Global.indexTFLabel, Global.numSCCs);
 		if(null == pid2RtreeLeafNode)	pid2RtreeLeafNode = RTreeLeafNodeContainPids.loadPid2RTreeLeafNode(Global.recRTreeLeafNodeContainPidsPath);
 		if(null == minMaxDateSer)	minMaxDateSer = new MinMaxDateService(Global.outputDirectoryPath + Global.minMaxDatesFile);
+		if(null == widHasDate)	widHasDate = FileMakeOrLoader.loadWidHasDate();
 		if(null == Global.wordFrequency) Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
 		
 		// 由于rgi在计算时，会上锁，故每个SPBest实例都会新创建个rgi
@@ -146,6 +138,8 @@ public class SPBest implements SPInterface{
 		// 各索引路径
 		String nIdWIdDateIndex = Global.outputDirectoryPath + Global.indexNIdWordDate;
 		String wIdPNIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(qp.radius) + "_" + String.valueOf(qp.MAX_PN_LENGTH) + File.separator;
+		String wIdPNInfIndex = Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(qp.radius) + "_" + Global.INFINITE_PN_LENGTH_STR + File.separator;
+		String wIdPNNodateIndex = Global.outputDirectoryPath + Global.indexWidPNNodate + "_" + String.valueOf(qp.radius) + "_" + Global.INFINITE_PN_LENGTH_STR + File.separator;
 		
 		nIdWIdDateSer = new IndexNidKeywordsListService(nIdWIdDateIndex);
 		nIdWIdDateSer.openIndexReader();
@@ -154,6 +148,10 @@ public class SPBest implements SPInterface{
 			wIdPnSer = new IndexWordPNService(wIdPNIndex);
 			wIdPnSer.openIndexReader();
 		}
+		wIdPnInfSer = new IndexWordPNService(wIdPNInfIndex);
+		wIdPnInfSer.openIndexReader();
+		wIdPnNodateSer = new IndexWordPNService(wIdPNNodateIndex);
+		wIdPnNodateSer.openIndexReader();
 		
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
@@ -163,10 +161,19 @@ public class SPBest implements SPInterface{
 		w2pReachSer.openIndexs();
 	}
 	
-	
-	
-	
-	
+	/**
+	 * 释放资源
+	 * @throws Exception
+	 */
+	public void free() throws Exception{
+		nIdWIdDateSer.closeIndexReader();
+		if(qp.MAX_PN_LENGTH> 0)	wIdPnSer.closeIndexReader();
+		wIdPnInfSer.closeIndexReader();
+		wIdPnNodateSer.closeIndexReader();
+		wid2DateNidPairIndex.closeIndexReader();
+		w2pReachSer.closeIndexs();
+		if(Global.isDebug)	Global.recReachBW.close();
+	}
 	
 	/**
 	 * bsp算法实现
@@ -202,7 +209,7 @@ public class SPBest implements SPInterface{
 		if(Global.isTest) {
 			qp.rr.setFrontTime();
 		}
-		boolean[] signInRange = new boolean[sortQwords.length];
+		boolean[] signInDate = new boolean[sortQwords.length];
 		for(i=0; i<searchedDatesWids.length; i++)	searchedDatesWids[i] = null;
 		DatesWIds dws = null;
 		
@@ -211,6 +218,9 @@ public class SPBest implements SPInterface{
 		ArrayList<DateNidNode> dnList = null;
 		int tDateSpan = 0;
 		int sDate = TimeUtility.getIntDate(searchDate);
+		
+		// 纪录哪些点在时间范围内
+		List<Integer>[] nidsInDate = new ArrayList[sortQwords.length];
 		
 		for(i=0; i<sortQwords.length; i++) {
 			// 检索
@@ -232,7 +242,7 @@ public class SPBest implements SPInterface{
 					dnn.isMax = Boolean.TRUE;
 				
 				// 获得wid2DateNid
-				if(eDate == null && dnn.getDate() != Integer.MAX_VALUE) {
+				if(eDate == null && dnn.getDate() != Global.TIME_INAVAILABLE) {
 					if(tDateSpan > maxDateSpans[i]) {
 						maxDateSpans[i] = tDateSpan;
 						maxDate = dnn.getDate();
@@ -242,17 +252,21 @@ public class SPBest implements SPInterface{
 				
 				// 获得nIdDateWidMap
 				if(null == (dws = searchedDatesWids[dnn.getNid()])) {
-					if(dnn.getDate() == Integer.MAX_VALUE)	{
-						dws = new DatesWIds(maxDate, sortQwords.length);
+					if(dnn.getDate() == Global.TIME_INAVAILABLE)	{
+						dws = new DatesWIds(Global.TIME_INAVAILABLE, sortQwords.length);     /****************  注意：此处对于没有时间的节点给的是Global.TIME_INAVAILABLE而不是maxDate   **********/
 					}
 					else	dws = new DatesWIds(dnn.getDate(), sortQwords.length);
 					searchedDatesWids[dnn.getNid()] = dws;
 				}
 				dws.addWid(i, sortQwords[i]);
 				
-				// 获得是否存在包含查询词，且时间在查询范围内的点
-				if(eDate != null && !signInRange[i] && dnn.getDate() >= searchIntDate && dnn.getDate() <= eIntDate) {
-					signInRange[i] = Boolean.TRUE;
+				// 获得在时间范围内的nid，设置signInDate
+				if(null != eDate && dnn.getDate() >= sDate && dnn.getDate() <= eIntDate) {
+					if(null == nidsInDate[i])	nidsInDate[i] = new ArrayList<>();
+					nidsInDate[i].add(dnn.getNid());
+				}
+				if(dnn.getDate() != Global.TIME_INAVAILABLE) {
+					signInDate[i] = Boolean.TRUE;
 				}
 			}
 			
@@ -262,6 +276,16 @@ public class SPBest implements SPInterface{
 			qp.rr.timeBspBuidingWid2DateNid += qp.rr.getTimeSpan();
 			qp.rr.setFrontTime();
 		}
+		
+		
+		
+		
+		/*********		test  *****************/
+//		String tStr = "";
+//		for(Boolean b : signInDate)	tStr += b.toString() + " ";
+//		MLog.log(tStr);
+		
+		
 		
 		// 判断是否至少有一个词在时间范围内
 		List<Integer> matchNids = null;
@@ -303,10 +327,27 @@ public class SPBest implements SPInterface{
 		// 获得word 的  place neighborhood
 		HashMap<Integer, WordRadiusNeighborhood> wordPNMap = new HashMap<>();
 		if(qp.MAX_PN_LENGTH> 0) {
-			for(Integer in : qwords) {
-				byte[] bs =  wIdPnSer.getPlaceNeighborhoodBin(in);
-				if(null != bs) {
-					wordPNMap.put(in, new WordRadiusNeighborhood(qp.radius, bs));
+			for(i=0; i<sortQwords.length; i++) {
+				byte[] bs = null;
+				if(widHasDate.contains(sortQwords[i])) {
+					if(eDate == null)	signInDate[i] = Boolean.TRUE;
+					bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i]);
+					
+					/*********		test  *****************/
+//					if(null==bs)	MLog.log("PN-widHasDate: 0");
+//					else MLog.log("PN-widHasDate: " + bs.length);
+					
+					
+					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs));
+				} else {
+					if(eDate == null)	signInDate[i] = Boolean.FALSE;
+					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i]);
+					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs, Boolean.FALSE));
+					else	return null;	// 因为wIdPnNodateSer记录了所有不带有时间的关键词
+					
+					/*********		test  *****************/
+//					if(null==bs)	MLog.log("PN-widNoDate: 0");
+//					else MLog.log("PN-widNoDate: " + bs.length);
 				}
 			}
 		}
@@ -324,7 +365,7 @@ public class SPBest implements SPInterface{
 		IVisitor v = new KSPCandidateVisitor(k);
 		
 		KSPIndex kSPExecutor = new KSPIndex(rgi, rtreeNode2Pid, pid2RtreeLeafNode, cReach, searchedDatesWids, wid2DateNidPair, minMaxDateSer, 
-						w2pReachable, wordPNMap, maxDateSpans, signInRange, qp);
+						w2pReachable, wordPNMap, maxDateSpans, signInDate, qp, nidsInDate);
 		if(eDate == null)	kSPExecutor.kSPComputation(k, qp.radius, qpoint, sortQwords, searchIntDate, v);
 		else kSPExecutor.kSPComputation(k, qp.radius, matchNids, qpoint, sortQwords, searchIntDate, eIntDate, v);
 		
@@ -389,7 +430,7 @@ public class SPBest implements SPInterface{
 				bw.write(qp.rr.getHeader());
 			}
 			
-			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(Global.testOrgSampleNum) + ".t=" + String.valueOf(qp.searchType) + ".wn=10"));
+			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(Global.testOrgSampleNum) + ".wn=" + qp.numWid));
 			String lineStr = null;
 			while(samNum > 0) {
 				lineStr = br.readLine().trim();
@@ -408,8 +449,8 @@ public class SPBest implements SPInterface{
 					qwords.add(Integer.parseInt(strArr[i]));
 				}
 				
-				date = TimeUtility.getDate(strArr[strArr.length-2]);
-				eDate = TimeUtility.getDate(strArr[strArr.length-1]);
+				date = TimeUtility.getDate(strArr[strArr.length-1]);
+				eDate = date;
 				binIntDate = (TimeUtility.getIntDate(date) + TimeUtility.getIntDate(eDate))/2;
 				
 				if(qp.searchType==0) {
@@ -420,8 +461,8 @@ public class SPBest implements SPInterface{
 				}
 				
 				bw.write(qp.rr.getBspInfo(qp.curRecIndex, 1000000));
-				qp.rr = new RunRecord();
 				bw.flush();
+				qp.rr = new RunRecord();
 				
 				qp.curRecIndex++;
 				samNum--;

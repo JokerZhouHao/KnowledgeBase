@@ -13,9 +13,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import entity.sp.GraphByArray;
+import utility.FileMakeOrLoader;
 import utility.Global;
 import utility.IOUtility;
 import utility.LoopQueue;
+import utility.MLog;
 import utility.RandomNumGenerator;
 import utility.TimeUtility;
 
@@ -309,53 +311,12 @@ public class TestSampleChooser {
 		System.out.println("> 开始从原始文件中随机选取" + sampleNum + "个测试样本 . . . ");
 		
 		// 读取坐标信息
-		double[][] pidCoords = new double[Global.numPid][];
-		for(int i=0; i<pidCoords.length; i++) {
-			pidCoords[i] = new double[2];
-		}
 		String fp = Global.inputDirectoryPath + Global.pidCoordFile;
-		BufferedReader br = IOUtility.getBR(fp);
-		String line = br.readLine();
-		String[] strArr = null;
-		int i= 0;
-		while(null != (line = br.readLine())) {
-			strArr = line.split(Global.delimiterLevel1)[1].split(Global.delimiterSpace);
-			pidCoords[i][0] = Double.parseDouble(strArr[0]);
-			pidCoords[i][1] = Double.parseDouble(strArr[1]);
-			i++;
-		}
-		br.close();
+		double[][] pidCoords = FileMakeOrLoader.loadArrayCoord(fp);
 		
 		// 读取
-		Map<Integer, int[][]> nidDatesWids = new HashMap<>();
 		fp = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
-		br = IOUtility.getBR(fp);
-		int[][] tIntArr = null;
-		String[] dates = null;
-		String[] wids = null;
-		Integer nid;
-		br.readLine();
-		while(null != (line=br.readLine())) {
-			tIntArr = new int[2][];
-			
-			strArr = line.split(Global.delimiterLevel1);
-			nid = Integer.parseInt(strArr[0]);
-			
-			dates = strArr[1].split(Global.delimiterDate);
-			tIntArr[0] = new int[dates.length-1];
-			for(i=0; i<tIntArr[0].length; i++) {
-				tIntArr[0][i] = Integer.parseInt(dates[i]);
-			}
-			
-			wids = dates[dates.length-1].split(Global.delimiterLevel2);
-			tIntArr[1] = new int[wids.length];
-			for(i=0; i<tIntArr[1].length; i++) {
-				tIntArr[1][i] = Integer.parseInt(wids[i]);
-			}
-			
-			nidDatesWids.put(nid, tIntArr);
-		}
-		br.close();
+		Map<Integer, int[][]> nidDatesWids = FileMakeOrLoader.loadArrayNid2DatesWids(fp);
 		
 		// 加载图
 		if(null == graph) {
@@ -363,6 +324,9 @@ public class TestSampleChooser {
 			graph.loadGraph(Global.inputDirectoryPath + Global.edgeFile);
 		}
 		int[] edges = null;
+		
+		int[][] tIntArr = null;
+		Integer nid, i;
 		
 		// 开始生成样本文件
 		BufferedWriter bw = IOUtility.getBW(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(sampleNum) + ".t=1.wn=" + String.valueOf(wNum));
@@ -462,19 +426,175 @@ public class TestSampleChooser {
 	
 	
 	
+	/**
+	 * 0.8概率取有时间的，0.2概率取无时间的
+	 * @return
+	 */
+	public static Boolean isDate() {
+		if(RandomNumGenerator.getRandomFloat() <= 0.8)	return Boolean.TRUE;
+		else return Boolean.FALSE;
+	}
+	
+	/**
+	 * 使用论文上的方法产生测试样本
+	 * @param sampleNum
+	 * @param wNum
+	 * @throws Exception
+	 */
+	public static void productTestSampleByPaper(int sampleNum, int wNum) throws Exception {
+		String pathSample = Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(sampleNum) + ".wn=" + String.valueOf(wNum);
+		MLog.log("开始生成测试文件 " + pathSample + " . . . ");
+		
+		// 读取坐标信息
+		String fp = Global.inputDirectoryPath + Global.pidCoordFile;
+		double[][] pidCoords = FileMakeOrLoader.loadArrayCoord(fp);
+		// 读取
+		fp = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		Map<Integer, int[][]> nidDatesWids = FileMakeOrLoader.loadArrayNid2DatesWids(fp);
+		
+		// 加载图
+		if(null == graph) {
+			graph = new GraphByArray(Global.numNodes);
+			graph.loadGraph(Global.inputDirectoryPath + Global.edgeFile);
+		}
+		int[] edges = null;
+		
+		int[][] tIntArr = null;
+		Integer nid;
+		
+		// 开始生成样本文件
+		BufferedWriter bw = IOUtility.getBW(pathSample);
+		double[] sampCoords = new double[2];
+		
+		Integer pid;
+		
+		LoopQueue<Integer> queue = new LoopQueue<>(100000);
+		HashSet<Integer> recBfs = new HashSet<Integer>();
+		Set<Integer> recPids = new HashSet<>();
+		
+		// pid随机随机产生器
+		RandomNumGenerator pidGe = new RandomNumGenerator(0, Global.numPid);
+		
+		MLog.log("数据加载完成");
+		
+		int index = 1;
+		
+		// 开始生成测试样本
+		while(index <= sampleNum) {
+			// 生成坐标
+			while(true) {
+				pid = pidGe.getRandomInt();
+				if(!recPids.contains(pid)) {
+					while(true) {
+						sampCoords[0] = pidCoords[pid][0] + RandomNumGenerator.getRandomFloat();
+						sampCoords[1] = pidCoords[pid][1] + RandomNumGenerator.getRandomFloat();
+						if (sampCoords[0] >= -90 && sampCoords[0] <= 90 && sampCoords[1] >= -180 && sampCoords[1] <= 180)
+							break;
+					}
+					recPids.add(pid);
+					break;
+				}
+			}
+			
+			// 取[n/2, n*2]
+			int numBfsNode = RandomNumGenerator.getRandomInt(wNum/2 > 0 ? wNum/2 : 1, wNum * 2);
+			List<Integer> bfsNode = new ArrayList<>();
+			nid = pid;
+			queue.reset();
+			queue.push(nid);
+			recBfs.clear();
+			recBfs.add(nid);
+			while(null != (nid = queue.poll())) {
+				if(null != (edges = graph.getEdge(nid))) {
+					for(int e : edges) {
+						if(!recBfs.contains(e)) {
+							if(!queue.push(e)) {
+								MLog.log("队列" + queue.size() + "太短");
+								System.exit(0);
+							}
+							recBfs.add(e);
+						}
+					}
+				}
+				
+				bfsNode.add(nid);
+				if((--numBfsNode) == 0)	break;
+			}
+			if(numBfsNode != 0)	continue;
+			
+			// 取其中随机个[1, n]个node
+			int numRandomNode = RandomNumGenerator.getRandomInt(1, wNum);
+			Set<Integer> randomNids = new HashSet<>();
+			RandomNumGenerator g = new RandomNumGenerator(0, bfsNode.size() - 1);
+			while(numRandomNode-- > 0) {
+				randomNids.add(bfsNode.get(g.getRandomInt()));
+			}
+			
+			// 提取时间、词
+			List<Integer> dates = new ArrayList<>();
+			List<Integer> widsHasDate = new ArrayList<>();
+			List<Integer> widsNoDate = new ArrayList<>();
+			for(int nd : randomNids) {
+				tIntArr = nidDatesWids.get(nd);
+				if(tIntArr != null) {
+					if(tIntArr[0][0] != Global.TIME_INAVAILABLE) {
+						dates.add(tIntArr[0][0]);
+						for(int nd1 : tIntArr[1])	widsHasDate.add(nd1);
+					} else {
+						for(int nd1 : tIntArr[1])	widsNoDate.add(nd1);
+					}
+				}
+			}
+			
+			// 选取样本
+			if(dates.isEmpty() || widsHasDate.size() < wNum || widsNoDate.size() < wNum)	continue;
+			int samDate = 0;
+			List<Integer> samWids = new ArrayList<>();
+			int numWid = wNum;
+			samDate = dates.get(RandomNumGenerator.getRandomInt(0, dates.size() - 1));
+			while(numWid-- > 0) {
+				int ii = 0;
+				if(isDate()) {
+					ii = RandomNumGenerator.getRandomInt(0, widsHasDate.size() - 1);
+					samWids.add(widsHasDate.get(ii));
+					widsHasDate.remove(ii);
+				} else {
+					ii = RandomNumGenerator.getRandomInt(0, widsNoDate.size() - 1);
+					samWids.add(widsNoDate.get(ii));
+					widsNoDate.remove(ii);
+				}
+			}
+			
+			// 写样本
+			String line = index + Global.delimiterLevel1;
+			for(double d : sampCoords)	line += d + Global.delimiterSpace;
+			for(int ii : samWids)	line += ii + Global.delimiterSpace;
+			line += TimeUtility.getDateByIntDate(samDate);
+			bw.write(line + "\n");
+			
+//			MLog.log("已生成" + index + " : " + line + " 个样本");
+			index++;
+		}
+		
+		bw.close();
+		MLog.log("productTestSampleByBfsForPaper: <" + fp + "> over");
+	}
+	
+	
 	public static void main(String[] args) throws Exception{
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
 //				Global.inputDirectoryPath + Global.testSampleFile);
 		int a[] = new int[1];
-		a[0] = 10;
+		a[0] = 3;
 //		a[1] = 3;
 //		a[2] = 5;
 //		a[3] = 8;
 //		a[4] = 10;
 		for(int ii : a) {
-			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
+//			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
 //			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
+			TestSampleChooser.productTestSampleByPaper(500, ii);
 		}
 	}
 }

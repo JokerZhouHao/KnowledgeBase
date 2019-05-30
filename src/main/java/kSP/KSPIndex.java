@@ -33,6 +33,7 @@ import spatialindex.spatialindex.INearestNeighborComparator;
 import spatialindex.spatialindex.IShape;
 import spatialindex.spatialindex.IVisitor;
 import utility.Global;
+import utility.MLog;
 import utility.TimeUtility;
 
 /**
@@ -53,9 +54,10 @@ public class KSPIndex {
 	private HashMap<Integer, int[][]> recMinDateSpanMap = new HashMap<>();
 	private HashMap<Integer, int[]> recMinPid2WidDis = new HashMap<>();
 	private int[] maxDateSpans;
-	private boolean[] signInRange = null;
+	private boolean[] signInDate = null;
 	
 	private QueryParams qp = null;
+	private List<Integer>[] nidsInDate = null;
 	
 	// 记录pid到wid的最小路径距离
 	private int[] pid2WidPathDis = {-1, -1};
@@ -63,7 +65,7 @@ public class KSPIndex {
 	public KSPIndex(RTreeWithGI rgi, Set<Integer>[] rtreeNode2Pid, int[] pid2RtreeLeafNode, CReach cReach,
 			DatesWIds searchedDatesWids[], SortedDateWidIndex[] wid2DateNidPair, MinMaxDateService minMaxDateSer,
 			Map<Integer, Short>[] w2pReachable, HashMap<Integer, WordRadiusNeighborhood> wordPNMap,
-			int[] maxDateSpans, boolean[] signInRange, QueryParams qp) {
+			int[] maxDateSpans, boolean[] signInDate, QueryParams qp, List<Integer>[] nidsInDate) {
 		super();
 		this.rgi = rgi;
 		this.rtreeNode2Pid = rtreeNode2Pid;
@@ -75,8 +77,9 @@ public class KSPIndex {
 		this.w2pReachable = w2pReachable;
  		this.wordPNMap = wordPNMap;
  		this.maxDateSpans = maxDateSpans;
- 		this.signInRange = signInRange;
+ 		this.signInDate = signInDate;
  		this.qp = qp;
+ 		this.nidsInDate = nidsInDate;
 	}
 
 	public void kSPComputation(int k, int alphaRadius, final IShape qpoint, int[] sortQwords, int date,
@@ -318,7 +321,7 @@ public class KSPIndex {
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
 							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), 
-							recMinPid2WidDis.get(nid), semanticTree, qp);
+							recMinPid2WidDis.get(nid), semanticTree, qp, signInDate);
 					
 					if(Global.isTest) {
 						qp.rr.timeCptGetSemanticTree += qp.rr.getTimeSpan();
@@ -546,6 +549,7 @@ public class KSPIndex {
 						}
 						
 						double alphaRankingScoreBound = minSpatialDist * alphaLoosenessBound;
+						
 						if (alphaRankingScoreBound > kthScore) {
 							if(n.m_level == 0) {
 								qp.rr.numCptBoundPidPrune++;
@@ -607,7 +611,8 @@ public class KSPIndex {
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
 					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
-							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, semanticTree, signInRange, qp);
+							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, 
+							semanticTree, signInDate, qp, nidsInDate, cReach);
 					
 					if(Global.isTest) {
 						qp.rr.timeCptGetSemanticTree += qp.rr.getTimeSpan();
@@ -737,8 +742,8 @@ public class KSPIndex {
 		
 		HashSet<Integer> rec = new HashSet<>();
 		for(i=0; i<sortQwords.length; i++) {
-			if(widMinDateSpans[i][0]>=qp.maxDateSpan)	continue;
-			wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, widMinDateSpans[i][0], widMinDateSpans[i], maxDateSpans[i], qp);
+			if(signInDate[i])	wid2DateNidPair[i].getMinDateSpan(rec, date, id, cReach, widMinDateSpans[i][0], widMinDateSpans[i], maxDateSpans[i], qp);
+			else widMinDateSpans[i][0] = qp.DEFAULT_DATE_SPAN;
 		}
 		rec.clear();
 		return widMinDateSpans;
@@ -761,7 +766,8 @@ public class KSPIndex {
 		}
 		
 		for(i=0; i<sortQwords.length; i++) {
-			wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date, widMinDateSpans[i], maxDateSpans[i], qp);
+			if(signInDate[i])	wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date, widMinDateSpans[i], maxDateSpans[i], qp);
+			else widMinDateSpans[i][0] = qp.DEFAULT_DATE_SPAN;
 		}
 		
 //		for(i=0; i<sortQwords.length; i++) {
@@ -792,15 +798,23 @@ public class KSPIndex {
 		double tempd1 = 0;
 		double tempd2 = 0;
 		for(int i=0; i<sortQwords.length; i++) {
-			if(this.pid2WidPathDis[i] != -1) {
-				alphaLoosenessBound += this.pid2WidPathDis[i] * widMinDateSpans[i][0];
-			} else if (null == wordPNMap.get(sortQwords[i])) {
-				alphaLoosenessBound += widMinDateSpans[i][0];
+			if (null == wordPNMap.get(sortQwords[i])) {
+				if(this.pid2WidPathDis[i] != -1) 
+					alphaLoosenessBound += this.pid2WidPathDis[i] * widMinDateSpans[i][0];
+				else alphaLoosenessBound += 1 * widMinDateSpans[i][0];
 			} else {
-				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
-				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
-				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
+				alphaLoosenessBound = wordPNMap.get(sortQwords[i]).getLooseness(id, date, 
+						this.pid2WidPathDis[i], widMinDateSpans[i][0], signInDate[i]);
 			}
+//			if(this.pid2WidPathDis[i] != -1) {
+//				alphaLoosenessBound += this.pid2WidPathDis[i] * widMinDateSpans[i][0];
+//			} else if (null == wordPNMap.get(sortQwords[i])) {
+//				alphaLoosenessBound += widMinDateSpans[i][0];
+//			} else {
+//				tempd1 = (alphaRadius + 2) *  widMinDateSpans[i][0];
+//				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
+//				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
+//			}
 		}
 		return alphaLoosenessBound;
 	}
@@ -818,14 +832,18 @@ public class KSPIndex {
 	 */
 	public double getAlphaLoosenessBound(int id, int alphaRadius, int[] sortQwords, int sDate, int eDate) throws IOException {
 		double alphaLoosenessBound = 0;
+		double dis = 0;
 		for(int i=0; i<sortQwords.length; i++) {
+			dis = 0;
 			if(this.pid2WidPathDis[i] != -1) {
-				alphaLoosenessBound += this.pid2WidPathDis[i] * Global.WEIGHT_REV_PATH;
+				dis = this.pid2WidPathDis[i];
 			} else if(null == wordPNMap.get(sortQwords[i])) {
-				alphaLoosenessBound += 1 * Global.WEIGHT_REV_PATH;
+				dis = 1;
 			} else {
-				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate);
+				return wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate, signInDate[i]);
 			}
+			if(signInDate[i])	alphaLoosenessBound += dis * Global.WEIGHT_REV_PATH;
+			else alphaLoosenessBound += dis * Global.WEIGHT_PATH;
 		}
 		return alphaLoosenessBound;
 	}
