@@ -29,13 +29,16 @@ import entity.sp.RunRecord;
  */
 public class YagoGlobal {
 	
+	public final static int TIME_INAVAILABLE = Integer.MAX_VALUE; 
+	
+	public final static int MAX_BFS_LEVEL = 10;
+	
 	public static int defaultMaxDateSpan = 1000;
 	
 	// 用于DBpedia创建wid2pid索引
 	public static GraphWithWids graphWithWids = null;
 	
 	// optimization method
-	public static OptMethod optMethod = OptMethod.O1;
 	public static String INFINITE_PN_LENGTH_STR = "2147483631";
 	
 	public static final double WEIGHT_PATH = 0.8;
@@ -54,8 +57,6 @@ public class YagoGlobal {
 	//The statistic for runtime
 	public static long[] runtime = new long[10];
 	
-	// radius
-	public static int radius = 1;
 	
 	/* the maximum runtime threshold for the queries */
 	public static long runtimeThreshold = -1;
@@ -124,8 +125,8 @@ public class YagoGlobal {
 //	public static String dateSetType = "DBpedia" + File.separator;
 	
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
-//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
@@ -146,11 +147,21 @@ public class YagoGlobal {
 	public static String minMaxDatesFile = "minMaxDates.bin";
 	public static String wordFrequencyFile = "wordFrequency.txt";
 	
+	/*	与查询相关的一些参数		*/
+	public static int testOrgSampleNum = 500;
+	public static int testSampleNum = testOrgSampleNum;
+	public static int radius = 1;
+	public static int testK = 10;
+	public static int maxDateSpan = 1000;
+	public static int DATE_RANGE = 7;
+	public static OptMethod optMethod = OptMethod.O5;
+	public static RunRecord rr = new RunRecord();
+	public static int curRecIndex = 0;
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "testIndex" + File.separator;
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
-//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_4000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_6000000" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;
@@ -158,6 +169,9 @@ public class YagoGlobal {
 	public static String DAGFile = Global.dagFile + Global.sccFlag + Global.keywordFlag + Global.edgeFile;
 	public static String placeWNFile = Global.outputDirectoryPath + "placeWN" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 	public static String wordPNFile = Global.outputDirectoryPath + "wordPN"+ Global.rtreeFlag
+			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String placeWNNodateFile = Global.outputDirectoryPath + "placeWNNodate" + Global.rtreeFlag + Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
+	public static String wordPNNodateFile = Global.outputDirectoryPath + "wordPNNodate"+ Global.rtreeFlag
 			+ Global.rtreeFanout + "." + Global.radius + Global.dataVersion;
 	public static String alphaIindexFile = null;
 	public static int alphaIindexRTNodeBufferSize = -1;
@@ -176,6 +190,7 @@ public class YagoGlobal {
 	public static String indexTFLabel = "tf_label" + File.separator;
 //	public static String indexWidPN = "wid_pn_" + String.valueOf(Global.radius) + File.separator;
 	public static String indexWidPN = "wid_pn";
+	public static String indexWidPNNodate = "wid_pn_nodate";
 	public static String indexRTree = Global.outputDirectoryPath + Global.rTreePath + Global.pidCoordFile + Global.rtreeFlag + Global.rtreeFanout + Global.dataVersion;
 	public static int MAX_WORD_FREQUENCY = 1000;
 	public static String indexWid2Pid = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(Global.MAX_WORD_FREQUENCY) + File.separator;
@@ -202,14 +217,10 @@ public class YagoGlobal {
 	
 	public static Boolean isTest = Boolean.TRUE;
 	public static Boolean isOutputTestInfo = Boolean.FALSE;
-	public static int testK = 10;
-	public static int testOrgSampleNum = 500;
-	public static int testSampleNum = testOrgSampleNum;
 	
 	public static String testSampleFile =  "sample" + File.separator + "testSample";
 	public static String testSampleResultFile =  "sample_result" + File.separator + "testSampleResultFile";
 	
-	public static int curRecIndex = 0;
 	public static boolean isFirstReadPn = false;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/10;
 //	public static int MAX_STORED_STRING_LENGTH = IndexWriter.MAX_STORED_STRING_LENGTH/50;
@@ -221,16 +232,13 @@ public class YagoGlobal {
 	public static HashMap<Integer, Integer> minDateSpan = null;
 	public static BufferedWriter recReachBW = null;
 	public static String fileReachGZip = Global.outputDirectoryPath + "recP2PReachable.gz";
-	public static RunRecord rr = new RunRecord();
 	
 	public static int leftMaxIndexSpan = 50;
 	public static int rightMaxIndexSpan = 50;
-	public static int maxDateSpan = 1000;
 	
 	public static Boolean isTestRangeDate = Boolean.FALSE;
 	
 	public static Map<Integer, Integer> wordFrequency = null;
-	public static int DATE_RANGE = 7;	
 //	public static int[] WORD_FREQUENCYS = {0, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 1000000};
 	public static int[] WORD_FREQUENCYS = null;
 	public static String recordPid2WidSizePath = "recordPid2WidSize.txt";

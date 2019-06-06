@@ -201,21 +201,20 @@ public class WordRadiusNeighborhood {
 		double dis = Double.MAX_VALUE;
 		for(i=0; i < radius + 1; i++) {
 			if(null != eachLayerWN[i] && null != (dates=eachLayerWN[i].get(pid))) {
-				if(dates.get(0) >= sDate && dates.get(0) <= eDate)	return (i+1) * Global.WEIGHT_REV_PATH;
-				else dis = dis <= (i+1) * Global.WEIGHT_PATH ? dis : (i+1) * Global.WEIGHT_PATH;
-				if(!inDate)	return dis;
-//				if(dates.get(dates.size()-1)<sDate || dates.get(0)>eDate) {
-//					temp = temp <= (i+1) * Global.WEIGHT_PATH ? temp : (i+1) * Global.WEIGHT_PATH;
-//				} else temp = temp <= (i + 1) * Global.WEIGHT_REV_PATH ? temp : (i + 1) * Global.WEIGHT_REV_PATH;
+//				if(dates.get(0) >= sDate && dates.get(0) <= eDate)	return (i+1) * Global.WEIGHT_REV_PATH;
+//				else dis = dis <= (i+1) * Global.WEIGHT_PATH ? dis : (i+1) * Global.WEIGHT_PATH;
+//				if(!inDate)	return dis;
+				return i+1;
 			}
 		}
-		if(dis != Double.MAX_VALUE) {
-			return dis <= (i+1) * Global.WEIGHT_REV_PATH ? dis : (i+1) * Global.WEIGHT_REV_PATH;
-		}
-		else {
-			if(inDate)	return (i+1) * Global.WEIGHT_REV_PATH;
-			else return (i+1) * Global.WEIGHT_PATH; 
-		}
+//		if(dis != Double.MAX_VALUE) {
+//			return dis <= (i+1) * Global.WEIGHT_REV_PATH ? dis : (i+1) * Global.WEIGHT_REV_PATH;
+//		}
+//		else {
+//			if(inDate)	return (i+1) * Global.WEIGHT_REV_PATH;
+//			else return (i+1) * Global.WEIGHT_PATH; 
+//		}
+		return i+1;
 	}
 	
 	/**

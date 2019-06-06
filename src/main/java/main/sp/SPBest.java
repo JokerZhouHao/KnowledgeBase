@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.zip.GZIPOutputStream;
 
+import entity.OptMethod;
 import entity.sp.DateNidNode;
 import entity.sp.DatesWIds;
 import entity.sp.GraphByArray;
@@ -156,8 +157,8 @@ public class SPBest implements SPInterface{
 		wid2DateNidPairIndex = new Wid2DateNidPairIndex(Global.indexWid2DateNid);
 		wid2DateNidPairIndex.openIndexReader();
 		
-		Global.indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(qp.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
-		w2pReachSer = new W2PReachService(Global.indexWid2PidBase);
+		String indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(qp.MAX_WORD_FREQUENCY) + File.separator + "wids_block_";
+		w2pReachSer = new W2PReachService(indexWid2PidBase);
 		w2pReachSer.openIndexs();
 	}
 	
@@ -183,7 +184,6 @@ public class SPBest implements SPInterface{
 	public KSPCandidateVisitor bsp(int k, double[] pCoords, ArrayList<Integer> qwords, Date searchDate, Date eDate) throws Exception {
 		
 		if(Global.isTest) {
-			qp.rr.timeBspStart = System.nanoTime();
 			qp.rr.setFrontTime();
 		}
 		
@@ -277,16 +277,6 @@ public class SPBest implements SPInterface{
 			qp.rr.setFrontTime();
 		}
 		
-		
-		
-		
-		/*********		test  *****************/
-//		String tStr = "";
-//		for(Boolean b : signInDate)	tStr += b.toString() + " ";
-//		MLog.log(tStr);
-		
-		
-		
 		// 判断是否至少有一个词在时间范围内
 		List<Integer> matchNids = null;
 		if(eDate != null) {
@@ -309,19 +299,24 @@ public class SPBest implements SPInterface{
 		// 获得W2PReachable
 		if(Global.isTest)	qp.rr.setFrontTime();
 		Map<Integer, Short>[] w2pReachable = new Map[sortQwords.length];
-		for(i=0; i<sortQwords.length; i++) {
-			if(Global.wordFrequency.get(sortQwords[i]) >= qp.MAX_WORD_FREQUENCY) {
-				w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);
-				// 所有pid都不能到达该wid
-				if(null == w2pReachable[i]) {
-					MLog.log(sortQwords[i] + "'s w2pReachable is null");
-					return null;
+		if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4 || qp.optMethod == OptMethod.O2) {
+			for(i=0; i<sortQwords.length; i++) {
+				if(Global.wordFrequency.get(sortQwords[i]) >= qp.MAX_WORD_FREQUENCY) {
+					w2pReachable[i] = w2pReachSer.getPids(sortQwords[i]);
+					// 所有pid都不能到达该wid
+					if(null == w2pReachable[i]) {
+						MLog.log(sortQwords[i] + "'s w2pReachable is null");
+						return null;
+					}
 				}
 			}
 		}
 		if(Global.isTest) {
 			qp.rr.timeBspGetW2PReach = qp.rr.getTimeSpan();
 			qp.rr.setFrontTime();
+			if(qp.optMethod == OptMethod.O4) {
+				qp.rr.timeBspStart += qp.rr.timeBspGetW2PReach;
+			}
 		}
 		
 		// 获得word 的  place neighborhood
@@ -330,24 +325,16 @@ public class SPBest implements SPInterface{
 			for(i=0; i<sortQwords.length; i++) {
 				byte[] bs = null;
 				if(widHasDate.contains(sortQwords[i])) {
-					if(eDate == null)	signInDate[i] = Boolean.TRUE;
-					bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i]);
-					
-					/*********		test  *****************/
-//					if(null==bs)	MLog.log("PN-widHasDate: 0");
-//					else MLog.log("PN-widHasDate: " + bs.length);
-					
-					
+					if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O3) {
+						bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i]);
+					} else {
+						bs = wIdPnInfSer.getPlaceNeighborhoodBin(sortQwords[i]);
+					}
 					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs));
 				} else {
-					if(eDate == null)	signInDate[i] = Boolean.FALSE;
 					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i]);
 					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs, Boolean.FALSE));
 					else	return null;	// 因为wIdPnNodateSer记录了所有不带有时间的关键词
-					
-					/*********		test  *****************/
-//					if(null==bs)	MLog.log("PN-widNoDate: 0");
-//					else MLog.log("PN-widNoDate: " + bs.length);
 				}
 			}
 		}
@@ -380,8 +367,6 @@ public class SPBest implements SPInterface{
 		
 		if(Global.isTest) {
 			qp.rr.timeBspClearJob = qp.rr.getTimeSpan();
-			qp.rr.setTimeBsp();
-//			if(Global.isOutputTestInfo)	System.out.println("> 已处理" + (Global.curRecIndex) + "个sample");
 		}
 		
 		return (KSPCandidateVisitor)v;
@@ -442,10 +427,10 @@ public class SPBest implements SPInterface{
 				
 				qwords.clear();
 				for(int i=2; i<2 + qp.numWid; i++) {
-					if(qp.numWid==1) {
-						qwords.add(Integer.parseInt(strArr[i+5]));	// 避免第一个关键词为一些频繁单无意义的词，例如I,the等
-						break;
-					}
+//					if(qp.numWid==1) {
+//						qwords.add(Integer.parseInt(strArr[i+5]));	// 避免第一个关键词为一些频繁单无意义的词，例如I,the等
+//						break;
+//					}
 					qwords.add(Integer.parseInt(strArr[i]));
 				}
 				
@@ -453,11 +438,21 @@ public class SPBest implements SPInterface{
 				eDate = date;
 				binIntDate = (TimeUtility.getIntDate(date) + TimeUtility.getIntDate(eDate))/2;
 				
+				// 设置起始时间
+				if(Global.isTest) {
+					qp.rr.timeBspStart = System.nanoTime();
+				}
+				
 				if(qp.searchType==0) {
 					date = TimeUtility.getDate(TimeUtility.getDateByIntDate(binIntDate));
 					bsp(qp.testK, pcoords, qwords, date, null);
 				} else {
 					bsp(qp.testK, pcoords, qwords, date, date);
+				}
+				
+				// 设置结束时间
+				if(Global.isTest) {
+					qp.rr.setTimeBsp();
 				}
 				
 				bw.write(qp.rr.getBspInfo(qp.curRecIndex, 1000000));

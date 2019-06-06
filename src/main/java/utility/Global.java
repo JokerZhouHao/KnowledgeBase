@@ -125,8 +125,8 @@ public class Global {
 //	public static String dateSetType = "DBpedia" + File.separator;
 	
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
-//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
@@ -154,14 +154,14 @@ public class Global {
 	public static int testK = 10;
 	public static int maxDateSpan = 1000;
 	public static int DATE_RANGE = 7;
-	public static OptMethod optMethod = OptMethod.O1;
+	public static OptMethod optMethod = OptMethod.O5;
 	public static RunRecord rr = new RunRecord();
 	public static int curRecIndex = 0;
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "testIndex" + File.separator;
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
-//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_4000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_6000000" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;

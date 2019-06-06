@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import entity.sp.QueryParams;
+import entity.sp.reach.W2PIndex;
 import precomputation.sample.TestInputDataBuilder;
 import utility.Global;
 import utility.MLog;
@@ -50,6 +51,7 @@ public class AlgTest {
 		
 		ArrayBlockingQueue<QueryParams> queue = new ArrayBlockingQueue<>(numThread);
 		SPInterface sps[] = null;
+		List<Integer> tempL = W2PIndex.allWids;
 		if(args[0].equals("SPBest")) {
 			sps = new SPBest[numThread];
 			for(int i=0; i<numThread; i++)	sps[i] = new SPBest(queue);

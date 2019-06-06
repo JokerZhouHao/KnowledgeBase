@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -22,9 +23,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import entity.OptMethod;
+import entity.sp.reach.W2PReachService;
 import utility.Global;
 import utility.IOUtility;
 import utility.LoopQueue;
+import utility.MLog;
 import utility.RandomNumGenerator;
 import utility.TimeUtility;
 
@@ -39,6 +42,19 @@ public class ATest {
 	
 	public static void main(String[] args) throws Exception{
 		
+//		10561570's w2pReachable is null
+//		11381939's w2pReachable is null
+		Global.indexWid2PidBase = Global.outputDirectoryPath + "wid_2_pid_reachable_pidDis_fre=" + String.valueOf(100000) + File.separator + "wids_block_";
+		W2PReachService w2pReachSer = new W2PReachService(Global.indexWid2PidBase);
+		w2pReachSer.openIndexs();
+		Map<Integer, Short> w2pReachable = null;
+		int wid = 10561570;
+		w2pReachable = w2pReachSer.getPids(wid);
+		if(w2pReachable == null) MLog.log("wid " + wid + " is null");
+		wid = 11381939;
+		w2pReachable = w2pReachSer.getPids(wid);
+		if(w2pReachable == null) MLog.log("wid " + wid + " is null");
+		w2pReachSer.closeIndexs();
 		
 //		int a[][] = new int[1][3];
 //		set(a[0]);

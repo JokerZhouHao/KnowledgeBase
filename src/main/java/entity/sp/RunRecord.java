@@ -104,6 +104,8 @@ public class RunRecord {
 	
 	public long timeBspGetW2PReach = 0;
 	
+	public long timeP2PInSemanticTree = 0;
+	
 	public String getHeader() {
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,timeBspGetW2PReach,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
@@ -119,7 +121,7 @@ public class RunRecord {
 				+ "numGetSemanticTree,timeCptGetSemanticTree,"
 				+ "numCptGetMinDateSpanLeftSpan,numCptGetMinDateSpanRightSpan,"
 				+ "timeKSPComputation,timeBsp,"
-				+ "queueLastValue,kthScore,resultSize,\n";
+				+ "queueLastValue,kthScore,resultSize,timeP2PInSemanticTree,\n";
 	}
 	
 	public String getBspInfo(int id, long base) {
@@ -137,6 +139,7 @@ public class RunRecord {
 				String.valueOf(numGetSemanticTree) + "," + String.valueOf(timeCptGetSemanticTree/base) + "," +
 				String.valueOf(numCptGetMinDateSpanLeftSpan) + "," + String.valueOf(numCptGetMinDateSpanRightSpan) + "," + 
 				String.valueOf(timeKSPComputation/base) + "," + String.valueOf(timeBsp/base) + "," +
-				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore) + "," + String.valueOf(resultSize) + ",\n";
+				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore) + "," + String.valueOf(resultSize) + "," + 
+				String.valueOf(timeP2PInSemanticTree/base) + ",\n";
 	}
 }

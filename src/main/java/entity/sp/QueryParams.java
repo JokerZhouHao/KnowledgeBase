@@ -21,7 +21,7 @@ public class QueryParams {
 	public int maxDateSpan = 1000;
 	public int MAX_WORD_FREQUENCY = 1000;
 	public int DATE_RANGE = 7;
-	public OptMethod optMethod = null;
+	public OptMethod optMethod = OptMethod.O5;
 	public RunRecord rr = new RunRecord();
 	public int curRecIndex = 1;	
 	

@@ -330,7 +330,7 @@ public class W2PIndex {
 			if(null!=st)	st.clear();
 		}
 		W2PReachWriter.buildingWPReach();
-//		P2WRTreeReach.deleteAllFiles();
+		P2WRTreeReach.deleteAllFiles();
 		
 		for(int fre : fres) {
 			Global.MAX_WORD_FREQUENCY = fre;

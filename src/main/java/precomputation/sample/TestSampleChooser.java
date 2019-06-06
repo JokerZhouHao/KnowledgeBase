@@ -497,7 +497,7 @@ public class TestSampleChooser {
 			}
 			
 			// 取[n/2, n*2]
-			int numBfsNode = RandomNumGenerator.getRandomInt(wNum/2 > 0 ? wNum/2 : 1, wNum * 2);
+			int numBfsNode = RandomNumGenerator.getRandomInt(wNum/2 > 0 ? wNum/2 : 1, wNum * 2 > 3 ? wNum * 2 : 3);
 			List<Integer> bfsNode = new ArrayList<>();
 			nid = pid;
 			queue.reset();
@@ -523,7 +523,7 @@ public class TestSampleChooser {
 			if(numBfsNode != 0)	continue;
 			
 			// 取其中随机个[1, n]个node
-			int numRandomNode = RandomNumGenerator.getRandomInt(1, wNum);
+			int numRandomNode = RandomNumGenerator.getRandomInt(1, wNum >= 3 ? wNum : 3);
 			Set<Integer> randomNids = new HashSet<>();
 			RandomNumGenerator g = new RandomNumGenerator(0, bfsNode.size() - 1);
 			while(numRandomNode-- > 0) {
@@ -585,12 +585,8 @@ public class TestSampleChooser {
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
 //				Global.inputDirectoryPath + Global.testSampleFile);
-		int a[] = new int[1];
-		a[0] = 3;
-//		a[1] = 3;
-//		a[2] = 5;
-//		a[3] = 8;
-//		a[4] = 10;
+//		int a[] = {1, 5, 8, 10, 15, 20};
+		int a[] = {2, 4};
 		for(int ii : a) {
 //			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
 //			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);

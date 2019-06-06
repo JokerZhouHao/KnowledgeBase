@@ -121,7 +121,7 @@ public class GraphByArray {
 			}
 			
 		}
-		// this.reset();
+//		 this.reset();
 		return radiusWN;
 	}
 
@@ -658,6 +658,7 @@ public class GraphByArray {
 						if(null == nidsInDate[i]) {
 							looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_PATH;
 						} else {
+							long startTime = System.currentTimeMillis();
 							Boolean isReacContainDate = Boolean.FALSE;
 							for(Integer nid : nidsInDate[i]) {
 								if(cReach.queryReachable(source, nid)) {
@@ -665,6 +666,8 @@ public class GraphByArray {
 									break;
 								}
 							}
+							qp.rr.timeP2PInSemanticTree += System.currentTimeMillis() - startTime;
+							
 							if(isReacContainDate)	looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_REV_PATH;
 							else looseness += Global.MAX_BFS_LEVEL * Global.WEIGHT_PATH;
 						}
@@ -677,6 +680,8 @@ public class GraphByArray {
 					}
 				}
 			}
+			
+			semanticTree.add(this.getPath(source, recKeyVectices[i]));
 		}
 		
 		if(looseness <= loosenessThreshold)	return looseness;

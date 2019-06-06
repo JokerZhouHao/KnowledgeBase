@@ -14,6 +14,7 @@ import java.util.Set;
 
 import entity.sp.WordRadiusNeighborhood;
 import entity.sp.reach.CReach;
+import entity.OptMethod;
 import entity.sp.DatesWIds;
 import entity.sp.NNEntryMapHeap;
 import entity.sp.QueryParams;
@@ -163,7 +164,11 @@ public class KSPIndex {
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
 							}
-							this.placeReachablePrune(nid, sortQwords);
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2) {
+								this.placeReachablePrune(nid, sortQwords);
+							} else {
+								this.placeReachablePruneOld(nid, sortQwords);
+							}
 							if (1==this.pid2WidPathDis[sortQwords.length]) {
 								if(Global.isTest) {
 									qp.rr.timeCptPid2Wids += qp.rr.getTimeSpan();
@@ -186,7 +191,10 @@ public class KSPIndex {
 								qp.rr.setFrontTime();
 							}
 							
-							minDateSpans = this.getPidWidMinDateSpan(nid, sortQwords, date);
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O1)
+								minDateSpans = this.getPidWidMinDateSpan(nid, sortQwords, date);
+							else
+								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(Global.isTest) {
 								qp.rr.timeCptPidGetMinDateSpan += qp.rr.getTimeSpan();
@@ -198,29 +206,44 @@ public class KSPIndex {
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
 							}
-							this.placeReachablePrune(-nid-1, sortQwords);
-							if (1==this.pid2WidPathDis[sortQwords.length]) {
-								if(Global.isTest) {
-									qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
-									qp.rr.numCptPruneRTree2Wids++;
-									qp.rr.setFrontTime();
+							
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
+								this.placeReachablePrune(-nid-1, sortQwords);
+								if (1==this.pid2WidPathDis[sortQwords.length]) {
+									if(Global.isTest) {
+										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
+										qp.rr.numCptPruneRTree2Wids++;
+										qp.rr.setFrontTime();
+									}
+									continue;
 								}
-								continue;
+							} else {
+								this.pid2WidPathDis[sortQwords.length] = 0;
+								for(int i=0; i<sortQwords.length; i++) {
+									this.pid2WidPathDis[i] = -1;
+								}
 							}
+							
 							if(Global.isTest) {
 								qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
 								qp.rr.setFrontTime();
 							}
 							
-							if(null==rtreeNode2Pid[nid]) {
-								if(Global.isTest) {
-									qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
-									qp.rr.numCptPruneRTree2Wids++;
-									qp.rr.setFrontTime();
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
+								if(null==rtreeNode2Pid[nid]) {
+									if(Global.isTest) {
+										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
+										qp.rr.numCptPruneRTree2Wids++;
+										qp.rr.setFrontTime();
+									}
+									continue;
 								}
-								continue;
 							}
-							minDateSpans = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+							
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O1)
+								minDateSpans = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+							else
+								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
 							if(null == minDateSpans) {
 								if(Global.isTest) {
@@ -250,13 +273,17 @@ public class KSPIndex {
 						
 						if(n.m_level==0) {	// pid
 							recMinDateSpanMap.put(nid, minDateSpans);
-							int[] dis = new int[this.pid2WidPathDis.length];
-							for(int s=0; s<this.pid2WidPathDis.length; s++) {
-								dis[s] = this.pid2WidPathDis[s];
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2) {
+								int[] dis = new int[this.pid2WidPathDis.length];
+								for(int s=0; s<this.pid2WidPathDis.length; s++) {
+									dis[s] = this.pid2WidPathDis[s];
+								}
+								recMinPid2WidDis.put(nid, dis);
 							}
-							recMinPid2WidDis.put(nid, dis);
 						} else { // rtree node
-							recMinDateSpanMap.put(-nid-1, minDateSpans);
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O1) {
+								recMinDateSpanMap.put(-nid-1, minDateSpans);
+							}
 						}
 						
 						IEntry eChild = new Data(minSpatialDist, n.m_pMBR[cChild],
@@ -480,7 +507,12 @@ public class KSPIndex {
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
 							}
-							this.placeReachablePrune(nid, sortQwords);
+							
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2)
+								this.placeReachablePrune(nid, sortQwords);
+							else
+								this.placeReachablePruneOld(nid, sortQwords);
+							
 							if (1==this.pid2WidPathDis[sortQwords.length]) {
 								if(Global.isTest) {
 									qp.rr.timeCptPid2Wids += qp.rr.getTimeSpan();
@@ -508,29 +540,42 @@ public class KSPIndex {
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
 							}
-							this.placeReachablePrune(-nid-1, sortQwords);
-							if (1==this.pid2WidPathDis[sortQwords.length]) {
-								if(Global.isTest) {
-									qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
-									qp.rr.numCptPruneRTree2Wids++;
-									qp.rr.setFrontTime();
+							
+							
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
+								this.placeReachablePrune(-nid-1, sortQwords);
+								if (1==this.pid2WidPathDis[sortQwords.length]) {
+									if(Global.isTest) {
+										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
+										qp.rr.numCptPruneRTree2Wids++;
+										qp.rr.setFrontTime();
+									}
+									continue;
+								} 
+							} else {
+								this.pid2WidPathDis[sortQwords.length] = 0;
+								for(int i=0; i<sortQwords.length; i++) {
+									this.pid2WidPathDis[i] = -1;
 								}
-								continue;
 							}
+							
 							if(Global.isTest) {
 								qp.rr.timeCptPid2Wids += qp.rr.getTimeSpan();
 								qp.rr.setFrontTime();
 							}
 							
 							// 判断RTree节点是否能到达所有matchNids
-							if(null==rtreeNode2Pid[nid]) {
-								if(Global.isTest) {
-									qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
-									qp.rr.numCptPruneRTree2Wids++;
-									qp.rr.setFrontTime();
+							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
+								if(null==rtreeNode2Pid[nid]) {
+									if(Global.isTest) {
+										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
+										qp.rr.numCptPruneRTree2Wids++;
+										qp.rr.setFrontTime();
+									}
+									continue;
 								}
-								continue;
 							}
+							
 //							if(rTreeNodeReachable(matchNids, rtreeNode2Pid[nid], sortQwords)) {
 //								if(Global.isTest) {
 //									Global.rr.numCptRangeRNodePrune++;
@@ -715,7 +760,48 @@ public class KSPIndex {
 		this.pid2WidPathDis[sortQwords.length] = 0;
 		return this.pid2WidPathDis;
 	}
-
+	
+	/**
+	 * Unqualified place pruning
+	 * @param place
+	 * @param qwords
+	 * @return
+	 */
+	private int[] placeReachablePruneOld(int place, int[] sortQwords) {
+		/*
+		 * For unqualified place pruning, based on the observation that infrequent query keywords have a high chance to make a place unqualified, 
+		 * we prioritize them when issuing reachability queries.
+		 * Furthermore, the least Frequent query keyword is powerful enough for pruning.
+		 * */
+		this.pid2WidPathDis[sortQwords.length] = 1;
+		for(int i=0; i<sortQwords.length; i++) {
+			if(!this.cReach.queryReachable(place, sortQwords[i]))	return this.pid2WidPathDis;
+			else this.pid2WidPathDis[i] = -1;
+		}
+		this.pid2WidPathDis[sortQwords.length] = 0;
+		return this.pid2WidPathDis;
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param qwords
+	 * @param date
+	 * @return
+	 * @throws IOException
+	 */
+	public int[][] getPidWidMinDateSpan(int[] sortQwords, int date) throws IOException {
+		if(Global.isTest) {
+			Global.rr.numCptPidGetMinDateSpan += sortQwords.length;
+		}
+		int widMinDateSpans[][] = new int[sortQwords.length][1];
+		for(int i=0; i<sortQwords.length; i++) {
+			if(signInDate[i])	widMinDateSpans[i][0] = wid2DateNidPair[i].getMinDateSpan(date);
+			else widMinDateSpans[i][0] = qp.DEFAULT_DATE_SPAN;
+		}
+		return widMinDateSpans;
+	}
+	
 	/**
 	 * 
 	 * @param id
@@ -840,7 +926,9 @@ public class KSPIndex {
 			} else if(null == wordPNMap.get(sortQwords[i])) {
 				dis = 1;
 			} else {
-				return wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate, signInDate[i]);
+//				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate, signInDate[i]);
+//				continue;
+				dis = wordPNMap.get(sortQwords[i]).getLooseness(id, sDate, eDate, signInDate[i]);
 			}
 			if(signInDate[i])	alphaLoosenessBound += dis * Global.WEIGHT_REV_PATH;
 			else alphaLoosenessBound += dis * Global.WEIGHT_PATH;

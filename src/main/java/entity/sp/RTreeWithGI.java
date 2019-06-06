@@ -40,7 +40,7 @@ public class RTreeWithGI extends RTree {
 	// graph: in memory
 	protected GraphByArray graph;
 	
-	private Boolean isAvailableTime = Boolean.TRUE;
+	public Boolean isAvailableTime = Boolean.TRUE;
 	
 	public RTreeWithGI(PropertySet psRTree, IStorageManager sm) throws Exception {
 		this(psRTree, sm, Boolean.FALSE);

@@ -46,6 +46,8 @@ public class PlaceWNPrecomputation {
 			
 			String nidToDateWidFile = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
 			nidToDateWidIndex = new NidToDateWidIndex(nidToDateWidFile);
+		} else {
+			rgi.isAvailableTime = isAvailableTime;
 		}
 	}
 	
