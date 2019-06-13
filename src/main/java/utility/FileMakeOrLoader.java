@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.sun.org.apache.regexp.internal.recompile;
+
 import entity.freebase.Pair;
 
 /**
@@ -86,16 +88,17 @@ public class FileMakeOrLoader {
 	 */
 	public static Map<Integer, Pair<Double, Double>> loadCoord(String path) throws Exception {
 		BufferedReader br = IOUtility.getBR(path);
+		br.readLine();
 		String line = null;
 		Map<Integer, Pair<Double, Double>> id2Coord = new TreeMap<>();
 		while(null != (line = br.readLine())) {
-			if(line.endsWith(Global.delimiterPound))	continue;
 			String[] arr = line.split(Global.delimiterLevel1);
 			int id = Integer.parseInt(arr[0]);
 			arr = arr[1].split(Global.delimiterSpace);
 			Pair<Double, Double> pair = new Pair<>(Double.parseDouble(arr[0]), Double.parseDouble(arr[1]));
 			id2Coord.put(id, pair);
 		}
+		br.close();
 		return id2Coord; 
 	}
 	
@@ -175,13 +178,30 @@ public class FileMakeOrLoader {
 	
 	
 	
-	
-	
+	public static Set<Integer> loadAllNid() throws Exception {
+		BufferedReader br = IOUtility.getBR(Global.inputDirectoryPath + "edgeYagoVB.txt");
+		Set<Integer> nids = new HashSet<>();
+		String line = br.readLine();
+		while(null != (line = br.readLine())) {
+			String[] arr = line.split(Global.delimiterLevel1);
+			int nid = Integer.parseInt(arr[0]);
+			if(!nids.contains(nid))	nids.add(nid);
+			arr = arr[1].split(Global.delimiterLevel2);
+			for(String st : arr) {
+				nid = Integer.parseInt(st);
+				if(!nids.contains(nid))	nids.add(nid);
+			}
+		}
+		br.close();
+		MLog.log("nid_num: " + nids.size());
+		return nids;
+	}
 	
 	
 	public static void main(String[] args) throws Exception {
 //		makeWidHasDateFile(pathInput, pathOutput);
-		loadWidHasDate();
+//		loadWidHasDate();
+		loadAllNid();
 	}
 	
 }

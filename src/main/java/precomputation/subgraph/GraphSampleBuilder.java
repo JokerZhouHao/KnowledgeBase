@@ -97,7 +97,6 @@ public class GraphSampleBuilder extends GraphSample{
 		
 		int numCurNode = 0;
 		
-		int numThreshold = 0;
 		
 		int nidIndex = -1;
 		int curNid = -1;
@@ -106,9 +105,7 @@ public class GraphSampleBuilder extends GraphSample{
 		Stack<Integer> stack = new Stack<>();
 		
 		int i, j, k;
-		
-		while(!sampleNums.isEmpty()) {
-			numThreshold = sampleNums.poll();
+		for(int numThreshold : sampleNums) {
 			while(true) {
 				
 				j = RandomNumGenerator.getRInt(accessedNode.length);
@@ -127,6 +124,7 @@ public class GraphSampleBuilder extends GraphSample{
 				
 				for(int nid : edges) {
 					sampleGraph[curNid].add(nid);
+					
 					if(!accessedNode[nid]) {
 						accessedNode[nid] = true;
 						numCurNode++;
@@ -154,7 +152,7 @@ public class GraphSampleBuilder extends GraphSample{
 		sampleNums.add(4000000);
 		sampleNums.add(6000000);
 		GraphSampleBuilder gsnc =  new GraphSampleBuilder(Boolean.TRUE);
-//		gsnc.buildGraphSample(sampleNums);
+		gsnc.buildGraphSample(sampleNums);
 		gsnc.adjustSampleGraph(sampleNums);
 	}
 }

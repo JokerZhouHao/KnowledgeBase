@@ -10,6 +10,7 @@ import org.tukaani.xz.lz.Matches;
 
 import entity.sp.reach.CReach;
 import precomputation.rechable.ReachableQueryService;
+import utility.Global;
 import utility.MComparator;
 
 /**
@@ -80,6 +81,30 @@ public class SortedDateWidIndex {
 			return 1;
 		else {
 			reIndex = -reIndex;
+			if(0 < reIndex-1 && reIndex-1 < dateWidList.size()) {	// 当前日期在所有日期中间
+				if(sDate - dateWidList.get(reIndex -2).getDate() < dateWidList.get(reIndex - 1).getDate() - sDate)
+					return sDate - dateWidList.get(reIndex -2).getDate() + 1;
+				else
+					return dateWidList.get(reIndex - 1).getDate() - sDate + 1;
+			} else if(reIndex == dateWidList.size() + 1) {	// 当前日期晚于于当前所有日期
+				return sDate - dateWidList.get(dateWidList.size() -1).getDate() + 1;
+			} else {	// 当前时间早于所有时间
+				return dateWidList.get(0).getDate() - sDate + 1;
+			}
+		}
+	}
+	
+	public int getMinDateSpan(int sDate, int[] widMinDateSpan) {
+		if(dateWidList.isEmpty())	return 1;
+		int reIndex = Collections.binarySearch(this.dateWidList, new DateNidNode(sDate, -1), comparator);
+		if(0 <= reIndex) {	// 存在相等的日期
+			widMinDateSpan[1] = reIndex;
+			widMinDateSpan[2] = reIndex + 1;
+			return 1;
+		} else {
+			reIndex = -reIndex;
+			widMinDateSpan[1] = reIndex - 2;
+			widMinDateSpan[2] = reIndex - 1;
 			if(0 < reIndex-1 && reIndex-1 < dateWidList.size()) {	// 当前日期在所有日期中间
 				if(sDate - dateWidList.get(reIndex -2).getDate() < dateWidList.get(reIndex - 1).getDate() - sDate)
 					return sDate - dateWidList.get(reIndex -2).getDate() + 1;

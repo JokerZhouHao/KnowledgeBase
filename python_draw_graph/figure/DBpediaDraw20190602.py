@@ -988,13 +988,80 @@ class LineChart:
     def sleep():
         plt.pause(1200)
 
+
+
+
+base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190609\\test\\'
+fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=110000)
+data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O0"), time_total_threshold=110000)
+print(data)
+data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+print(data)
+
+
+fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=110000)
+data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O0"), time_total_threshold=110000)
+print(data)
+data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+print(data)
+
+
+# data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+# data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+
+
+
+######### 画radius_len柱状图 ################
+# Bar.draw_radius_len(0, 30000, ftype='Alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 10000, ftype='Alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
+
+######## 画WORD_FREQUENCY折线图 ##############
+# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
+
+######### 画top-k柱状图 #################
+# Bar.draw_topK()
+# Bar.draw_topK(1)
+# Bar.draw_topK(0, 1)
+# Bar.draw_topK(1, 1)
+# Bar.draw_topK(0, 2)
+# Bar.draw_topK(1, 2)
+# 折线图
+# LineChart.draw_k(0, base_y=2, fpath=PathUtility.figure_path() + 'topK_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_k(1, base_y=800, fpath=PathUtility.figure_path() + 'topK_TQTSPDBpediaVB_Date.pdf')
+# LineChart.draw_k(2, base_y=10, fpath=PathUtility.figure_path() + 'topK_RTreeNodeDBpediaVB_Date.pdf')
+
+
+######### 画不同数keywords柱状图 #########
+# Bar.draw_n_words()
+# Bar.draw_n_words(1)
+# 折线图
+# LineChart.draw_nw(base_y=0, fpath=PathUtility.figure_path() + 'WordNum_RuntimeDBpediaVB_Date.pdf')
+
+######## 画不同的时间差对查询情况影响  #########
+# LineChart.draw_date_range(base_y=2, fpath=PathUtility.figure_path() + 'DateRange_RuntimeDBpediaVB_Date.pdf')
+
+
+
+
+
+
+
+
+
+
+
 # opt折线图
 # LineChart.draw_opt(0, fpath=PathUtility.figure_path() + 'opt_SPTD_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_opt(1, fpath=PathUtility.figure_path() + 'opt_SPTR_RuntimeYagoVB_Date.pdf')
 
 ######### 画radius_len柱状图 ################
-Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
-Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
+# Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
 # LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')

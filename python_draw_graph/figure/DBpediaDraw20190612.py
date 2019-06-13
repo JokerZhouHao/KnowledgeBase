@@ -86,6 +86,8 @@ class Bar:
         elif self.f_type.startswith('alpha_len_SPTR'):
             # self.ax.legend(loc=2, frameon=False, prop={'size': 25})
             self.ax.legend(loc=2, frameon=False)
+        # else:
+        #     self.ax.legend(loc=2)
 
         # 设置X、Y限制
         self.ax.tick_params(axis='x', direction='in', width=3, length=8, which='major')
@@ -292,15 +294,33 @@ class Bar:
     @staticmethod
     def draw_radius_len(search_type=0, base_y = 600, ftype=None, fpath='test.pdf'):
         xs = [0.5, 1, 2, 3, 3.5]
-        # x_txts = [r'$10^5$', r'$10^6$', r'$10^7$']
-        # x_txts = [r'$10^4$', r'$10^5$', r'$10^6$']
+
+        x_txts = None
+        lens = None
+
         # x_txts = [r'$10^2$', r'$10^3$', r'$10^4$']
-        x_txts = [r'$10^2$', r'$10^4$', r'$10^6$']
+        # x_txts = [r'$10^5$', r'$10^6$', r'$10^7$']
+        # x_txts = [r'$10^6$', r'$10^7$',r'$+\infty$']
+        # x_txts = [r'$10^2$', r'$10^3$', r'$10^4$']
+        # x_txts = [r'$10^2$', r'$10^4$', r'$10^6$']
+
+        # lens = (100000, 1000000, 10000000)
+        # lens = (10000, 100000, 1000000)
+        # lens = (100, 1000, 10000)
+        # lens = (100000, 1000000, 10000000)
+        # lens = (1000000, 10000000, 2147483631)
+
+        if search_type == 0:
+            x_txts = [r'$10^4$', r'$10^6$', r'$+\infty$']
+            lens = (10000, 1000000, 2147483631)
+        elif search_type == 1:
+            x_txts = [r'$10^6$', r'$10^7$', r'$+\infty$']
+            lens = (1000000, 10000000, 2147483631)
 
         if search_type==0:
-            ys = [500+i*500 for i in range(0, 5)]
+            ys = [500+i*500 for i in range(0, 6)]
         elif search_type==1:
-            ys = [2000+i*500 for i in range(0, 5)]
+            ys = [5000+i *1000 for i in range(0, 5)]
 
         if search_type==0:
             title = 'SPTD*'
@@ -309,22 +329,18 @@ class Bar:
 
         timeBar = Bar(xLabel=r'$\mathit{l}$', yLabel='Runtime (ms)', is_stack=False, title=title, ys=ys, xs=xs, x_txts=x_txts, yscale='linear', y_type='NW', f_type=ftype, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\r_len\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\r_len\\'
         radius = [1, 2, 3]
         radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
-        # lens = (100000, 1000000, 10000000)
-        # lens = (10000, 100000, 1000000)
-        # lens = (100, 1000, 10000)
-        lens = (100, 10000, 1000000)
 
-        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=50, dr=7, opt='O5')
-        indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
+        # fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=50, dr=7, opt='O5')
+        # indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
 
         for radiu_i in range(len(radius)):
             runtimes = []
             for len_i in range(len(lens)):
-                # data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
-                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=300, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=12000000)
+                # data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
                 print(data)
                 runtimes.append(data.timeTotal)
             timeBar.draw_bar(radiu_i, runtimes, hatch=Bar.hatchxes[radiu_i], label=radius_txt[radiu_i], )
@@ -988,13 +1004,78 @@ class LineChart:
     def sleep():
         plt.pause(1200)
 
+
+# base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190609\\test\\'
+# fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+# indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=110000)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O0"), time_total_threshold=110000)
+# print(data)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+#
+#
+# fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+# indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=110000)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O0"), time_total_threshold=110000)
+# print(data)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+
+
+# data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+# data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# print(data)
+
+
+
+######### 画radius_len柱状图 ################
+Bar.draw_radius_len(0, 30000, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
+Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
+
+######## 画WORD_FREQUENCY折线图 ##############
+# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
+
+######### 画top-k柱状图 #################
+# Bar.draw_topK()
+# Bar.draw_topK(1)
+# Bar.draw_topK(0, 1)
+# Bar.draw_topK(1, 1)
+# Bar.draw_topK(0, 2)
+# Bar.draw_topK(1, 2)
+# 折线图
+# LineChart.draw_k(0, base_y=2, fpath=PathUtility.figure_path() + 'topK_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_k(1, base_y=800, fpath=PathUtility.figure_path() + 'topK_TQTSPDBpediaVB_Date.pdf')
+# LineChart.draw_k(2, base_y=10, fpath=PathUtility.figure_path() + 'topK_RTreeNodeDBpediaVB_Date.pdf')
+
+
+######### 画不同数keywords柱状图 #########
+# Bar.draw_n_words()
+# Bar.draw_n_words(1)
+# 折线图
+# LineChart.draw_nw(base_y=0, fpath=PathUtility.figure_path() + 'WordNum_RuntimeDBpediaVB_Date.pdf')
+
+######## 画不同的时间差对查询情况影响  #########
+# LineChart.draw_date_range(base_y=2, fpath=PathUtility.figure_path() + 'DateRange_RuntimeDBpediaVB_Date.pdf')
+
+
+
+
+
+
+
+
+
+
+
 # opt折线图
 # LineChart.draw_opt(0, fpath=PathUtility.figure_path() + 'opt_SPTD_RuntimeYagoVB_Date.pdf')
 # LineChart.draw_opt(1, fpath=PathUtility.figure_path() + 'opt_SPTR_RuntimeYagoVB_Date.pdf')
 
 ######### 画radius_len柱状图 ################
-Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
-Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
+# Bar.draw_radius_len(0, 0, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
 # LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')

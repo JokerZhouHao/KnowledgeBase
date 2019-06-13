@@ -35,7 +35,9 @@ public class GraphSample {
 			
 			strArr = strArr[1].split(Global.delimiterLevel2);
 			for(String st : strArr) {
-				bw.write(String.valueOf(nid2Nid.get(Integer.parseInt(st))) + Global.delimiterLevel2);
+				if(nid2Nid.containsKey(Integer.parseInt(st))) {
+					bw.write(String.valueOf(nid2Nid.get(Integer.parseInt(st))) + Global.delimiterLevel2);
+				}
 			}
 			bw.write('\n');
 		}
@@ -103,8 +105,7 @@ public class GraphSample {
 	
 	public void adjustSampleGraph(LinkedList<Integer> sampleNums) throws Exception{
 		System.out.println("> 开始调整样本子图  . . . ");
-		while(!sampleNums.isEmpty()) {
-			numNode = sampleNums.poll();
+		for(int numNode : sampleNums) {
 			String edgePath = Global.inputDirectoryPath + String.valueOf(numNode) + sampleEdgeType + Global.edgeFile;
 			BufferedReader br = IOUtility.getBR(edgePath);
 			br.readLine();
@@ -112,7 +113,7 @@ public class GraphSample {
 			String[] strArr = line.split(",");
 			Map<Integer, Integer> nid2Nid = new HashMap<>();
 			for(int i=0; i<strArr.length; i++) {
-				nid2Nid.put(Integer.parseInt(strArr[i]), i);
+				nid2Nid.put(Integer.parseInt(strArr[i]), Integer.parseInt(strArr[i]));
 			}
 			br.close();
 			

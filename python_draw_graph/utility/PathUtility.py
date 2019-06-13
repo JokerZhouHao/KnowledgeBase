@@ -18,7 +18,7 @@ def sample_res_path(dir, sp='SPBest', nwlen=1000000, mds=1000, t=0, ns=200, r=2,
     if wf!=None:
         fp += '.wf=' + str(wf)
     if dr!=None:
-        fp += '.dr=' + str(dr)
+        fp += '.dr=' + str(int(dr))
     if opt!=None:
         fp += '.' + opt
     return fp+'.csv'

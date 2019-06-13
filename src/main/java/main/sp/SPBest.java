@@ -237,7 +237,7 @@ public class SPBest implements SPInterface{
 			
 			// 遍历
 			for(DateNidNode dnn : dnList) {
-				tDateSpan = Math.abs(dnn.getDate() - sDate);
+				tDateSpan = Math.abs(dnn.getDate() - sDate) + 1;
 				if(tDateSpan  >= qp.maxDateSpan)
 					dnn.isMax = Boolean.TRUE;
 				
@@ -273,6 +273,14 @@ public class SPBest implements SPInterface{
 			qp.rr.numBspWid2DateWid += wid2DateNidPair[i].size();
 		}
 		if(Global.isTest) {
+			for(i=0; i<searchedDatesWids.length; i++) {
+				if(searchedDatesWids[i] != null) {
+					qp.rr.NumTotalSearchNid++;
+					int date = searchedDatesWids[i].getDate();
+					if(date != Global.TIME_INAVAILABLE && eDate != null &&
+					   (date >= sDate && date <= eIntDate))	qp.rr.NumInRangeSearchNid++;
+				}
+			}
 			qp.rr.timeBspBuidingWid2DateNid += qp.rr.getTimeSpan();
 			qp.rr.setFrontTime();
 		}
@@ -330,6 +338,7 @@ public class SPBest implements SPInterface{
 					} else {
 						bs = wIdPnInfSer.getPlaceNeighborhoodBin(sortQwords[i]);
 					}
+//					MLog.log(qp.optMethod + " > " + i + "-bs = " + bs);
 					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs));
 				} else {
 					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i]);
@@ -415,7 +424,7 @@ public class SPBest implements SPInterface{
 				bw.write(qp.rr.getHeader());
 			}
 			
-			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(Global.testOrgSampleNum) + ".wn=" + qp.numWid));
+			BufferedReader br = new BufferedReader(new FileReader(Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(500) + ".wn=" + qp.numWid));
 			String lineStr = null;
 			while(samNum > 0) {
 				lineStr = br.readLine().trim();

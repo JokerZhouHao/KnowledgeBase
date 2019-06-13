@@ -11,7 +11,7 @@ import utility.Global;
 import utility.TimeUtility;
 
 public class QueryParams {
-	public int DEFAULT_DATE_SPAN = 300; 	// 对于不带时间的关键词，默认时间差
+	public int DEFAULT_DATE_SPAN = Global.MAX_DATE_SPAN; 	// 对于不带时间的关键词，默认时间差
 	public int searchType = 0;
 	public int testSampleNum = 500;
 	public int radius = 1;

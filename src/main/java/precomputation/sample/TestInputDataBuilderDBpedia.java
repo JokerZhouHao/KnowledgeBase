@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import entity.OptMethod;
 import utility.Global;
 import utility.IOUtility;
 
@@ -48,20 +49,22 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateRLen(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int rs[] = {1, 2, 3};
+//		int rs[] = {1, 2, 3};
+		int rs[] = {1, 3};
 		int k = 5;
 		int nw = 3;
-		int rLens[] = {100000, 1000000, 10000000};
+//		int rLens[] = {100000, 1000000, 10000000};
+		int rLens[] = {100, 1000};
 		int maxDataSpan = 50000000;
-		int wf = 1000;
+		int wf = 50;
 		int dr = 7;
 		
 		List<String> lines = new ArrayList<>();
-		for(int type : types) {
-			for(int r : rs) {
-				for(int rLen : rLens) {
-					lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
-				}
+		for(int r : rs) {
+			for(int type : types) {
+					for(int rLen : rLens) {
+						lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, "5"));
+					}
 			}
 		}
 		
@@ -78,18 +81,19 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateWf(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int r = 2;
+		int r = 3;
 		int k = 5;
 		int nw = 3;
-		int rLen = 1000000;
+		int rLen = 10000;
 		int maxDataSpan = 50000000;
-		int wfs[] = {1000, 10000, 100000, 1000000};
+		int wfs[] = {50, 100, 250, 500, 1000, 10000, 100000, 1000000};
 		int dr = 7;
 		
 		List<String> lines = new ArrayList<>();
-		for(int wf : wfs) {
-			for(int type : types) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
+		
+		for(int type : types) {
+			for(int j = wfs.length - 1; j >= 0; j--) {
+				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wfs[j], dr, "5"));
 			}
 		}
 		
@@ -106,19 +110,23 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateK(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int r = 2;
-		int ks[] = {1, 5, 10, 3, 8, 15};
+		int r = 3;
+		int ks[] = {20, 15, 10, 8, 5, 3, 1};
+//		int ks[] = {1, 3, 4, 5};
 		int nw = 3;
-		int rLen = 1000000;
+		int rLen = 10000;
 		int maxDataSpan = 50000000;
-		int wf = 1000000;
+		int wf = 1000;
 		int dr = 7;
+		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
 		
-		for(int k : ks) {
+		for(String opt : opts) {
 			for(int type : types) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
+				for(int k : ks) {
+					lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+				}
 			}
 		}
 		
@@ -135,19 +143,22 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateNW(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int r = 2;
+		int r = 3;
 		int k = 5;
-		int nws[] = {1, 3, 5, 2, 4};
-		int rLen = 1000000;
+		int nws[] = {5, 4, 3, 2, 1};
+		int rLen = 10000;
 		int maxDataSpan = 50000000;
-		int wf = 1000000;
+		int wf = 1000;
 		int dr = 7;
+		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
 		
-		for(int nw : nws) {
+		for(String opt : opts) {
 			for(int type : types) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
+				for(int nw : nws) {
+					lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+				}
 			}
 		}
 		
@@ -164,18 +175,21 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateDr(){
 		int type = 1;
 		int ns = 200;
-		int r = 2;
+		int r = 3;
 		int k = 5;
 		int nw = 3;;
-		int rLen = 1000000;
+		int rLen = 10000;
 		int maxDataSpan = 50000000;
-		int wf = 1000000;
+		int wf = 1000;
 //		int drs[] = {0, 3, 7, 14, 30, 50, 100, 150};
-		int drs[] = {0, 7, 50, 100, 3, 14, 30, 150};
+		int drs[] = {2, 6, 14, 30, 60, 100, 200, 300};
+		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
-		for(int dr : drs) {
-			lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
+		for(String opt : opts) {
+			for(int dr : drs) {
+				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, (dr - 2)/2, opt));
+			}
 		}
 		
 		for(String line : lines)
@@ -189,26 +203,61 @@ public class TestInputDataBuilderDBpedia {
 	 * @return
 	 */
 	public static List<String> generateOpt(){
-		int types[] = {0, 1};
+		int types[] = {1};
 		int ns = 200;
-		int r = 2;
-		int k = 5;
-		int nw = 3;;
-		int rLen = 100000;
-		int maxDataSpan = 200000;
-		int wf = 50;
+		int r = 3;
+//		int ks[] = {1, 3, 5, 8, 10, 15, 20};
+		int ks[] = {20, 15, 10, 8, 5, 3, 1};
+		int nw = 3;
+		int rLen = 10000000;
+		int maxDataSpan = 50000000;
+		int wf = 100;
 		int dr = 7;
-		String opts[] = {"O1", "O2", "O3", "O4"};
+		String opts0[] = {"0", "1", "2", "3", "4"};
+		String opts1[] = {"0", "2", "3", "4"};
+		String opts[] = null;
 		
 		List<String> lines = new ArrayList<>();
+		
 		for(int type : types) {
-			for(String opt : opts) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+			for(int k : ks) {
+				if(type == 0) {
+					opts = opts0;
+				} else opts = opts1;
+				for(String opt : opts) {
+					lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+					System.out.println(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+				}
+				System.out.println();
 			}
+			System.out.println();
 		}
 		
-		for(String line : lines)
-			System.out.println(line);
+		return lines;
+	}
+	
+	
+	public static List<String> generateDiffSize(){
+		int types[] = {0, 1};
+		int ns = 200;
+		int r = 3;
+//		int ks[] = {1, 3, 5, 8, 10, 15, 20};
+		int k= 5;
+		int nw = 3;
+		int rLen = 10000;
+		int maxDataSpan = 50000000;
+		int wf = 1000;
+		int dr = 7;
+		String opts[] = {"0", "5"};
+		
+		List<String> lines = new ArrayList<>();
+		
+		for(String opt : opts) {
+			for(int type : types) {
+				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+				System.out.println(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+			}
+		}
 		
 		return lines;
 	}
@@ -245,10 +294,11 @@ public class TestInputDataBuilderDBpedia {
 	public static void main(String[] args) throws Exception{
 //		generateRLen();
 //		generateWf();
-		generateK();
+//		generateK();
 //		generateNW();
 //		generateDr();
-//		System.out.println(generateOpt());
+//		generateOpt();
+		generateDiffSize();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";
 //		for(String[] sts : loadTestString(path)) {

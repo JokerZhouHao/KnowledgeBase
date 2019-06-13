@@ -106,6 +106,12 @@ public class RunRecord {
 	
 	public long timeP2PInSemanticTree = 0;
 	
+	public long AvgNumBfsNid = 0;
+	public long AvgLevelBfs = 0;
+	
+	public long NumTotalSearchNid = 0;
+	public long NumInRangeSearchNid = 0;
+	
 	public String getHeader() {
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,timeBspGetW2PReach,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
@@ -121,11 +127,12 @@ public class RunRecord {
 				+ "numGetSemanticTree,timeCptGetSemanticTree,"
 				+ "numCptGetMinDateSpanLeftSpan,numCptGetMinDateSpanRightSpan,"
 				+ "timeKSPComputation,timeBsp,"
-				+ "queueLastValue,kthScore,resultSize,timeP2PInSemanticTree,\n";
+				+ "queueLastValue,kthScore,resultSize,timeP2PInSemanticTree,NumTotalSearchNid,NumInRangeSearchNid,"
+				+ "AvgNumBfsNid,AvgLevelBfs,\n";
 	}
 	
 	public String getBspInfo(int id, long base) {
-		return  String.valueOf(id) + "," + String.valueOf(timeBspSearchWid2DateNid/base) + "," + String.valueOf(numBspWid2DateWid) + "," + String.valueOf(timeBspBuidingWid2DateNid/base) + "," + String.valueOf(timeBspGetPN/base) + "," + String.valueOf(timeBspGetW2PReach/base) + "," + 
+		String str = String.valueOf(id) + "," + String.valueOf(timeBspSearchWid2DateNid/base) + "," + String.valueOf(numBspWid2DateWid) + "," + String.valueOf(timeBspBuidingWid2DateNid/base) + "," + String.valueOf(timeBspGetPN/base) + "," + String.valueOf(timeBspGetW2PReach/base) + "," + 
 				String.valueOf(numCptMaxQueueSize) + "," + String.valueOf(numCptQueueRemove) + "," + String.valueOf(timeCptQueueRemove/base) + "," + 
 				String.valueOf(numCptQueuePut) + "," + String.valueOf(timeCptQueuePut/base) + "," + String.valueOf(numLastQueue) + "," +
 				String.valueOf(numCptTotalReach2Wids) + "," + String.valueOf(numCptPrunePid2Wids) + "," + String.valueOf(timeCptPid2Wids/base) + "," +
@@ -140,6 +147,11 @@ public class RunRecord {
 				String.valueOf(numCptGetMinDateSpanLeftSpan) + "," + String.valueOf(numCptGetMinDateSpanRightSpan) + "," + 
 				String.valueOf(timeKSPComputation/base) + "," + String.valueOf(timeBsp/base) + "," +
 				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore) + "," + String.valueOf(resultSize) + "," + 
-				String.valueOf(timeP2PInSemanticTree/base) + ",\n";
+				String.valueOf(timeP2PInSemanticTree/base) + "," +
+				String.valueOf(NumTotalSearchNid) + "," + String.valueOf(NumInRangeSearchNid) + ",";
+		if(numGetSemanticTree == 0)	return str += 	"0,0,\n";
+		else return str += String.valueOf(AvgNumBfsNid/numGetSemanticTree) + "," +
+						   String.valueOf(AvgLevelBfs/numGetSemanticTree) + "," + 
+						   "\n";
 	}
 }

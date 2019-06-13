@@ -30,6 +30,10 @@ public class AlgTest {
 	public static void main(String[] args) throws Exception {
 		long startTime = System.currentTimeMillis();
 		
+		MLog.log(Global.inputDirectoryPath);
+		MLog.log(Global.outputDirectoryPath);
+		Thread.sleep(10000);
+		
 		// args：算法类型[SPBest SPBase SPBestOpt] 线程数   查询集文件名
 		if(args.length != 3) {
 			throw new Exception("参数必须是：算法类型[SPBest SPBase SPBestOpt] 线程数   查询集文件名");
@@ -39,7 +43,8 @@ public class AlgTest {
 		String samplePath = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + args[2];
 		List<QueryParams> qps = TestInputDataBuilder.loadTestQuery(samplePath);
 		if(qps.isEmpty()) {
-			MLog.log(samplePath + "无查询");
+			MLog.log("Over: " + samplePath + "无查询");
+			return;
 		}
 		numTask = qps.size();
 		

@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.tartarus.snowball.ext.LovinsStemmer;
 
+import entity.OptMethod;
 import entity.sp.NidToDateWidIndex;
 import entity.sp.NidToDateWidIndex.DateWid;
 import entity.sp.reach.CReach;
@@ -53,6 +54,14 @@ public class GraphByArray {
 	private List<Integer> recCanWidIndex = new ArrayList<>();
 	private List<Integer> recSearchWidIndex = new ArrayList<>();
 	private List<Integer> recOkWidIndex = new ArrayList<>();
+	private List<Integer> recInRangeWIndex = new ArrayList<>();
+	private List<Integer> recHasDateNoInRangeWIndex = new ArrayList<>();
+	private List<Integer> recNoInRangeWIndex = new ArrayList<>();
+	
+	private List<Integer> recHasDateIndex = new ArrayList<>();
+	private List<Integer> recNoHasDateIndex = new ArrayList<>();
+	
+	
 	private static int signNone = -1;
 	
 	public GraphByArray(int numNodes) {
@@ -281,7 +290,9 @@ public class GraphByArray {
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
-			
+			if(Global.isTest) {
+				qp.rr.AvgNumBfsNid++;
+			}
 			///////////////////////////////////////////////////
 //			numAccessNid++;
 			
@@ -304,6 +315,7 @@ public class GraphByArray {
 					if(looseness >= loosenessThreshold) {
 						if(Global.isTest) {
 							qp.rr.numCptPruneInSemanticTree++;
+							qp.rr.AvgLevelBfs += currentRadius;
 						}
 						return Double.POSITIVE_INFINITY;
 					}
@@ -431,6 +443,10 @@ public class GraphByArray {
 			}
 		}
 		
+		if(Global.isTest) {
+			qp.rr.AvgLevelBfs += currentRadius;
+		}
+		
 		///////////////////////////////////////////////////
 //		if(loosenessThreshold!=Double.POSITIVE_INFINITY) {
 //			System.out.print("GetSemanticPlaceP >  " + 
@@ -497,6 +513,267 @@ public class GraphByArray {
 		if(looseness <= loosenessThreshold)	return looseness;
 		else return Double.POSITIVE_INFINITY;
 	}
+	
+	
+	/**
+	 * For SPP to get the looseness score and also the semantic tree rooted at source
+	 * 单个时间
+	 * @param source
+	 * @param qwords
+	 * @param loosenessThreshold
+	 * @param vertexQwordsMap
+	 * @param semanticTree
+	 * @return
+	 * @throws Exception
+	 */
+	public double getSemanticPlaceP1(int source, int[] sortQwords, int date, double loosenessThreshold, DatesWIds searchedDatesWids[],
+			int[][] wordMinDateSpans, int[] pid2WidPathDis, List<List<Integer>> semanticTree, QueryParams qp, boolean[] signInDate, 
+			SortedDateWidIndex[] wid2DateNidPair, CReach cReach, int[] maxDateSpans, double dis) throws Exception {
+
+		if (sortQwords.length == 0) {
+			throw new IllegalArgumentException("must provide at least one query keyword");
+		}
+		
+		if (loosenessThreshold < 0) {
+			throw new IllegalArgumentException("radius limitation must be >= 0");
+		}
+
+		if (source < 0 || source >= this.numVertices) {
+			throw new Exception("source id is out of range, " + source + " should be in [0,"
+					+ (this.numVertices - 1) + "]");
+		}
+		
+		double looseness = 0;
+		
+		int i, tDate;
+		if(sortQwords.length != recKeyVectices.length) {
+			recKeyVectices = new int[sortQwords.length];
+			recKeyDis = new double[sortQwords.length];
+			recCandVectices= new int[sortQwords.length];
+			recCandDis= new double[sortQwords.length];
+		}
+		
+		recSearchWidIndex.clear();
+		recCanWidIndex.clear();
+		recOkWidIndex.clear();
+		recHasDateIndex.clear();
+		recNoHasDateIndex.clear();
+		
+		for(i=0; i<sortQwords.length; i++) {
+			recKeyVectices[i] = signNone;
+			recKeyDis[i] = signNone;
+			recCandVectices[i] = signNone;
+			recCandDis[i] = signNone;
+			if(signInDate[i]) recHasDateIndex.add(i);
+			else recNoHasDateIndex.add(i);
+			recSearchWidIndex.add(i);
+		}
+		
+		int qwordsNum = sortQwords.length;
+		
+		List<Integer> tempHasDate = new ArrayList<>();
+		List<Integer> tempNoHasDate = new ArrayList<>();
+		List<Integer> tempList = new ArrayList<>();
+		int tempWids[] = null;
+		DatesWIds dateWid = null;
+		
+		preceder[source] = -1;
+		distance2Source[source] = 1;
+		visitedFlag[source] = source;
+		
+		Queue<Integer> queue = new LinkedList<Integer>();
+		queue.add(source);
+		double preRadius = 0;
+		int vertex = 0;
+		double currentRadius = 0;
+		
+		double tempDateSpan = 0;
+		double disMSpan = 0;
+		
+		while (!queue.isEmpty()) {
+			vertex = queue.poll();
+			if(Global.isTest) {
+				qp.rr.AvgNumBfsNid++;
+			}
+			currentRadius = distance2Source[vertex];
+			
+			// 新的一层
+			if (currentRadius != preRadius) {
+				if(Global.isTest && qp.rr.isCptOverTime()) {	// 判断是否超时
+					return Double.POSITIVE_INFINITY;
+				}
+				if(currentRadius > Global.MAX_BFS_LEVEL)	break;
+				
+				preRadius = currentRadius;
+				
+				// 判断哪些候选点能够转正
+				for(int candWidIndex : recCanWidIndex) {
+					if(recCandDis[candWidIndex] <= currentRadius * wordMinDateSpans[candWidIndex][0]) {
+						recKeyVectices[candWidIndex] = recCandVectices[candWidIndex];
+						recKeyDis[candWidIndex] = recCandDis[candWidIndex];
+						
+						recCandVectices[candWidIndex] = signNone;
+						recCandDis[candWidIndex] = signNone;
+						tempList.add(candWidIndex);
+					}
+				}
+				
+				if(!tempList.isEmpty()) {
+					recCanWidIndex.removeAll(tempList);
+					recHasDateIndex.removeAll(tempList);
+					tempList.clear();
+					if(recHasDateIndex.isEmpty() && recNoHasDateIndex.isEmpty())	break;
+				}
+				
+				// 计算新层下的looseness
+				looseness = 0;
+				for(double dou : recKeyDis) {
+					if(dou != signNone)	looseness += dou;
+				}
+				for(int in : recHasDateIndex) {
+					if(null==pid2WidPathDis) looseness += (wordMinDateSpans[in][0] * currentRadius);
+					else looseness += (wordMinDateSpans[in][0] * (pid2WidPathDis[in]>=currentRadius?pid2WidPathDis[in]:currentRadius));
+				}
+				for(int in : recNoHasDateIndex) {
+					if(null==pid2WidPathDis) looseness += (wordMinDateSpans[in][0] * currentRadius);
+					else looseness += (wordMinDateSpans[in][0] * (pid2WidPathDis[in]>=currentRadius?pid2WidPathDis[in]:currentRadius));
+				}
+				if(looseness >= loosenessThreshold) {
+					if(Global.isTest) {
+						qp.rr.numCptPruneInSemanticTree++;
+						qp.rr.AvgLevelBfs += currentRadius;
+					}
+					return Double.POSITIVE_INFINITY;
+				}
+			}
+			
+			// 判断是否包含词
+			if(null != (dateWid = searchedDatesWids[vertex])){
+				tempWids = dateWid.getWids();
+				tDate = dateWid.getDate();
+				
+				if(tDate == Global.TIME_INAVAILABLE) {	// 不包含时间
+					if(!recNoHasDateIndex.isEmpty()) {
+						for(int wIndex : recNoHasDateIndex) {
+							if(sortQwords[wIndex] == tempWids[wIndex]) {
+								recKeyVectices[wIndex] = vertex;
+								recKeyDis[wIndex] = currentRadius * Global.MAX_DATE_SPAN;
+								tempNoHasDate.add(wIndex);
+							}
+						}
+						if(!tempNoHasDate.isEmpty()) {
+							recNoHasDateIndex.removeAll(tempNoHasDate);
+							tempNoHasDate.clear();
+							if(recHasDateIndex.isEmpty() && recNoHasDateIndex.isEmpty())	break;
+						}
+					}
+				} else {	// 包含时间
+					if(!recHasDateIndex.isEmpty()) {
+						tempDateSpan = Math.abs(tDate - date) + 1;
+						tempDateSpan = tempDateSpan <= Global.MAX_DATE_SPAN ? tempDateSpan : Global.MAX_DATE_SPAN;
+						disMSpan = currentRadius * tempDateSpan;
+						for(int wIndex : recHasDateIndex) {
+							if(sortQwords[wIndex] == tempWids[wIndex]) {
+								if(wordMinDateSpans[wIndex][0] == tempDateSpan) {	// 已是最小时间差
+									if(recCandVectices[wIndex] == signNone) {	// 前面未找到该词
+										recKeyVectices[wIndex] = vertex;
+										recKeyDis[wIndex] = disMSpan;
+										tempHasDate.add(wIndex);
+									} else {	// 前面找到过该词
+										if(recCandDis[wIndex] >= disMSpan) {
+											recKeyVectices[wIndex] = vertex;
+											recKeyDis[wIndex] = disMSpan;
+										} else {
+											recKeyVectices[wIndex] = recCandVectices[wIndex];
+											recKeyDis[wIndex] = recCandDis[wIndex];
+										}
+										recCandVectices[wIndex] = signNone;
+										recCandDis[wIndex] = signNone;
+										tempHasDate.add(wIndex);
+									}
+								} else {	// 不是最小时间差
+									if(recCandVectices[wIndex] == signNone) {	// 前面未找到该词
+										recCandVectices[wIndex] = vertex;
+										recCandDis[wIndex] = disMSpan;
+										recCanWidIndex.add(wIndex);
+									} else if(recCandDis[wIndex] > disMSpan) {	// 前面已找到
+										recCandVectices[wIndex] = vertex;
+										recCandDis[wIndex] = disMSpan;
+									}
+								}
+							}
+						}
+						
+						if(!tempHasDate.isEmpty()) {
+							recCanWidIndex.removeAll(tempHasDate);
+							recHasDateIndex.removeAll(tempHasDate);
+							tempHasDate.clear();
+							if(recHasDateIndex.isEmpty() && recNoHasDateIndex.isEmpty())	break;
+						}
+					}
+				}
+			}
+				
+			// add the unvisited adj vertices of vertex into queue
+			int[] adjList = this.adjLists[vertex];
+			if (adjList == null) {
+				// there is no out-going edge from vertex, dead end, continue to next vertex
+				continue;
+			}
+			for (i = 0; i < adjList.length; i++) {
+				int adjVertex = adjList[i];
+				if (visitedFlag[adjVertex] != source) {
+					// not visited yet
+					preceder[adjVertex] = vertex;
+					distance2Source[adjVertex] = 1 + distance2Source[vertex];
+					visitedFlag[adjVertex] = source;
+					queue.add(adjVertex);
+				}
+			}
+		}
+		
+		if(Global.isTest) {
+			qp.rr.AvgLevelBfs += currentRadius;
+			if(currentRadius > Global.MAX_BFS_LEVEL)	qp.rr.AvgLevelBfs--;
+		}
+		
+		for(int in : recCanWidIndex) {
+			recKeyVectices[in] = recCandVectices[in];
+			recKeyDis[in] = recCandDis[in];
+		}
+		recHasDateIndex.removeAll(recCanWidIndex);
+		
+		HashSet<Integer> rec = new HashSet<>();
+		for(int in : recHasDateIndex) {
+			if(qp.optMethod != OptMethod.O1 && qp.optMethod != OptMethod.O5) {
+				wid2DateNidPair[in].getMinDateSpan(rec, date, source, cReach, wordMinDateSpans[in][0], wordMinDateSpans[in], maxDateSpans[in], qp);
+			}
+			recKeyVectices[in] = source;
+			recKeyDis[in] = (Global.MAX_BFS_LEVEL + 1) * wordMinDateSpans[in][0];
+//			recKeyDis[in] = (Global.MAX_BFS_LEVEL + 1) * wid2DateNidPair[in].getMinDateSpan(date);
+		}
+		
+		for(int in : recNoHasDateIndex) {
+			recKeyVectices[in] = source;
+			recKeyDis[in] = (Global.MAX_BFS_LEVEL + 1) * Global.MAX_DATE_SPAN;
+		}
+		
+//		MLog.log(qp.optMethod + " > source = " + source);
+//		MLog.log(qp.optMethod + " > " + "dis = " + dis);
+		
+		looseness = 0;
+		for(i=0; i<qwordsNum; i++) {
+			looseness += recKeyDis[i];
+			semanticTree.add(this.getPath(source, recKeyVectices[i]));
+//			MLog.log(qp.optMethod + " > " + "recKeyDis[" + i + "] = " + recKeyDis[i]);
+		}
+//		MLog.log(qp.optMethod + " > " + (dis * looseness));
+//		MLog.log("");
+		
+		if(looseness <= loosenessThreshold)	return looseness;
+		else return Double.POSITIVE_INFINITY;
+	}
+	
 	
 	/**
 	 * 范围查找计算
@@ -565,6 +842,9 @@ public class GraphByArray {
 		
 		while (!queue.isEmpty()) {
 			vertex = queue.poll();
+			if(Global.isTest) {
+				qp.rr.AvgNumBfsNid++;
+			}
 			currentRadius = distance2Source[vertex];
 			if(currentRadius > Global.MAX_BFS_LEVEL)	break;	// 超出了最大bfs层数
 			
@@ -587,6 +867,7 @@ public class GraphByArray {
 				if(looseness >= loosenessThreshold) {
 					if(Global.isTest) {
 						qp.rr.numCptPruneInSemanticTree++;
+						qp.rr.AvgLevelBfs += currentRadius;
 					}
 					return Double.POSITIVE_INFINITY;
 				}
@@ -647,6 +928,10 @@ public class GraphByArray {
 			}
 		}
 		
+		if(Global.isTest) {
+			qp.rr.AvgLevelBfs += currentRadius;
+		}
+		
 		// 计算looseness
 		for(i=0; i<sortQwords.length; i++) {
 			if(recSigns[i])	looseness += recKeyDis[i];
@@ -687,6 +972,241 @@ public class GraphByArray {
 		if(looseness <= loosenessThreshold)	return looseness;
 		else return Double.POSITIVE_INFINITY;
 	}
+	
+	
+	/**
+	 * 范围查找计算
+	 * @param source
+	 * @param sortQwords
+	 * @param sDate
+	 * @param eDate
+	 * @param loosenessThreshold
+	 * @param dateWIdMap
+	 * @param wordMinDateSpanMap
+	 * @param semanticTree
+	 * @return
+	 * @throws Exception
+	 */
+	public double getSemanticPlaceP1(int source, int[] sortQwords, int sDate, int eDate, double loosenessThreshold, DatesWIds searchedDatesWids[],
+			List<List<Integer>> semanticTree, boolean[] sIRange, QueryParams qp, List<Integer>[] nidsInDate, CReach cReach) throws Exception {
+
+		if (sortQwords.length == 0) {
+			throw new IllegalArgumentException("must provide at least one query keyword");
+		}
+		
+		if (loosenessThreshold < 0) {
+			throw new IllegalArgumentException("radius limitation must be >= 0");
+		}
+
+		if (source < 0 || source >= this.numVertices) {
+			throw new Exception("source id is out of range, " + source + " should be in [0,"
+					+ (this.numVertices - 1) + "]");
+		}
+		
+		double looseness = 0;
+		int i;
+		
+		if(sortQwords.length != recKeyVectices.length) {
+			recKeyVectices = new int[sortQwords.length];
+			recKeyDis = new double[sortQwords.length];
+			recSigns = new boolean[sortQwords.length];
+			signInRanges = new boolean[sortQwords.length];
+		}
+		
+		recSearchWidIndex.clear();
+		recOkWidIndex.clear();
+		recInRangeWIndex.clear();
+		recHasDateNoInRangeWIndex.clear();
+		recNoInRangeWIndex.clear();
+		
+		for(i=0; i<sortQwords.length; i++) {
+			recKeyVectices[i] = signNone;
+			recSigns[i] = Boolean.FALSE;
+			recKeyDis[i] = signNone;
+			signInRanges[i] = sIRange[i];
+			if(signInRanges[i]) {
+				recInRangeWIndex.add(i);
+				recHasDateNoInRangeWIndex.add(i);
+			} else recNoInRangeWIndex.add(i);
+			recSearchWidIndex.add(i);
+		}
+		
+		int[] tempWids = null;
+		DatesWIds dateWid = null;
+		
+		preceder[source] = -1;
+		distance2Source[source] = 1;
+		visitedFlag[source] = source;
+		
+		Queue<Integer> queue = new LinkedList<Integer>();
+		queue.add(source);
+		double preRadius = 0;
+		int vertex = 0;
+		double currentRadius = 0;
+		
+		List<Integer> tempInRange = new ArrayList<>();
+		List<Integer> tempNoInRange = new ArrayList<>();
+		
+		while (!queue.isEmpty()) {
+			vertex = queue.poll();
+			if(Global.isTest) {
+				qp.rr.AvgNumBfsNid++;
+				if(qp.rr.isCptOverTime())	return Double.POSITIVE_INFINITY;	// 已超时
+			}
+			currentRadius = distance2Source[vertex];
+			
+			// 新的一层
+			if (currentRadius != preRadius) {
+				if(currentRadius > Global.MAX_BFS_LEVEL)	break;	// 超出了最大bfs层数
+				
+				preRadius = currentRadius;
+				// 计算新层下的looseness
+				looseness = 0;
+				for(i=0; i<sortQwords.length; i++) {
+					if(recSigns[i])	looseness += recKeyDis[i];
+					else {
+						if(signInRanges[i]) {
+							if(recKeyDis[i] != signNone)	
+								looseness += recKeyDis[i] > currentRadius * Global.WEIGHT_REV_PATH ? currentRadius * Global.WEIGHT_REV_PATH : recKeyDis[i];
+							else looseness += currentRadius * Global.WEIGHT_REV_PATH;
+						} else {
+							looseness += currentRadius * Global.WEIGHT_PATH;
+						}
+					}
+				}
+				if(looseness >= loosenessThreshold) {
+					if(Global.isTest) {
+						qp.rr.numCptPruneInSemanticTree++;
+						qp.rr.AvgLevelBfs += currentRadius;
+					}
+					return Double.POSITIVE_INFINITY;
+				}
+			}
+			
+			// 判断节点是否包含词
+			int tDate = 0;
+			if(null != (dateWid = searchedDatesWids[vertex])) {
+				tDate = dateWid.getDate();
+				if(tDate == Global.TIME_INAVAILABLE) {	// 不包含时间
+					if(!recNoInRangeWIndex.isEmpty()) {	
+						tempWids = dateWid.getWids();
+						for(int wIndex : recNoInRangeWIndex) {
+							if(sortQwords[wIndex] == tempWids[wIndex]) {
+								recKeyVectices[wIndex] = vertex;
+								recKeyDis[wIndex] = currentRadius * Global.WEIGHT_PATH;
+								recSigns[wIndex] = Boolean.TRUE;
+								recOkWidIndex.add(wIndex);
+								tempNoInRange.add(wIndex);
+							}
+						}
+						if(!tempNoInRange.isEmpty()) {
+							recNoInRangeWIndex.removeAll(tempNoInRange);
+							tempNoInRange.clear();
+							if(recInRangeWIndex.isEmpty() && recNoInRangeWIndex.isEmpty())	break;
+						}
+					}
+				} else if(tDate >= sDate && tDate <= eDate) { // 包含时间，且在时间范围内
+					if(!recInRangeWIndex.isEmpty()) {	
+						tempWids = dateWid.getWids();
+						for(int wIndex : recInRangeWIndex) {
+							if(sortQwords[wIndex] == tempWids[wIndex]) {
+								recKeyVectices[wIndex] = vertex;
+								recKeyDis[wIndex] = currentRadius * Global.WEIGHT_REV_PATH;
+								recSigns[wIndex] = Boolean.TRUE;
+								recOkWidIndex.add(wIndex);
+								tempInRange.add(wIndex);
+							}
+						}
+						if(!tempInRange.isEmpty()) {
+							recInRangeWIndex.removeAll(tempInRange);
+							recHasDateNoInRangeWIndex.removeAll(tempInRange);
+							tempInRange.clear();
+							if(recInRangeWIndex.isEmpty() && recNoInRangeWIndex.isEmpty())	break;
+						}
+					}
+				} else {	// 包含时间，但是不在时间范围内
+					if(!recHasDateNoInRangeWIndex.isEmpty()) {
+						tempWids = dateWid.getWids();
+						for(int wIndex : recHasDateNoInRangeWIndex) {
+							if(sortQwords[wIndex] == tempWids[wIndex]) {
+								recKeyVectices[wIndex] = vertex;
+								recKeyDis[wIndex] = currentRadius * Global.WEIGHT_PATH;
+								tempInRange.add(wIndex);
+							}
+						}
+					}
+					if(!tempInRange.isEmpty()) {
+						recHasDateNoInRangeWIndex.removeAll(tempInRange);
+						tempInRange.clear();
+					}
+				}
+			}
+			
+			// add the unvisited adj vertices of vertex into queue
+			int[] adjList = this.adjLists[vertex];
+			if (adjList == null) {
+				// there is no out-going edge from vertex, dead end, continue to next vertex
+				continue;
+			}
+			for (i = 0; i < adjList.length; i++) {
+				int adjVertex = adjList[i];
+				if (visitedFlag[adjVertex] != source) {
+					// not visited yet
+					preceder[adjVertex] = vertex;
+					distance2Source[adjVertex] = 1 + distance2Source[vertex];
+					visitedFlag[adjVertex] = source;
+					queue.add(adjVertex);
+				}
+			}
+		}
+		
+		if(Global.isTest) {
+			qp.rr.AvgLevelBfs += currentRadius;
+			if(currentRadius > Global.MAX_BFS_LEVEL)	qp.rr.AvgLevelBfs--;
+		}
+		
+		// 计算looseness
+		for(i=0; i<sortQwords.length; i++) {
+			if(recSigns[i])	looseness += recKeyDis[i];
+			else {
+				if(signInRanges[i]) {	// 关键词带有时间
+					if(recKeyDis[i] != signNone)	looseness += recKeyDis[i];
+					else {
+						recKeyVectices[i] = source;
+						if(null == nidsInDate[i]) {
+							looseness += (Global.MAX_BFS_LEVEL + 1) * Global.WEIGHT_PATH;
+						} else {
+							long startTime = System.currentTimeMillis();
+							Boolean isReacContainDate = Boolean.FALSE;
+							for(Integer nid : nidsInDate[i]) {
+								if(cReach.queryReachable(source, nid)) {
+									isReacContainDate = Boolean.TRUE;
+									break;
+								}
+							}
+							qp.rr.timeP2PInSemanticTree += System.currentTimeMillis() - startTime;
+							
+							if(isReacContainDate)	looseness += (Global.MAX_BFS_LEVEL + 1) * Global.WEIGHT_REV_PATH;
+							else looseness += (Global.MAX_BFS_LEVEL + 1) * Global.WEIGHT_PATH;
+						}
+					}
+				} else {	// 关键词不带时间
+					if(recKeyDis[i] != signNone)	looseness += recKeyDis[i];
+					else {
+						recKeyVectices[i] = source;
+						looseness += (Global.MAX_BFS_LEVEL + 1) * Global.WEIGHT_PATH;
+					}
+				}
+			}
+			
+			semanticTree.add(this.getPath(source, recKeyVectices[i]));
+		}
+		
+		if(looseness <= loosenessThreshold)	return looseness;
+		else return Double.POSITIVE_INFINITY;
+	}
+	
+	
 	
 	/**
 	 * @param sink

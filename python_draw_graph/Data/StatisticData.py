@@ -36,8 +36,12 @@ class Data:
 
                 # print(index, end=' ')
                 strArr = line.split(',')
+
                 single_total_time = int(strArr[32])
-                if single_total_time >= time_total_threshold:  continue
+                if single_total_time >= time_total_threshold:
+                    continue
+                elif int(strArr[35]) < k:
+                    continue
                 else:
                     index += 1
                 # index += 1
@@ -76,6 +80,25 @@ class Data:
                     indexs.add(index)
         return  indexs
 
+
+    # 计算那些编号样例结果数小于k
+    @staticmethod
+    def get_equal_k_simple_indexs(t=0, ns=500, r=1, k=1, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None, time_total_threshold=1000000000):
+        if fp==None:    data = Data(t, ns, r, k, nw, prefix=prefix, f_TYPE_TEST=f_TYPE_TEST, f_nwlen=f_nwlen, f_mds=f_mds, relativePath=relativePath)
+        else:   data = Data(fp=fp)
+        indexs = set()
+        index = 0
+        with open(data.filePath) as f:
+            f.readline()
+            while True:
+                line = f.readline()
+                if line=='':    break
+                index += 1
+                strArr = line.split(',')
+                num_result = int(strArr[35])
+                if num_result == k and int(strArr[32]) <= time_total_threshold: indexs.add(index)
+        return  indexs
+
     # 计算确定样本编号平均时间
     @staticmethod
     def getData_by_indexs(indexs, t=0, ns=500, r=1, k=1, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None, time_total_threshold=1000000000):
@@ -88,7 +111,7 @@ class Data:
                 line = f.readline()
                 if line=='':    break
                 index += 1
-                if not(index in indexs):    continue
+                if None != indexs and not(index in indexs):    continue
                 strArr = line.split(',')
                 data.numAccessedRTreeNode += int(strArr[25])
                 data.numTQSP += int(strArr[27])

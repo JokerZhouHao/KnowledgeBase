@@ -50,6 +50,10 @@ public class DatesWIds {
 		return dateList;
 	}
 
+	public int getDate() {
+		return dateList.get(0);
+	}
+	
 	public int[] getWids() {
 		return wids;
 	}

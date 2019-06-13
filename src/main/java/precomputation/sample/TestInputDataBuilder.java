@@ -79,18 +79,18 @@ public class TestInputDataBuilder {
 	public static List<String> generateWf(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int r = 2;
+		int r = 3;
 		int k = 5;
 		int nw = 3;
-		int rLen = 1000000;
-		int maxDataSpan = 50000000;
-		int wfs[] = {1000, 10000, 100000, 1000000};
-		int dr = 7;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
+		int wfs[] = {100, 250, 500, 1000, 10000, 100000, 1000000};
+		int dr = 3;
 		
 		List<String> lines = new ArrayList<>();
 		for(int type : types) {
 			for(int wf : wfs) {
-				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, null));
+				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, "5"));
 			}
 		}
 		
@@ -248,22 +248,23 @@ public class TestInputDataBuilder {
 		BufferedReader br = IOUtility.getBR(path);
 		String line = null;
 		while(null != (line = br.readLine())) {
+			if(line.startsWith("-"))	break;
 			if(line.trim().isEmpty() || line.startsWith("#"))	continue;
 			list.add(new QueryParams(line.trim()));
 		}
-		if(list.isEmpty())	return null;
+		br.close();
 		return list;
 	}
 	
 	public static void main(String[] args) throws Exception{
 //		generateRLen();
-//		generateWf();
+		generateWf();
 //		generateK();
 //		generateNW();
 //		generateDr();
 //		System.out.println(generateOpt());
 		
-		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "opt.txt";
+//		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "opt.txt";
 //		for(String[] sts : loadTestString(path)) {
 //			for(String st : sts) {
 //				System.out.print(st + " ");
@@ -272,9 +273,9 @@ public class TestInputDataBuilder {
 //		}
 		
 		List<QueryParams> qps = TestInputDataBuilder.loadTestQuery(path);
-		for(QueryParams q : qps) {
-			System.out.println(q);
-		}
+//		for(QueryParams q : qps) {
+//			System.out.println(q);
+//		}
 		
 		
 	}

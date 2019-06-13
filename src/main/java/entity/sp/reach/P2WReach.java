@@ -113,6 +113,7 @@ public class P2WReach implements Runnable{
 		
 		/********** 普通BFS ***********/
 		for(i = this.start; i<this.end; i++) {
+			if(i >= allPid.size())	continue;
 			source = allPid.get(i);
 			queue.reset();
 			distance2Source[source] = 1;

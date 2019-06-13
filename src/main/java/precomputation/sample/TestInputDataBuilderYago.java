@@ -43,6 +43,41 @@ public class TestInputDataBuilderYago {
 	}
 	
 	/**
+	 * 生成test
+	 * @return
+	 */
+	public static List<String> generateTest(){
+		int types[] = {0, 1};
+		int ns = 50;
+//		int rs[] = {1, 2, 3};
+		int rs[] = {3};
+		int k = 5;
+		int nw = 3;
+//		int rLens[] = {100000, 1000000, 10000000};
+		int rLens[] = {10000};
+		int maxDataSpan = 300;
+		int wf = 1000;
+		int dr = 3;
+		String[] oo = {"0", "5"};
+		
+		List<String> lines = new ArrayList<>();
+		for(String o : oo) {
+			for(int r : rs) {
+				for(int type : types) {
+					for(int rLen : rLens) {
+							lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, o));
+					}
+				}
+			}
+		}
+		
+		for(String line : lines)
+			System.out.println(line);
+		
+		return lines;
+	}
+	
+	/**
 	 * 生成用于测试radius len 的串
 	 * @return
 	 */
@@ -50,14 +85,17 @@ public class TestInputDataBuilderYago {
 		int types[] = {0, 1};
 		int ns = 200;
 //		int rs[] = {1, 2, 3};
-		int rs[] = {1, 3};
+		int rs[] = {1, 2, 3};
 		int k = 5;
 		int nw = 3;
-//		int rLens[] = {100000, 1000000, 10000000};
-		int rLens[] = {100, 1000};
-		int maxDataSpan = 50000000;
-		int wf = 50;
-		int dr = 7;
+//		int rLens[] = {100, 10000, 1000000};
+//		int rLens[] = {1000, 100000, 10000000};
+		int rLens[] = {2147483631};
+		
+//		int rLens[] = {100, 1000};
+		int maxDataSpan = 300;
+		int wf = 1000;
+		int dr = 3;
 		
 		List<String> lines = new ArrayList<>();
 		for(int r : rs) {
@@ -203,16 +241,16 @@ public class TestInputDataBuilderYago {
 	 * @return
 	 */
 	public static List<String> generateOpt(){
-		int types[] = {1};
+		int types[] = {0, 1};
 		int ns = 200;
 		int r = 3;
 //		int ks[] = {1, 3, 5, 8, 10, 15, 20};
 		int ks[] = {20, 15, 10, 8, 5, 3, 1};
 		int nw = 3;
-		int rLen = 10000000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000;
+		int maxDataSpan = 300;
 		int wf = 100;
-		int dr = 7;
+		int dr = 3;
 		String opts0[] = {"0", "1", "2", "3", "4"};
 		String opts1[] = {"0", "2", "3", "4"};
 		String opts[] = null;
@@ -231,6 +269,32 @@ public class TestInputDataBuilderYago {
 				System.out.println();
 			}
 			System.out.println();
+		}
+		
+		return lines;
+	}
+	
+	
+	public static List<String> generateDiffSize(){
+		int types[] = {0, 1};
+		int ns = 200;
+		int r = 3;
+//		int ks[] = {1, 3, 5, 8, 10, 15, 20};
+		int k= 5;
+		int nw = 3;
+		int rLen = 10000;
+		int maxDataSpan = 50000000;
+		int wf = 1000;
+		int dr = 7;
+		String opts[] = {"0", "5"};
+		
+		List<String> lines = new ArrayList<>();
+		
+		for(String opt : opts) {
+			for(int type : types) {
+				lines.add(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+				System.out.println(getTestString(type, ns, r, k, nw, rLen, maxDataSpan, wf, dr, opt));
+			}
 		}
 		
 		return lines;
@@ -266,12 +330,14 @@ public class TestInputDataBuilderYago {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		generateRLen();
+//		generateTest();
+		generateRLen();
 //		generateWf();
 //		generateK();
 //		generateNW();
-		generateDr();
+//		generateDr();
 //		generateOpt();
+//		generateDiffSize();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";
 //		for(String[] sts : loadTestString(path)) {

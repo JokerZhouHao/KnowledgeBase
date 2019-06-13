@@ -135,7 +135,6 @@ public class KSPIndex {
 			}
 			
 			heap.put(new NNEntry(nd, 0.0, rgi.getTreeHeight()));
-			
 			while(heap.size() != 0) {
 				if(Global.isTest) {
 					qp.rr.setFrontTime();
@@ -166,6 +165,7 @@ public class KSPIndex {
 							}
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2) {
 								this.placeReachablePrune(nid, sortQwords);
+//								this.placeReachablePruneOld(nid, sortQwords);
 							} else {
 								this.placeReachablePruneOld(nid, sortQwords);
 							}
@@ -193,6 +193,7 @@ public class KSPIndex {
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O1)
 								minDateSpans = this.getPidWidMinDateSpan(nid, sortQwords, date);
+//								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							else
 								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
@@ -242,6 +243,7 @@ public class KSPIndex {
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O1)
 								minDateSpans = this.getRTreeWidMinDateSpan(nid, sortQwords, date);
+//								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							else
 								minDateSpans = this.getPidWidMinDateSpan(sortQwords, date);
 							
@@ -346,9 +348,13 @@ public class KSPIndex {
 						qp.rr.setFrontTime();
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
-					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
+//					double looseness = this.rgi.getGraph().getSemanticPlaceP1(nid,
+//							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), 
+//							recMinPid2WidDis.get(nid), semanticTree, qp, signInDate);
+					double looseness = this.rgi.getGraph().getSemanticPlaceP1(nid,
 							sortQwords, date, loosenessThreshold, searchedDatesWids, recMinDateSpanMap.get(nid), 
-							recMinPid2WidDis.get(nid), semanticTree, qp, signInDate);
+							recMinPid2WidDis.get(nid), semanticTree, qp, signInDate,
+							wid2DateNidPair, cReach, maxDateSpans, placeData.getWeight());
 					
 					if(Global.isTest) {
 						qp.rr.timeCptGetSemanticTree += qp.rr.getTimeSpan();
@@ -391,6 +397,8 @@ public class KSPIndex {
 		} finally {
 			rgi.readUnlock();
 		}
+		
+//		MLog.log("heap.size = " + heap.size());
 		
 		recMinDateSpanMap.clear();
 		if(Global.isTest && Global.isOutputTestInfo) {
@@ -655,7 +663,7 @@ public class KSPIndex {
 						qp.rr.setFrontTime();
 					}
 					List<List<Integer>> semanticTree = new ArrayList<List<Integer>>();
-					double looseness = this.rgi.getGraph().getSemanticPlaceP(nid,
+					double looseness = this.rgi.getGraph().getSemanticPlaceP1(nid,
 							sortQwords, sDate, eDate, loosenessThreshold, searchedDatesWids, 
 							semanticTree, signInDate, qp, nidsInDate, cReach);
 					
@@ -754,7 +762,7 @@ public class KSPIndex {
 				return this.pid2WidPathDis;
 			} else	{
 				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
-				else	this.pid2WidPathDis[i] = distance;
+				else	this.pid2WidPathDis[i] = distance <= (Global.MAX_BFS_LEVEL + 1) ? distance : (Global.MAX_BFS_LEVEL + 1);
 			}
 		}
 		this.pid2WidPathDis[sortQwords.length] = 0;
@@ -794,10 +802,11 @@ public class KSPIndex {
 		if(Global.isTest) {
 			Global.rr.numCptPidGetMinDateSpan += sortQwords.length;
 		}
-		int widMinDateSpans[][] = new int[sortQwords.length][1];
+		int widMinDateSpans[][] = new int[sortQwords.length][3];
 		for(int i=0; i<sortQwords.length; i++) {
-			if(signInDate[i])	widMinDateSpans[i][0] = wid2DateNidPair[i].getMinDateSpan(date);
-			else widMinDateSpans[i][0] = qp.DEFAULT_DATE_SPAN;
+			if(signInDate[i])	widMinDateSpans[i][0] = wid2DateNidPair[i].getMinDateSpan(date, widMinDateSpans[i]);
+			else widMinDateSpans[i][0] = Global.MAX_DATE_SPAN;
+			widMinDateSpans[i][0] = widMinDateSpans[i][0] <= Global.MAX_DATE_SPAN ? widMinDateSpans[i][0] : Global.MAX_DATE_SPAN;
 		}
 		return widMinDateSpans;
 	}
@@ -853,7 +862,7 @@ public class KSPIndex {
 		
 		for(i=0; i<sortQwords.length; i++) {
 			if(signInDate[i])	wid2DateNidPair[i].getMinDateSpan(rtreeNode2Pid[id], date, widMinDateSpans[i], maxDateSpans[i], qp);
-			else widMinDateSpans[i][0] = qp.DEFAULT_DATE_SPAN;
+			else widMinDateSpans[i][0] = Global.MAX_DATE_SPAN;
 		}
 		
 //		for(i=0; i<sortQwords.length; i++) {
@@ -889,7 +898,7 @@ public class KSPIndex {
 					alphaLoosenessBound += this.pid2WidPathDis[i] * widMinDateSpans[i][0];
 				else alphaLoosenessBound += 1 * widMinDateSpans[i][0];
 			} else {
-				alphaLoosenessBound = wordPNMap.get(sortQwords[i]).getLooseness(id, date, 
+				alphaLoosenessBound += wordPNMap.get(sortQwords[i]).getLooseness(id, date, 
 						this.pid2WidPathDis[i], widMinDateSpans[i][0], signInDate[i]);
 			}
 //			if(this.pid2WidPathDis[i] != -1) {
@@ -901,7 +910,16 @@ public class KSPIndex {
 //				tempd2 = wordPNMap.get(sortQwords[i]).getLoosenessByMax(id, date, maxDateSpans[i]);
 //				alphaLoosenessBound += (tempd1 >= tempd2 ? tempd2 : tempd1);
 //			}
+//			if(id == 69503 || id == 338203 || id == 807595 || id == 635681 
+//			               || id == 444195 || id == 164721 || id == 559032
+//			               || id == 95997 || id == 436822 || id == 52680) {
+//				MLog.log("id i alphaLoosenessBound = " + id + " " + i + " "+ alphaLoosenessBound);
+//			}
 		}
+//		if(id == 69503 || id == 338203 || id == 807595 || id == 635681 
+//	               || id == 444195 || id == 164721 || id == 559032
+//	               || id == 95997 || id == 436822 || id == 52680)	MLog.log("");
+		
 		return alphaLoosenessBound;
 	}
 	

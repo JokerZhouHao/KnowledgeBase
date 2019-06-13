@@ -31,9 +31,10 @@ public class YagoGlobal {
 	
 	public final static int TIME_INAVAILABLE = Integer.MAX_VALUE; 
 	
-	public final static int MAX_BFS_LEVEL = 10;
+	public final static int MAX_BFS_LEVEL = 5;
+	public final static int MAX_DATE_SPAN = 300;
 	
-	public static int defaultMaxDateSpan = 1000;
+	public static int defaultMaxDateSpan = 300;
 	
 	// 用于DBpedia创建wid2pid索引
 	public static GraphWithWids graphWithWids = null;
@@ -125,8 +126,8 @@ public class YagoGlobal {
 //	public static String dateSetType = "DBpedia" + File.separator;
 	
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "test" + File.separator;
-//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
-	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
+	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal" + File.separator;
+//	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_2000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_4000000" + File.separator;
 //	public static String inputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginal_6000000" + File.separator;
 	public static String edgeFile = "edgeYagoVB.txt";
@@ -148,7 +149,7 @@ public class YagoGlobal {
 	public static String wordFrequencyFile = "wordFrequency.txt";
 	
 	/*	与查询相关的一些参数		*/
-	public static int testOrgSampleNum = 500;
+	public static int testOrgSampleNum = 200;
 	public static int testSampleNum = testOrgSampleNum;
 	public static int radius = 1;
 	public static int testK = 10;
@@ -160,8 +161,8 @@ public class YagoGlobal {
 	
 	/* output file path */
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "testIndex" + File.separator;
-//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
-	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
+	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex" + File.separator;
+//	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_2000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_4000000" + File.separator;
 //	public static String outputDirectoryPath = LocalFileInfo.getDataSetPath() + dateSetType + "orginalIndex_6000000" + File.separator;
 	public static String rTreePath = "rtree" + File.separator;

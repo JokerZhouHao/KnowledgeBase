@@ -966,8 +966,8 @@ class LineChart:
 
 
 # opt折线图
-LineChart.draw_opt(0, fpath=PathUtility.figure_path() + 'opt_SPTD_RuntimeYagoVB_Date.pdf')
-LineChart.draw_opt(1, fpath=PathUtility.figure_path() + 'opt_SPTR_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_opt(0, fpath=PathUtility.figure_path() + 'opt_SPTD_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_opt(1, fpath=PathUtility.figure_path() + 'opt_SPTR_RuntimeYagoVB_Date.pdf')
 
 
 ######### 画不同数keywords柱状图 #########

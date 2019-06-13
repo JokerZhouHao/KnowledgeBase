@@ -14,6 +14,7 @@ import entity.sp.SortedList;
 
 import entity.sp.NidToDateWidIndex.DateWid;
 import utility.Global;
+import utility.MLog;
 import utility.TimeUtility;
 
 /**
@@ -130,6 +131,7 @@ public class WordRadiusNeighborhood {
 				pid = bb.getInt();
 				tempList = new ArrayList<>();
 				tempList.add(Global.TIME_INAVAILABLE);
+				eachLayerWN[i].put(pid, tempList);
 			}
 		}
 	}
@@ -154,15 +156,40 @@ public class WordRadiusNeighborhood {
 	public int getLooseness(int pid, int date, int minPathDis, int minDateSpan, Boolean inDate) {
 		int minLoose = Integer.MAX_VALUE;
 		int td = 0, i;
+		int dateSpan = 0;
 		for(i=0; i < radius + 1; i++) {
 			if(null != eachLayerWN[i] && null != eachLayerWN[i].get(pid)) {
 				if(inDate) {
-					if(minLoose > (td = ((i+1) * TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid))))) {
+					dateSpan = TimeUtility.getMinDateSpan(date, eachLayerWN[i].get(pid));
+					dateSpan = dateSpan <= Global.MAX_DATE_SPAN ? dateSpan : Global.MAX_DATE_SPAN;
+					
+//					if(pid == 69503 || pid == 338203 || pid == 807595 || pid == 635681 
+//				               || pid == 444195 || pid == 164721 || pid == 559032
+//				               || pid == 95997 || pid == 436822 || pid == 52680) {
+//						MLog.log("i * dateSpan = " + i + " * " + dateSpan);
+//					}
+					
+					if(minLoose > (td = ((i+1) * dateSpan))) {
 						minLoose = td;
 					}
-				} else return (i + 1) * minDateSpan;
+				} else {
+					
+//					if(pid == 69503 || pid == 338203 || pid == 807595 || pid == 635681 
+//				               || pid == 444195 || pid == 164721 || pid == 559032
+//				               || pid == 95997 || pid == 436822 || pid == 52680) {
+//						MLog.log("i * minDateSpan = " + i + " * " + minDateSpan);
+//					}
+					
+					return (i + 1) * minDateSpan;
+				}
 			}
 		}
+		
+//		if(pid == 69503 || pid == 338203 || pid == 807595 || pid == 635681 
+//	               || pid == 444195 || pid == 164721 || pid == 559032
+//	               || pid == 95997 || pid == 436822 || pid == 52680) {
+//			MLog.log("i * minDateSpan = " + i + " * " + minDateSpan);
+//		}
 		
 		if(minLoose == Integer.MAX_VALUE) {
 			if(minPathDis == -1)	minLoose = (i + 1) * minDateSpan;

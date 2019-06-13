@@ -11,8 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
+import entity.sp.AllPidWid;
 import entity.sp.GraphByArray;
+import precomputation.sp.IndexNidKeywordsListService;
+import sun.security.pkcs.SigningCertificateInfo;
 import utility.FileMakeOrLoader;
 import utility.Global;
 import utility.IOUtility;
@@ -23,6 +27,7 @@ import utility.TimeUtility;
 
 public class TestSampleChooser {
 	private static GraphByArray graph = null;
+	public static final int singNewLevel = -1;
 	
 	/**
 	 * 选取测试样本，随机选点，然后选取点的首词
@@ -441,7 +446,7 @@ public class TestSampleChooser {
 	 * @param wNum
 	 * @throws Exception
 	 */
-	public static void productTestSampleByPaper(int sampleNum, int wNum) throws Exception {
+	public static void productTestSampleByPaper(int sampleNum, int wNum, int maxLevel, int minWf) throws Exception {
 		String pathSample = Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(sampleNum) + ".wn=" + String.valueOf(wNum);
 		MLog.log("开始生成测试文件 " + pathSample + " . . . ");
 		
@@ -479,8 +484,11 @@ public class TestSampleChooser {
 		
 		int index = 1;
 		
+		
 		// 开始生成测试样本
 		while(index <= sampleNum) {
+//			if(minWf == -1)	minWf = RandomNumGenerator.getRandomInt(1, 10);
+			
 			// 生成坐标
 			while(true) {
 				pid = pidGe.getRandomInt();
@@ -502,9 +510,21 @@ public class TestSampleChooser {
 			nid = pid;
 			queue.reset();
 			queue.push(nid);
+			queue.push(singNewLevel);
 			recBfs.clear();
 			recBfs.add(nid);
+			int level = 1;
 			while(null != (nid = queue.poll())) {
+				if(nid == singNewLevel) {
+					queue.push(singNewLevel);
+					if((++level) > maxLevel)	break;
+					continue;
+				}
+				if(null != (tIntArr = nidDatesWids.get(nid))) {
+					bfsNode.add(nid);
+					if((--numBfsNode) == 0)	break;
+				}
+				
 				if(null != (edges = graph.getEdge(nid))) {
 					for(int e : edges) {
 						if(!recBfs.contains(e)) {
@@ -516,10 +536,8 @@ public class TestSampleChooser {
 						}
 					}
 				}
-				
-				bfsNode.add(nid);
-				if((--numBfsNode) == 0)	break;
 			}
+			
 			if(numBfsNode != 0)	continue;
 			
 			// 取其中随机个[1, n]个node
@@ -539,9 +557,15 @@ public class TestSampleChooser {
 				if(tIntArr != null) {
 					if(tIntArr[0][0] != Global.TIME_INAVAILABLE) {
 						dates.add(tIntArr[0][0]);
-						for(int nd1 : tIntArr[1])	widsHasDate.add(nd1);
+						for(int nd1 : tIntArr[1]) {
+							if(Global.wordFrequency.get(nd1) < minWf)	continue;
+							widsHasDate.add(nd1);
+						}
 					} else {
-						for(int nd1 : tIntArr[1])	widsNoDate.add(nd1);
+						for(int nd1 : tIntArr[1]) {
+							if(Global.wordFrequency.get(nd1) < minWf)	continue;
+							widsNoDate.add(nd1);
+						}
 					}
 				}
 			}
@@ -572,7 +596,165 @@ public class TestSampleChooser {
 			line += TimeUtility.getDateByIntDate(samDate);
 			bw.write(line + "\n");
 			
-//			MLog.log("已生成" + index + " : " + line + " 个样本");
+			MLog.log("已生成" + index + "-" + minWf + " : " + line + " 个样本");
+			index++;
+		}
+		
+		bw.close();
+		MLog.log("productTestSampleByBfsForPaper: <" + fp + "> over");
+	}
+	
+	
+	/**
+	 * 使用论文上的方法产生测试样本
+	 * @param sampleNum
+	 * @param wNum
+	 * @throws Exception
+	 */
+	public static void productTestSampleByPaper(int sampleNum, int wNum) throws Exception {
+		String pathSample = Global.inputDirectoryPath + Global.testSampleFile + "." + String.valueOf(500) + ".wn=" + String.valueOf(wNum);
+		MLog.log("开始生成测试文件 " + pathSample + " . . . ");
+		
+		// 读取坐标信息
+		String fp = Global.inputDirectoryPath + Global.pidCoordFile;
+		double[][] pidCoords = FileMakeOrLoader.loadArrayCoord(fp);
+		// 读取
+		fp = Global.inputDirectoryPath + Global.nodeIdKeywordListOnIntDateFile;
+		Map<Integer, int[][]> nidDatesWids = FileMakeOrLoader.loadArrayNid2DatesWids(fp);
+		
+		// 加载图
+		if(null == graph) {
+			graph = new GraphByArray(Global.numNodes);
+			graph.loadGraph(Global.inputDirectoryPath + Global.edgeFile);
+		}
+		int[] edges = null;
+		
+		int[][] tIntArr = null;
+		Integer nid;
+		
+		// 开始生成样本文件
+		BufferedWriter bw = IOUtility.getBW(pathSample);
+		double[] sampCoords = new double[2];
+		
+		Integer pid;
+		
+		LoopQueue<Integer> queue = new LoopQueue<>(100000);
+		HashSet<Integer> recBfs = new HashSet<Integer>();
+		Set<Integer> recPids = new HashSet<>();
+		
+		// pid随机随机产生器
+//		RandomNumGenerator pidGe = new RandomNumGenerator(0, Global.numPid);
+		List<Integer> pids = AllPidWid.getAllPid();
+		
+		MLog.log("数据加载完成");
+		
+		int index = 1;
+		
+		
+		// 开始生成测试样本
+		while(index <= sampleNum) {
+//			if(minWf == -1)	minWf = RandomNumGenerator.getRandomInt(1, 10);
+			
+			// 生成坐标
+			while(true) {
+				if(pids.size() < 2)	pids = AllPidWid.getAllPid();
+				int pidIndex = RandomNumGenerator.getRandomInt(pids.size());
+				pid = pids.get(pidIndex);
+				pids.remove(pidIndex);
+//				if(!recPids.contains(pid)) {
+					while(true) {
+						sampCoords[0] = pidCoords[pid][0] + RandomNumGenerator.getRandomFloat();
+						sampCoords[1] = pidCoords[pid][1] + RandomNumGenerator.getRandomFloat();
+						if (sampCoords[0] >= -90 && sampCoords[0] <= 90 && sampCoords[1] >= -180 && sampCoords[1] <= 180)
+							break;
+					}
+					recPids.add(pid);
+					break;
+//				}
+			}
+			
+			// 取[n/2, n*2]
+			int numBfsNode = RandomNumGenerator.getRandomInt(wNum/2 > 0 ? wNum/2 : 1, wNum * 2 > 3 ? wNum * 2 : 3);
+			List<Integer> bfsNode = new ArrayList<>();
+			nid = pid;
+			queue.reset();
+			queue.push(nid);
+			recBfs.clear();
+			recBfs.add(nid);
+			while(null != (nid = queue.poll())) {
+				bfsNode.add(nid);
+				if((--numBfsNode) == 0)	break;
+				
+				if(null != (edges = graph.getEdge(nid))) {
+					for(int e : edges) {
+						if(!recBfs.contains(e)) {
+							if(!queue.push(e)) {
+								MLog.log("队列" + queue.size() + "太短");
+								System.exit(0);
+							}
+							recBfs.add(e);
+						}
+					}
+				}
+			}
+			
+			if(numBfsNode != 0)	continue;
+			
+			// 取其中随机个[1, n]个node
+			int numRandomNode = RandomNumGenerator.getRandomInt(1, wNum >= 3 ? wNum : 3);
+			Set<Integer> randomNids = new HashSet<>();
+			RandomNumGenerator g = new RandomNumGenerator(0, bfsNode.size() - 1);
+			while(numRandomNode-- > 0) {
+				randomNids.add(bfsNode.get(g.getRandomInt()));
+			}
+			
+			// 提取时间、词
+			List<Integer> dates = new ArrayList<>();
+			List<Integer> widsHasDate = new ArrayList<>();
+			List<Integer> widsNoDate = new ArrayList<>();
+			for(int nd : randomNids) {
+				tIntArr = nidDatesWids.get(nd);
+				if(tIntArr != null) {
+					if(tIntArr[0][0] != Global.TIME_INAVAILABLE) {
+						dates.add(tIntArr[0][0]);
+						for(int nd1 : tIntArr[1]) {
+							widsHasDate.add(nd1);
+						}
+					} else {
+						for(int nd1 : tIntArr[1]) {
+							widsNoDate.add(nd1);
+						}
+					}
+				}
+			}
+			
+			// 选取样本
+			if(dates.isEmpty() || widsHasDate.size() < wNum || widsNoDate.size() < wNum)	continue;
+			int samDate = 0;
+			List<Integer> samWids = new ArrayList<>();
+			int numWid = wNum;
+			samDate = dates.get(RandomNumGenerator.getRandomInt(0, dates.size() - 1));
+			while(numWid-- > 0) {
+				int ii = 0;
+				if(isDate()) {
+					ii = RandomNumGenerator.getRandomInt(0, widsHasDate.size() - 1);
+					samWids.add(widsHasDate.get(ii));
+					widsHasDate.remove(ii);
+				} else {
+					ii = RandomNumGenerator.getRandomInt(0, widsNoDate.size() - 1);
+					samWids.add(widsNoDate.get(ii));
+					widsNoDate.remove(ii);
+				}
+			}
+			
+			// 写样本
+			String line = index + Global.delimiterLevel1;
+			for(double d : sampCoords)	line += d + Global.delimiterSpace;
+			for(int ii : samWids)	line += ii + Global.delimiterSpace;
+			line += TimeUtility.getDateByIntDate(samDate);
+			bw.write(line + "\n");
+			
+			MLog.log("已生成" + index + " : " + line + " 个样本");
 			index++;
 		}
 		
@@ -582,15 +764,31 @@ public class TestSampleChooser {
 	
 	
 	public static void main(String[] args) throws Exception{
+		
+//		IndexNidKeywordsListService.buildWordFrequencyFile();
+		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+		
+		int num = 0;
+		int minWf = 100;
+		for(Entry<Integer, Integer> en : Global.wordFrequency.entrySet()) {
+			if(en.getValue() >= minWf) {
+				num++;
+			}
+		}
+		MLog.log("wNum = " + Global.wordFrequency.size());
+		MLog.log("num = " + num);
+		
+		
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
 //				Global.inputDirectoryPath + Global.testSampleFile);
 //		int a[] = {1, 5, 8, 10, 15, 20};
-		int a[] = {2, 4};
-		for(int ii : a) {
+//		int a[] = {3};
+//		for(int ii : a) {
 //			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
 //			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
-			TestSampleChooser.productTestSampleByPaper(500, ii);
-		}
+//			TestSampleChooser.productTestSampleByPaper(200, ii, 4, minWf);
+//			TestSampleChooser.productTestSampleByPaper(200, ii);
+//		}
 	}
 }

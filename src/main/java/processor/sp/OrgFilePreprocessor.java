@@ -39,16 +39,33 @@ public class OrgFilePreprocessor {
 	 */
 	public static void filterCoord(String pathInput, String pathOutput) throws Exception {
 		Map<Integer, Pair<Double, Double>> id2Coord = FileMakeOrLoader.loadCoord(pathInput);
-		List<Integer> invalidId = new ArrayList<>();
+		Set<Integer> invalidId = new HashSet();
 		for(Entry<Integer, Pair<Double, Double>> en : id2Coord.entrySet()) {
 			Pair<Double, Double> coord = en.getValue();
 			if(coord.getKey() >= MIN_LAT && coord.getKey() <= MAX_LAT &&
 				coord.getValue() >= MIN_LON && coord.getValue() <= MAX_LON)	continue;
 			invalidId.add(en.getKey());
 		}
+		
 		for(Integer id : invalidId) {
 			System.out.println(id + " " + id2Coord.get(id));
 		}
+		
+		// 输出文件
+		BufferedWriter bw = IOUtility.getBW(pathOutput);
+		bw.write(String.valueOf((id2Coord.size() - invalidId.size())) + Global.delimiterPound + "\n");
+		int index = 0;
+		for(Entry<Integer, Pair<Double, Double>> en : id2Coord.entrySet()) {
+			if(invalidId.contains(en.getKey()))	continue;
+			bw.write(String.valueOf(index++));
+			bw.write(Global.delimiterLevel1);
+			bw.write(String.valueOf(en.getValue().getKey()));
+			bw.write(Global.delimiterSpace);
+			bw.write(String.valueOf(en.getValue().getValue()));
+			bw.write('\n');
+		}
+		bw.close();
+		
 		MLog.log("filterCoord over");
 	}
 	
@@ -192,6 +209,9 @@ public class OrgFilePreprocessor {
 	
 	
 	public static void main(String[] args) throws Exception {
+		MLog.log(Global.inputDirectoryPath);
+		MLog.log(Global.outputDirectoryPath);
+		
 		String pathInput = Global.inputDirectoryPath + "pidCoordYagoVB.txt";
 		String pathOutput = Global.inputDirectoryPath + "pidCoordYagoVB_avaiable.txt";
 		
@@ -210,17 +230,17 @@ public class OrgFilePreprocessor {
 		String pathNidK = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB.txt";
 		
 		/** 从nidKeywordsListMapYagoVB.txt移除掉那些带时间的词  **/
-//		pathInput = Global.inputDirectoryPath + "nodeIdKeywordListOnIntDateMapYagoVB_available.txt";
-//		pathNidK = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_org.txt";
-//		String pathNoKD = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_nodate.txt";
-//		buildNoDateNidKeywordsListFile(pathInput, pathNidK, pathNoKD);
+		pathInput = Global.inputDirectoryPath + "nodeIdKeywordListOnIntDateMapYagoVB_available.txt";
+		pathNidK = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_org.txt";
+		String pathNoKD = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_nodate.txt";
+		buildNoDateNidKeywordsListFile(pathInput, pathNidK, pathNoKD);
 		
 		
 		/** 合并不带时间和带时间节点  **/
-//		pathNidKD = Global.inputDirectoryPath + "nodeIdKeywordListOnIntDateMapYagoVB_available.txt";
-//		pathNidK = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_nodate.txt";
-//		String pathM = Global.inputDirectoryPath + "mergeIdKDAndIdK.txt";
-//		merge(pathNidKD, pathNidK, pathM);
+		pathNidKD = Global.inputDirectoryPath + "nodeIdKeywordListOnIntDateMapYagoVB_available.txt";
+		pathNidK = Global.inputDirectoryPath + "nidKeywordsListMapYagoVB_nodate.txt";
+		String pathM = Global.inputDirectoryPath + "mergeIdKDAndIdK.txt";
+		merge(pathNidKD, pathNidK, pathM);
 		
 		
 	}

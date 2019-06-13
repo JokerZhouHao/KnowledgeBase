@@ -298,9 +298,9 @@ class Bar:
         x_txts = [r'$10^2$', r'$10^4$', r'$10^6$']
 
         if search_type==0:
-            ys = [500+i*500 for i in range(0, 5)]
-        elif search_type==1:
             ys = [2000+i*500 for i in range(0, 5)]
+        elif search_type==1:
+            ys = [2000+i*500 for i in range(0, 6)]
 
         if search_type==0:
             title = 'SPTD*'
@@ -309,7 +309,7 @@ class Bar:
 
         timeBar = Bar(xLabel=r'$\mathit{l}$', yLabel='Runtime (ms)', is_stack=False, title=title, ys=ys, xs=xs, x_txts=x_txts, yscale='linear', y_type='NW', f_type=ftype, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\r_len\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190612\\r_len\\'
         radius = [1, 2, 3]
         radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
         # lens = (100000, 1000000, 10000000)
@@ -317,14 +317,14 @@ class Bar:
         # lens = (100, 1000, 10000)
         lens = (100, 10000, 1000000)
 
-        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=50, dr=7, opt='O5')
-        indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
+        # fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=50, dr=7, opt='O5')
+        # indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
 
         for radiu_i in range(len(radius)):
             runtimes = []
             for len_i in range(len(lens)):
-                # data = Data.getData(k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
-                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
+                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=300, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=12000000)
+                # data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
                 print(data)
                 runtimes.append(data.timeTotal)
             timeBar.draw_bar(radiu_i, runtimes, hatch=Bar.hatchxes[radiu_i], label=radius_txt[radiu_i], )
