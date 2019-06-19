@@ -139,7 +139,6 @@ public class IndexWordPNService {
 			if(hits.length == 0)	return null;
 			byte[] bs = indexSearcher.doc(hits[0].doc).getBinaryValue("pIdDates").bytes;
 			if(Global.isTest) {
-				qp.rr.TimePNIORead += (System.currentTimeMillis() - Global.tempTime);
 				if(Global.isFirstReadPn) {
 					Global.isFirstReadPn = false;
 				}

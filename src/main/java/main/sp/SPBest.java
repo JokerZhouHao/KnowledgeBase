@@ -333,11 +333,13 @@ public class SPBest implements SPInterface{
 			for(i=0; i<sortQwords.length; i++) {
 				byte[] bs = null;
 				if(widHasDate.contains(sortQwords[i])) {
+					long tT = System.currentTimeMillis();
 					if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O3) {
 						bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
 					} else {
 						bs = wIdPnInfSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
 					}
+					qp.rr.TimePNIORead += System.currentTimeMillis() - tT;
 //					MLog.log(qp.optMethod + " > " + i + "-bs = " + bs);
 					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs));
 				} else {

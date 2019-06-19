@@ -339,7 +339,7 @@ public class TestInputDataBuilderYago {
 //		generateWf();
 //		generateK();
 //		generateNW();
-//		generateDr();
+		generateDr();
 //		generateDiffSize();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";

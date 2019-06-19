@@ -23,6 +23,9 @@ class Data:
         self.timeBspGetPN = 0
         self.timeCptPid2Wids = 0
 
+        self.TimePNIORead = 0
+        self.NumPNNidDisPair = 0
+
     # 计算所需字段的平均值
     @staticmethod
     #testSampleResultFile.t=0.ns=500.r=1.k=10.nw=1
@@ -134,6 +137,10 @@ class Data:
                 data.timeCptPid2Wids += (int(strArr[14]))
                 if len(strArr) >= 43:
                     data.NumTestPid += (int(strArr[42]))
+                if len(strArr) >= 45:
+                    data.TimePNIORead += (int(strArr[44]))
+                    data.NumPNNidDisPair += (int(strArr[45]))
+
         index = num
         data.numAccessedRTreeNode /= index
         data.numTQSP /= index
@@ -144,6 +151,8 @@ class Data:
         data.NumTestPid /= index
         data.timeBspGetPN /= index
         data.timeCptPid2Wids /= index
+        data.TimePNIORead /= index
+        data.NumPNNidDisPair /= index
         data.numSample = index
         return  data
 
@@ -154,8 +163,11 @@ class Data:
     def __str__(self):
         strs = ''
         strs = strs + self.filePath + '\n'
-        strs += 'numSample numAccessedRTreeNode numTQSP timeSemantic timeOther timeTotal numCptTotalReach2Wids NumTestPid timeBspGetPN timeCptPid2Wids\n'
-        strs += "%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7d"%(self.numSample, self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal, self.numCptTotalReach2Wids, self.NumTestPid, self.timeBspGetPN, self.timeCptPid2Wids) + '\n'
+        strs += 'numSample  numAccessedRTreeNode  numTQSP  timeSemantic   timeOther   timeTotal   numCptTotalReach2Wids   NumTestPid   timeBspGetPN   timeCptPid2Wids  TimePNIORead  NumPNNidDisPair\n'
+        strs += "%-11.0d%-22.0d%-9.0d%-15.0d%-12.0d%-12.0d%-19.0d%-18.0d%-15.0d%-17.0d%-14.0d%-15.0d"%(self.numSample,
+                self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal,
+                self.numCptTotalReach2Wids, self.NumTestPid, self.timeBspGetPN, self.timeCptPid2Wids,
+                self.TimePNIORead, self.NumPNNidDisPair) + '\n'
         return strs
 
 # data = Data.getData(0, 500, 1, 1, 5)
