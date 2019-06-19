@@ -114,10 +114,10 @@ public class TestInputDataBuilderDBpedia {
 		int ks[] = {20, 15, 10, 8, 5, 3, 1};
 //		int ks[] = {1, 3, 4, 5};
 		int nw = 3;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
-		int wf = 1000;
-		int dr = 7;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
+		int wf = 10000;
+		int dr = 3;
 		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
@@ -143,13 +143,13 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateNW(){
 		int types[] = {0, 1};
 		int ns = 200;
-		int r = 3;
 		int k = 5;
+		int r = 3;
+		int rLen = 10000000;
+		int wf = 10000;
 		int nws[] = {5, 4, 3, 2, 1};
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
-		int wf = 1000;
-		int dr = 7;
+		int maxDataSpan = 300;
+		int dr = 3;
 		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
@@ -175,12 +175,12 @@ public class TestInputDataBuilderDBpedia {
 	public static List<String> generateDr(){
 		int type = 1;
 		int ns = 200;
-		int r = 3;
 		int k = 5;
-		int nw = 3;;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
-		int wf = 1000;
+		int r = 3;
+		int rLen = 10000000;
+		int nw = 3;
+		int maxDataSpan = 300;
+		int wf = 10000;
 //		int drs[] = {0, 3, 7, 14, 30, 50, 100, 150};
 		int drs[] = {2, 6, 14, 30, 60, 100, 200, 300};
 		String[] opts = {"0", "5"};
@@ -298,7 +298,7 @@ public class TestInputDataBuilderDBpedia {
 //		generateNW();
 //		generateDr();
 //		generateOpt();
-		generateDiffSize();
+//		generateDiffSize();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";
 //		for(String[] sts : loadTestString(path)) {

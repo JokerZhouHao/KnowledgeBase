@@ -18,11 +18,15 @@ class Data:
         self.timeTotal = 0
         self.numTQSP = 0
         self.numAccessedRTreeNode = 0
+        self.numCptTotalReach2Wids = 0
+        self.NumTestPid = 0
+        self.timeBspGetPN = 0
+        self.timeCptPid2Wids = 0
 
     # 计算所需字段的平均值
     @staticmethod
     #testSampleResultFile.t=0.ns=500.r=1.k=10.nw=1
-    def getData(t=0, ns=500, r=1, k=1, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None, time_total_threshold=1000000000):
+    def getData(t=0, ns=500, r=1, k=0, nw=1, prefix=None, f_TYPE_TEST=None, f_nwlen=None, f_mds=None, relativePath=None, fp=None, time_total_threshold=1000000000):
         if fp==None:    data = Data(t, ns, r, k, nw, prefix=prefix, f_TYPE_TEST=f_TYPE_TEST, f_nwlen=f_nwlen, f_mds=f_mds, relativePath=relativePath)
         else:   data = Data(fp=fp)
         index = 0
@@ -50,11 +54,15 @@ class Data:
                 data.timeSemantic += int(strArr[28])
                 data.timeTotal += int(strArr[32])
                 data.timeOther += (int(strArr[32]) - int(strArr[28]))
+                data.numCptTotalReach2Wids += (int(strArr[12]))
+                data.NumTestPid += (int(strArr[42]))
         data.numAccessedRTreeNode /= index
         data.numTQSP /= index
         data.timeSemantic /= index
         data.timeTotal /= index
         data.timeOther /= index
+        data.numCptTotalReach2Wids /= index
+        data.NumTestPid /= index
         data.numSample = index
         return  data
 
@@ -105,25 +113,37 @@ class Data:
         if fp==None:    data = Data(t, ns, r, k, nw, prefix=prefix, f_TYPE_TEST=f_TYPE_TEST, f_nwlen=f_nwlen, f_mds=f_mds, relativePath=relativePath)
         else:   data = Data(fp=fp)
         index = 0
+        num = 0
         with open(data.filePath) as f:
             f.readline()
             while True:
                 line = f.readline()
                 if line=='':    break
                 index += 1
-                if None != indexs and not(index in indexs):    continue
                 strArr = line.split(',')
+                if None != indexs and not(index in indexs):    continue
+                if int(strArr[32]) >= time_total_threshold: continue
+                num += 1
                 data.numAccessedRTreeNode += int(strArr[25])
                 data.numTQSP += int(strArr[27])
                 data.timeSemantic += int(strArr[28])
                 data.timeTotal += int(strArr[32])
                 data.timeOther += (int(strArr[32]) - int(strArr[28]))
-        index = len(indexs)
+                data.numCptTotalReach2Wids += (int(strArr[12]))
+                data.timeBspGetPN += (int(strArr[4]))
+                data.timeCptPid2Wids += (int(strArr[14]))
+                if len(strArr) >= 43:
+                    data.NumTestPid += (int(strArr[42]))
+        index = num
         data.numAccessedRTreeNode /= index
         data.numTQSP /= index
         data.timeSemantic /= index
         data.timeTotal /= index
         data.timeOther /= index
+        data.numCptTotalReach2Wids /= index
+        data.NumTestPid /= index
+        data.timeBspGetPN /= index
+        data.timeCptPid2Wids /= index
         data.numSample = index
         return  data
 
@@ -134,8 +154,8 @@ class Data:
     def __str__(self):
         strs = ''
         strs = strs + self.filePath + '\n'
-        strs += 'numSample numAccessedRTreeNode numTQSP timeSemantic timeOther timeTotal\n';
-        strs += "%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d"%(self.numSample, self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal) + '\n'
+        strs += 'numSample numAccessedRTreeNode numTQSP timeSemantic timeOther timeTotal numCptTotalReach2Wids NumTestPid timeBspGetPN timeCptPid2Wids\n'
+        strs += "%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7.0d%-7d"%(self.numSample, self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal, self.numCptTotalReach2Wids, self.NumTestPid, self.timeBspGetPN, self.timeCptPid2Wids) + '\n'
         return strs
 
 # data = Data.getData(0, 500, 1, 1, 5)

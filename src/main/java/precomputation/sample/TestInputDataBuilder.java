@@ -272,7 +272,7 @@ public class TestInputDataBuilder {
 //			System.out.println();
 //		}
 		
-		List<QueryParams> qps = TestInputDataBuilder.loadTestQuery(path);
+//		List<QueryParams> qps = TestInputDataBuilder.loadTestQuery(path);
 //		for(QueryParams q : qps) {
 //			System.out.println(q);
 //		}

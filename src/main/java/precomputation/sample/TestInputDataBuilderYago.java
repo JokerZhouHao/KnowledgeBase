@@ -47,14 +47,14 @@ public class TestInputDataBuilderYago {
 	 * @return
 	 */
 	public static List<String> generateTest(){
-		int types[] = {0, 1};
-		int ns = 50;
+		int types[] = {1};
+		int ns = 200;
 //		int rs[] = {1, 2, 3};
 		int rs[] = {3};
 		int k = 5;
 		int nw = 3;
 //		int rLens[] = {100000, 1000000, 10000000};
-		int rLens[] = {10000};
+		int rLens[] = {10000000};
 		int maxDataSpan = 300;
 		int wf = 1000;
 		int dr = 3;
@@ -89,8 +89,8 @@ public class TestInputDataBuilderYago {
 		int k = 5;
 		int nw = 3;
 //		int rLens[] = {100, 10000, 1000000};
-//		int rLens[] = {1000, 100000, 10000000};
-		int rLens[] = {2147483631};
+		int rLens[] = {1000, 100000, 10000000, 2147483631};
+//		int rLens[] = {2147483631};
 		
 //		int rLens[] = {100, 1000};
 		int maxDataSpan = 300;
@@ -122,10 +122,10 @@ public class TestInputDataBuilderYago {
 		int r = 3;
 		int k = 5;
 		int nw = 3;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
 		int wfs[] = {50, 100, 250, 500, 1000, 10000, 100000, 1000000};
-		int dr = 7;
+		int dr = 3;
 		
 		List<String> lines = new ArrayList<>();
 		
@@ -152,10 +152,10 @@ public class TestInputDataBuilderYago {
 		int ks[] = {20, 15, 10, 8, 5, 3, 1};
 //		int ks[] = {1, 3, 4, 5};
 		int nw = 3;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
 		int wf = 1000;
-		int dr = 7;
+		int dr = 3;
 		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
@@ -171,6 +171,8 @@ public class TestInputDataBuilderYago {
 		for(String line : lines)
 			System.out.println(line);
 		
+		System.out.println();
+		
 		return lines;
 	}
 	
@@ -184,10 +186,10 @@ public class TestInputDataBuilderYago {
 		int r = 3;
 		int k = 5;
 		int nws[] = {5, 4, 3, 2, 1};
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
 		int wf = 1000;
-		int dr = 7;
+		int dr = 3;
 		String[] opts = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
@@ -202,6 +204,7 @@ public class TestInputDataBuilderYago {
 		
 		for(String line : lines)
 			System.out.println(line);
+		System.out.println();
 		
 		return lines;
 	}
@@ -216,8 +219,8 @@ public class TestInputDataBuilderYago {
 		int r = 3;
 		int k = 5;
 		int nw = 3;;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
 		int wf = 1000;
 //		int drs[] = {0, 3, 7, 14, 30, 50, 100, 150};
 		int drs[] = {2, 6, 14, 30, 60, 100, 200, 300};
@@ -244,12 +247,12 @@ public class TestInputDataBuilderYago {
 		int types[] = {0, 1};
 		int ns = 200;
 		int r = 3;
+		int rLen = 10000000;
 //		int ks[] = {1, 3, 5, 8, 10, 15, 20};
 		int ks[] = {20, 15, 10, 8, 5, 3, 1};
 		int nw = 3;
-		int rLen = 10000;
 		int maxDataSpan = 300;
-		int wf = 100;
+		int wf = 1000;
 		int dr = 3;
 		String opts0[] = {"0", "1", "2", "3", "4"};
 		String opts1[] = {"0", "2", "3", "4"};
@@ -282,10 +285,10 @@ public class TestInputDataBuilderYago {
 //		int ks[] = {1, 3, 5, 8, 10, 15, 20};
 		int k= 5;
 		int nw = 3;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
 		int wf = 1000;
-		int dr = 7;
+		int dr = 3;
 		String opts[] = {"0", "5"};
 		
 		List<String> lines = new ArrayList<>();
@@ -330,13 +333,13 @@ public class TestInputDataBuilderYago {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		generateTest();
-		generateRLen();
+//		generateOpt();
+		generateTest();
+//		generateRLen();
 //		generateWf();
 //		generateK();
 //		generateNW();
 //		generateDr();
-//		generateOpt();
 //		generateDiffSize();
 		
 //		String path = Global.inputDirectoryPath + File.separator + "sample_result" + File.separator + "r_len.txt";

@@ -112,6 +112,13 @@ public class RunRecord {
 	public long NumTotalSearchNid = 0;
 	public long NumInRangeSearchNid = 0;
 	
+	public long NumTestRtreeNode = 0;
+	public long NumTestPid = 0;
+	public long NumAccessPid = 0;
+	
+	public long TimePNIORead = 0;
+	public long NumPNNidDisPair = 0;
+	
 	public String getHeader() {
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,timeBspGetW2PReach,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
@@ -128,7 +135,10 @@ public class RunRecord {
 				+ "numCptGetMinDateSpanLeftSpan,numCptGetMinDateSpanRightSpan,"
 				+ "timeKSPComputation,timeBsp,"
 				+ "queueLastValue,kthScore,resultSize,timeP2PInSemanticTree,NumTotalSearchNid,NumInRangeSearchNid,"
-				+ "AvgNumBfsNid,AvgLevelBfs,\n";
+				+ "AvgNumBfsNid,AvgLevelBfs,"
+				+ "NumTestRtreeNode,NumTestPid,NumAccessPid,"
+				+ "TimePNIORead,NumPNNidDisPair,"
+				+ "\n";
 	}
 	
 	public String getBspInfo(int id, long base) {
@@ -149,9 +159,13 @@ public class RunRecord {
 				String.valueOf(queueLastValue) + "," + String.valueOf(kthScore) + "," + String.valueOf(resultSize) + "," + 
 				String.valueOf(timeP2PInSemanticTree/base) + "," +
 				String.valueOf(NumTotalSearchNid) + "," + String.valueOf(NumInRangeSearchNid) + ",";
-		if(numGetSemanticTree == 0)	return str += 	"0,0,\n";
-		else return str += String.valueOf(AvgNumBfsNid/numGetSemanticTree) + "," +
-						   String.valueOf(AvgLevelBfs/numGetSemanticTree) + "," + 
-						   "\n";
+		if(numGetSemanticTree == 0)	str += 	"0,0,";
+		else str += String.valueOf(AvgNumBfsNid/numGetSemanticTree) + "," +
+						   String.valueOf(AvgLevelBfs/numGetSemanticTree) + ",";
+		str += String.valueOf(NumTestRtreeNode) + "," + String.valueOf(NumTestPid) + "," +
+				String.valueOf(NumAccessPid) + "," + 
+				String.valueOf(TimePNIORead) + "," + String.valueOf(NumPNNidDisPair) + "," +
+				"\n";
+		return str;
 	}
 }

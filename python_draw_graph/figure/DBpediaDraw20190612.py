@@ -320,7 +320,7 @@ class Bar:
         if search_type==0:
             ys = [500+i*500 for i in range(0, 6)]
         elif search_type==1:
-            ys = [5000+i *1000 for i in range(0, 5)]
+            ys = [6000+i *1000 for i in range(0, 5)]
 
         if search_type==0:
             title = 'SPTD*'
@@ -331,16 +331,20 @@ class Bar:
 
         base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\r_len\\'
         radius = [1, 2, 3]
-        radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
+        # radius_txt = [r'$\alpha$-radius=1', r'$\alpha$-radius=2', r'$\alpha$-radius=3']
+        radius_txt = [r'$\alpha$=1', r'$\alpha$=2', r'$\alpha$=3']
 
-        # fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=50, dr=7, opt='O5')
-        # indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
+        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt='O5')
+        indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
 
         for radiu_i in range(len(radius)):
             runtimes = []
             for len_i in range(len(lens)):
-                data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=300, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=12000000)
-                # data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=50000000, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=50, dr=7, opt="O5"), time_total_threshold=12000000)
+                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=lens[len_i], mds=300, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=12000000)
+                # fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt='O5')
+                # indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
+                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest',
+                            nwlen=lens[len_i], mds=300, t=search_type, ns=200, r=radius[radiu_i], k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=12000000)
                 print(data)
                 runtimes.append(data.timeTotal)
             timeBar.draw_bar(radiu_i, runtimes, hatch=Bar.hatchxes[radiu_i], label=radius_txt[radiu_i], )
@@ -454,8 +458,9 @@ class LineChart:
             # self.ax.legend(loc=1, prop={'size': 15}, bbox_to_anchor=(0.97, 0.84))
             self.ax.legend(loc=2, prop={'size': 15}, frameon=False)
         if self.yLabel.find('Runtime') != -1 and self.xLabel.find('top') != -1:
-            self.ax.legend(loc=1, prop={'size': 13}, bbox_to_anchor=(0.18, 1.018), frameon=False)
+            # self.ax.legend(loc=1, prop={'size': 13}, bbox_to_anchor=(0.18, 1.018), frameon=False)
             # self.ax.legend(loc=1, prop={'size': 15}, bbox_to_anchor=(0.2, 1.1))
+            self.ax.legend(loc=2, prop={'size': 15}, frameon=False)
         elif self.xLabel.find('top') != -1 and self.yLabel.find('Runtime') != -1:
             self.ax.legend(loc=2, prop={'size': 15}, frameon=False)
         # elif self.title == r'opt-sptd':
@@ -535,49 +540,50 @@ class LineChart:
             yLabel = 'Runtime (ms)'
             yscale = 'log'
             ylim = (100, 100000)
+            # ys = [0 + i*2000 for i in range(0, 6)]
         elif show_type==1:
-            yLabel = '# of TQTSP Computations'
-            yscale='log'
-            ylim = (1000, 1000000)
-            ys = [base_y+i*100 for i in range(0, 11)]
+            yLabel = '# of TQSP Computations'
+            # yscale='log'
+            ylim = (0, 10000)
+            ys = [0 + i*2000 for i in range(0, 6)]
         elif show_type==2:
             yLabel = '# of R-tree nodes accessed'
-            ys = [0 + i*1000 for i in range(6)]
+            ys = [0 + i*50 for i in range(5)]
 
         x_txts = [1.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
         xs=[i for  i in  range(len(x_txts))]
 
-        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=r'top-$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
+        chart = LineChart(xs, x_txts, ys=ys, yscale=yscale, ylim=ylim, xLabel=r'$k$', yLabel=yLabel, title=r'top-$k$', fpath=fpath)
 
         alg_types = ['O0', 'O5']
         search_types = [0, 1]
         type = None
 
         ks = [1, 3, 5, 8, 10, 15, 20]
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\k_nw_dr\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\k_nw_dr\\'
 
-        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
-        # fp='D:\\nowMask\KnowledgeBase\sample_result\\res\\testSampleResultFile.SPBest.nwlen=10000.mds=50000000.t=0.ns=200.r=3.k=5.nw=3.wf=1000.dr=7.O5.csv'
-        # print(fp)
+        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=10000, dr=3, opt='O5')
         indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
-        # print(indexs)
-        # print(len(indexs))
 
+        time_out = 120000
 
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
+                    time_out = 10000000000
                     if search_index==0: type=r'$SPTD$'
                     else:   type=r'$SPTR$'
                 else:
+                    time_out = 120000
                     if search_index==0: type=r'$SPTD^*$'
                     else:   type=r'$SPTR^*$'
                 runtimes = []
                 for k in ks:
-                    # data = Data.getData(k=k, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000,
-                    #                             t=search_types[search_index], ns=200, r=3, k=k, nw=3, wf=1000, dr=7, opt=alg_types[alg_index]))
-                    data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000,
-                                                 t=search_types[search_index], ns=200, r=3, k=k, nw=3, wf=1000, dr=7, opt=alg_types[alg_index]))
+                    # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300,
+                    #                             t=search_types[search_index], ns=200, r=3, k=k, nw=3, wf=10000, dr=3, opt=alg_types[alg_index]))
+                    data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300,
+                                                 t=search_types[search_index], ns=200, r=3, k=k, nw=3, wf=10000, dr=3, opt=alg_types[alg_index]),
+                                                 time_total_threshold=1200000)
                     print(data)
                     if 0==show_type: runtimes.append(data.timeTotal)
                     elif 1==show_type: runtimes.append(data.numTQSP)
@@ -666,7 +672,12 @@ class LineChart:
         type = None
 
         nws = [1, 2, 3, 4, 5]
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\k_nw_dr\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\k_nw_dr\\'
+
+        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=10000, dr=3, opt='O5')
+        indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
+
+
         for search_index in range(len(search_types)):
             for alg_index in range(len(alg_types)):
                 if alg_index==0:
@@ -678,10 +689,11 @@ class LineChart:
                 runtimes = []
 
                 for nw in nws:
-                    fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=nw, wf=1000, dr=7, opt='O5')
+                    fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=nw, wf=10000, dr=3, opt='O5')
                     indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
                     # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=search_types[search_index], ns=200, r=3, k=5, nw=nw, wf=1000, dr=7, opt=alg_types[alg_index]))
-                    data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=search_types[search_index], ns=200, r=3, k=5, nw=nw, wf=1000, dr=7, opt=alg_types[alg_index]))
+                    data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000,
+                                                  mds=300, t=search_types[search_index], ns=200, r=3, k=5, nw=nw, wf=10000, dr=3, opt=alg_types[alg_index]))
                     print(data)
                     runtimes.append(data.timeTotal)
                 chart.draw_line(runtimes, type)
@@ -838,24 +850,24 @@ class LineChart:
     def draw_word_frequency(title=r'$\tau$', search_type=0, base_y=None, rotation=0, fpath='test.pdf'):
         if base_y!=None:
             if search_type==0:
-                # ys = [0+i*2000 for i in range(0, 7)]
-                ys = [0+i*2 for i in range(0, 7)]
+                # ys = [1000+i*2000 for i in range(0, 5)]
+                ys = [0+i*2 for i in range(0, 6)]
             elif search_type==1:
                 ys = [base_y+i*2000 for i in range(0, 7)]
-        xs=[i for  i in  range(0, 8)]
-        x_txts = [r'$5\times10^1$', r'$1\times10^2$', r'$2.5\times10^2$',
+
+        x_txts = [r'$1\times10^2$', r'$2.5\times10^2$',
                      r'$5\times10^2$', r'$1\times10^3$',
                      r'$1\times10^4$',r'$1\times10^5$',
-                     r'$1\times10^6$'
-                 ]
+                     r'$1\times10^6$']
+        xs=[i for  i in  range(0, len(x_txts))]
         if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=title, yLabel='Runtime (s)', title=title, xlabel_rotation=rotation, fpath = fpath)
         else: chart = LineChart(xs, x_txts, xLabel=title, yLabel='Runtime (s)', title=title, xlabel_rotation=rotation, fpath = fpath)
 
         # chart.ax.grid('on')
 
-        wfs = [50, 100, 250, 500, 1000, 10000, 100000, 1000000]
+        wfs = [100, 250, 500, 1000, 10000, 100000, 1000000]
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\wf\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\wf\\'
         search_name = None
         if search_type==0:
             search_name = r'$SPTD^*$'
@@ -865,15 +877,16 @@ class LineChart:
         search_types = (0, 1)
         search_names = (r'$SPTD^*$', r'$SPTR^*$')
 
-        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt='O5')
         indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
 
         for search_type_index in range(len(search_types)):
             runtimes = []
             for wf in wfs:
-                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=7, opt="O5"), time_total_threshold=12000000)
-                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=7, opt="O5"), time_total_threshold=12000000)
+                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
+                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
                 runtimes.append(data.timeTotal / 1000)
+                print(data)
             chart.draw_line(runtimes, search_names[search_type_index])
         chart.show()
 
@@ -908,8 +921,9 @@ class LineChart:
 
      # 画不同date range折线图
     @staticmethod
-    def draw_date_range(label=r'$|q.\delta|$', base_y=None, x_rotation=0, fpath='test.pdf'):
-        if base_y!=None: ys = [2000 + i*2000 for i in range(0, 5)]
+    # def draw_date_range(label=r'$|q.\delta|$', base_y=None, x_rotation=0, fpath='test.pdf'):
+    def draw_date_range(label=r'$|q.r|$', base_y=None, x_rotation=0, fpath='test.pdf'):
+        if base_y!=None: ys = [6 + i*1 for i in range(0, 5)]
 
         # x_txts = [r'$5\times10^8$', r'$1\times10^8$', r'$5\times10^7$', r'$1\times10^7$',
         #           r'$5\times10^6$', r'$1\times10^6$', r'$5\times10^5$', r'$1\times10^5$',
@@ -920,12 +934,12 @@ class LineChart:
         x_txts = [2, 6, 14, 30, 60, 100, 200, 300]
         xs=[i for  i in  range(len(drs))]
 
-        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath = fpath)
-        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, ylim=(1000, 100000), yLabel='Runtime (ms)', xlabel_rotation=x_rotation, fpath=fpath)
+        if base_y!=None: chart = LineChart(xs, x_txts, ys=ys, yscale='liner', xLabel=label, title=label, yLabel='Runtime (s)', xlabel_rotation=x_rotation, fpath = fpath)
+        else:   chart = LineChart(xs, x_txts, xLabel=label, title=label, ylim=(1000, 100000), yLabel='Runtime (s)', xlabel_rotation=x_rotation, fpath=fpath)
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190602\\k_nw_dr\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\k_nw_dr\\'
 
-        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
+        fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=10000, dr=3, opt='O5')
         indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5)
 
         alg_types=['O0', 'O5']
@@ -933,9 +947,10 @@ class LineChart:
             runtimes = []
             for dr in drs:
                 # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=(dr-2)/2, opt=alg_type))
-                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=1, ns=200, r=3, k=5, nw=3, wf=1000, dr=(dr-2)/2, opt=alg_type))
+                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest',
+                                              nwlen=10000000, mds=300, t=1, ns=200, r=3, k=5, nw=3, wf=10000, dr=(dr-2)/2, opt=alg_type))
                 # print(data)
-                runtimes.append(data.timeTotal)
+                runtimes.append(data.timeTotal / 1000)
             print(runtimes)
             if alg_type=='O0':
                 chart.draw_line(runtimes, r'$SPTR$')
@@ -1005,12 +1020,12 @@ class LineChart:
         plt.pause(1200)
 
 
-# base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190609\\test\\'
-# fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt='O5')
-# indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=110000)
-# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O0"), time_total_threshold=110000)
+# base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\yago2s_single_date\\20190612\\r_len\\'
+# fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt='O5')
+# indexs = Data.get_equal_k_simple_indexs(fp=fp, k=5, time_total_threshold=120000)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=110000)
 # print(data)
-# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=50000000, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=7, opt="O5"), time_total_threshold=110000)
+# data = Data.getData_by_indexs(indexs=indexs, k=5, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000, mds=300, t=0, ns=200, r=3, k=5, nw=3, wf=1000, dr=3, opt="O5"), time_total_threshold=110000)
 # print(data)
 #
 #
@@ -1030,8 +1045,8 @@ class LineChart:
 
 
 ######### 画radius_len柱状图 ################
-Bar.draw_radius_len(0, 30000, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
-Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
+# Bar.draw_radius_len(0, 30000, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
+# Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
 # LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')

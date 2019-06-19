@@ -754,7 +754,7 @@ public class TestSampleChooser {
 			line += TimeUtility.getDateByIntDate(samDate);
 			bw.write(line + "\n");
 			
-			MLog.log("已生成" + index + " : " + line + " 个样本");
+			MLog.log("已生成" + index + " - " + pids.size() + " : " + line + " 个样本");
 			index++;
 		}
 		
@@ -766,29 +766,29 @@ public class TestSampleChooser {
 	public static void main(String[] args) throws Exception{
 		
 //		IndexNidKeywordsListService.buildWordFrequencyFile();
-		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
-		
-		int num = 0;
-		int minWf = 100;
-		for(Entry<Integer, Integer> en : Global.wordFrequency.entrySet()) {
-			if(en.getValue() >= minWf) {
-				num++;
-			}
-		}
-		MLog.log("wNum = " + Global.wordFrequency.size());
-		MLog.log("num = " + num);
+//		Global.wordFrequency = IndexNidKeywordsListService.loadWordFrequency(Global.outputDirectoryPath + Global.wordFrequencyFile);
+//		
+//		int num = 0;
+//		int minWf = 100;
+//		for(Entry<Integer, Integer> en : Global.wordFrequency.entrySet()) {
+//			if(en.getValue() >= minWf) {
+//				num++;
+//			}
+//		}
+//		MLog.log("wNum = " + Global.wordFrequency.size());
+//		MLog.log("num = " + num);
 		
 		
 //		SampleChooser.productTestSampleByFirstWid(100, Global.inputDirectoryPath + Global.nodeIdKeywordListOnDateFile, 
 //				Global.inputDirectoryPath + Global.pidCoordFile, 
 //				Global.inputDirectoryPath + Global.testSampleFile);
 //		int a[] = {1, 5, 8, 10, 15, 20};
-//		int a[] = {3};
-//		for(int ii : a) {
+		int a[] = {3};
+		for(int ii : a) {
 //			TestSampleChooser.productSingleDateTestSampleForPaper(500, ii);
 //			TestSampleChooser.productRangeDateTestSampleForPaper(500, ii);
 //			TestSampleChooser.productTestSampleByPaper(200, ii, 4, minWf);
-//			TestSampleChooser.productTestSampleByPaper(200, ii);
-//		}
+			TestSampleChooser.productTestSampleByPaper(200, ii);
+		}
 	}
 }

@@ -26,24 +26,27 @@ public class WordRadiusNeighborhood {
 	
 	private HashMap<Integer, ArrayList<Integer>>[] eachLayerWN = null;
 	private Integer radius = Global.radius;
+	private QueryParams qp = null;
 	
 	public WordRadiusNeighborhood() {
 	}
 	
-	public WordRadiusNeighborhood(int radius, String placeNeigh) {
-		this.radius = radius;
+	public WordRadiusNeighborhood(QueryParams qp, String placeNeigh) {
+		this.qp = qp;
+		this.radius = qp.radius;
 		eachLayerWN = new HashMap[this.radius  + 1];
 		this.formate(placeNeigh);
 	}
 	
-	public WordRadiusNeighborhood(int radius, byte[] binPlaceNeigh) {
+	public WordRadiusNeighborhood(QueryParams qp, byte[] binPlaceNeigh) {
 //		this.radius = radius;
 //		eachLayerWN = new HashMap[this.radius  + 1];
 //		this.formateBin(binPlaceNeigh);
-		this(radius, binPlaceNeigh, Boolean.TRUE);
+		this(qp, binPlaceNeigh, Boolean.TRUE);
 	}
 	
-	public WordRadiusNeighborhood(int radius, byte[] binPlaceNeigh, Boolean hasDate) {
+	public WordRadiusNeighborhood(QueryParams qp, byte[] binPlaceNeigh, Boolean hasDate) {
+		this.qp = qp;
 		this.radius = radius;
 		eachLayerWN = new HashMap[this.radius  + 1];
 		if(hasDate)	this.formateBin(binPlaceNeigh);
@@ -99,6 +102,7 @@ public class WordRadiusNeighborhood {
 		for(i=0; i<this.radius+1; i++) {
 			numWD = bb.getInt();
 			if(0==numWD) 	continue;
+			if(Global.isTest)	qp.rr.NumPNNidDisPair += numWD;
 			eachLayerWN[i] = new HashMap<>();
 			for(j=0; j<numWD; j++) {
 				pid = bb.getInt();
@@ -126,6 +130,7 @@ public class WordRadiusNeighborhood {
 		for(i=0; i<this.radius+1; i++) {
 			numWD = bb.getInt();
 			if(0==numWD) 	continue;
+			if(Global.isTest)	qp.rr.NumPNNidDisPair += numWD;
 			eachLayerWN[i] = new HashMap<>();
 			for(j=0; j<numWD; j++) {
 				pid = bb.getInt();
@@ -283,7 +288,7 @@ public class WordRadiusNeighborhood {
 	
 	public static void main(String[] args) {
 		String st = "2,12@13@ -4,12@13@ L0,12@13@ -3,12@13@ L1,12@13@ L2,17612@ -4,17612@ -5,12@17612@ 6,12@17612@ L";
-		WordRadiusNeighborhood wrn = new WordRadiusNeighborhood(Global.radius, st);
+		WordRadiusNeighborhood wrn = new WordRadiusNeighborhood(null, st);
 		System.out.println(st + "\n" + wrn);
 	}
 	

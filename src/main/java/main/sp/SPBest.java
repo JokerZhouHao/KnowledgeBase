@@ -334,15 +334,15 @@ public class SPBest implements SPInterface{
 				byte[] bs = null;
 				if(widHasDate.contains(sortQwords[i])) {
 					if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O3) {
-						bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i]);
+						bs =  wIdPnSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
 					} else {
-						bs = wIdPnInfSer.getPlaceNeighborhoodBin(sortQwords[i]);
+						bs = wIdPnInfSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
 					}
 //					MLog.log(qp.optMethod + " > " + i + "-bs = " + bs);
-					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs));
+					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs));
 				} else {
-					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i]);
-					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp.radius, bs, Boolean.FALSE));
+					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
+					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs, Boolean.FALSE));
 					else	return null;	// 因为wIdPnNodateSer记录了所有不带有时间的关键词
 				}
 			}

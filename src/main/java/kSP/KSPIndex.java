@@ -162,6 +162,7 @@ public class KSPIndex {
 							//children of n are places
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
+								qp.rr.NumTestPid++;
 							}
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2) {
 								this.placeReachablePrune(nid, sortQwords);
@@ -206,6 +207,7 @@ public class KSPIndex {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
+								qp.rr.NumTestRtreeNode++;
 							}
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
@@ -305,6 +307,10 @@ public class KSPIndex {
 					}
 					if(sign)	break;
 				} else {
+					if(Global.isTest) {
+						qp.rr.NumAccessPid++;
+					}
+					
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();
@@ -514,6 +520,7 @@ public class KSPIndex {
 							//children of n are places
 							if(Global.isTest) {
 								qp.rr.setFrontTime();
+								qp.rr.NumTestPid++;
 							}
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2)
@@ -546,9 +553,9 @@ public class KSPIndex {
 						} else {
 							//ATTENTION: children of n are nodes that have -id-1 as identifier in alpha index
 							if(Global.isTest) {
+								qp.rr.NumTestRtreeNode++;
 								qp.rr.setFrontTime();
 							}
-							
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
 								this.placeReachablePrune(-nid-1, sortQwords);
@@ -629,6 +636,10 @@ public class KSPIndex {
 					}
 					if(sign)	break;
 				} else {
+					if(Global.isTest) {
+						qp.rr.NumAccessPid++;
+					}
+					
 					if(Global.isDebug && Global.isFirstRTree) {
 						System.out.println("> 遍历完RTree所有非叶子节点，用时" + TimeUtility.getSpendTimeStr(Global.frontTime, System.currentTimeMillis()));
 						Global.frontTime = System.currentTimeMillis();

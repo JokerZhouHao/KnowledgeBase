@@ -18,6 +18,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
+import entity.sp.QueryParams;
 import entity.sp.WordRadiusNeighborhood;
 import utility.Global;
 import utility.PatternAnalyzer;
@@ -128,7 +129,7 @@ public class IndexWordPNService {
 	 * @param wid
 	 * @return
 	 */
-	public byte[] getPlaceNeighborhoodBin(int wid) {
+	public byte[] getPlaceNeighborhoodBin(int wid, QueryParams qp) {
 		try {
 			TopDocs results = indexSearcher.search(IntPoint.newExactQuery("wId", wid), 1);
 			if(Global.isTest) {
@@ -136,9 +137,9 @@ public class IndexWordPNService {
 			}
 			ScoreDoc[] hits = results.scoreDocs;
 			if(hits.length == 0)	return null;
-			
 			byte[] bs = indexSearcher.doc(hits[0].doc).getBinaryValue("pIdDates").bytes;
 			if(Global.isTest) {
+				qp.rr.TimePNIORead += (System.currentTimeMillis() - Global.tempTime);
 				if(Global.isFirstReadPn) {
 					Global.isFirstReadPn = false;
 				}
@@ -170,8 +171,8 @@ public class IndexWordPNService {
 		IndexWordPNService ser = new IndexWordPNService(Global.outputDirectoryPath + Global.indexWidPN + "_" + String.valueOf(radius));
 		ser.openIndexReader();
 		for(int i = Global.numNodes; i < Global.numNodes + Global.numKeywords; i++) {
-			if(null != (bs = ser.getPlaceNeighborhoodBin(i))) {
-				WordRadiusNeighborhood wrn = new WordRadiusNeighborhood(radius, bs);
+			if(null != (bs = ser.getPlaceNeighborhoodBin(i, null))) {
+				WordRadiusNeighborhood wrn = new WordRadiusNeighborhood(null, bs);
 //				System.out.println(i + ": " + wrn);
 //				break;
 			}
