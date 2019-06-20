@@ -311,8 +311,8 @@ class Bar:
         # lens = (1000000, 10000000, 2147483631)
 
         if search_type == 0:
-            x_txts = [r'$10^4$', r'$10^6$', r'$+\infty$']
-            lens = (10000, 1000000, 2147483631)
+            x_txts = [r'$10^4$', r'$10^7$', r'$+\infty$']
+            lens = (10000, 10000000, 2147483631)
         elif search_type == 1:
             x_txts = [r'$10^6$', r'$10^7$', r'$+\infty$']
             lens = (1000000, 10000000, 2147483631)
@@ -883,8 +883,10 @@ class LineChart:
         for search_type_index in range(len(search_types)):
             runtimes = []
             for wf in wfs:
-                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
-                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000, mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
+                # data = Data.getData(fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000,
+                #                             mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
+                data = Data.getData_by_indexs(indexs=indexs, fp=PathUtility.sample_res_path(base_dir, sp='SPBest', nwlen=10000000,
+                                            mds=300, t=search_types[search_type_index], ns=200, r=3, k=5, nw=3, wf=wf, dr=3, opt="O5"), time_total_threshold=12000000)
                 runtimes.append(data.timeTotal / 1000)
                 print(data)
             chart.draw_line(runtimes, search_names[search_type_index])
@@ -1049,7 +1051,7 @@ class LineChart:
 # Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
-# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
 # LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
 
 ######### 画top-k柱状图 #################

@@ -341,7 +341,10 @@ public class SPBest implements SPInterface{
 					}
 					qp.rr.TimePNIORead += System.currentTimeMillis() - tT;
 //					MLog.log(qp.optMethod + " > " + i + "-bs = " + bs);
-					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs));
+					if(null != bs) {
+						wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs));
+						qp.rr.NumBytePNRead += bs.length;
+					}
 				} else {
 					bs = wIdPnNodateSer.getPlaceNeighborhoodBin(sortQwords[i], qp);
 					if(null != bs)	wordPNMap.put(sortQwords[i], new WordRadiusNeighborhood(qp, bs, Boolean.FALSE));

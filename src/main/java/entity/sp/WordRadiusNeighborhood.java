@@ -102,7 +102,7 @@ public class WordRadiusNeighborhood {
 		for(i=0; i<this.radius+1; i++) {
 			numWD = bb.getInt();
 			if(0==numWD) 	continue;
-			if(Global.isTest)	qp.rr.NumPNNidDisPair += numWD;
+			if(Global.isTest)	qp.rr.NumPNPidDatePair += numWD;
 			eachLayerWN[i] = new HashMap<>();
 			for(j=0; j<numWD; j++) {
 				pid = bb.getInt();

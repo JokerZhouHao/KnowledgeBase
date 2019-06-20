@@ -1048,7 +1048,8 @@ class LineChart:
 # Bar.draw_radius_len(1, 0, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeYagoVB_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
-LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=1000, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeYagoVB_Date.pdf')
+
 
 ######### 画top-k柱状图 #################
 # Bar.draw_topK()

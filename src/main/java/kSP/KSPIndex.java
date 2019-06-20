@@ -165,7 +165,7 @@ public class KSPIndex {
 								qp.rr.NumTestPid++;
 							}
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2) {
-								this.placeReachablePrune(nid, sortQwords);
+								this.placeReachablePrune(nid, sortQwords, qp);
 //								this.placeReachablePruneOld(nid, sortQwords);
 							} else {
 								this.placeReachablePruneOld(nid, sortQwords);
@@ -211,7 +211,7 @@ public class KSPIndex {
 							}
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
-								this.placeReachablePrune(-nid-1, sortQwords);
+								this.placeReachablePrune(-nid-1, sortQwords, qp);
 								if (1==this.pid2WidPathDis[sortQwords.length]) {
 									if(Global.isTest) {
 										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
@@ -524,7 +524,7 @@ public class KSPIndex {
 							}
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O2)
-								this.placeReachablePrune(nid, sortQwords);
+								this.placeReachablePrune(nid, sortQwords, qp);
 							else
 								this.placeReachablePruneOld(nid, sortQwords);
 							
@@ -558,7 +558,7 @@ public class KSPIndex {
 							}
 							
 							if(qp.optMethod == OptMethod.O5 || qp.optMethod == OptMethod.O4) {
-								this.placeReachablePrune(-nid-1, sortQwords);
+								this.placeReachablePrune(-nid-1, sortQwords, qp);
 								if (1==this.pid2WidPathDis[sortQwords.length]) {
 									if(Global.isTest) {
 										qp.rr.timeCptRTree2Wids += qp.rr.getTimeSpan();
@@ -755,7 +755,7 @@ public class KSPIndex {
 	 * @param qwords
 	 * @return
 	 */
-	private int[] placeReachablePrune(int place, int[] sortQwords) {
+	private int[] placeReachablePrune(int place, int[] sortQwords, QueryParams qp) {
 		/*
 		 * For unqualified place pruning, based on the observation that infrequent query keywords have a high chance to make a place unqualified, 
 		 * we prioritize them when issuing reachability queries.
@@ -772,7 +772,7 @@ public class KSPIndex {
 			} else if(null == (distance=w2pReachable[i].get(place))) {
 				return this.pid2WidPathDis;
 			} else	{
-				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
+				if(place < 0 || qp.optMethod == OptMethod.O2)	this.pid2WidPathDis[i] = -1;	// rtree节点
 				else	this.pid2WidPathDis[i] = distance <= (Global.MAX_BFS_LEVEL + 1) ? distance : (Global.MAX_BFS_LEVEL + 1);
 			}
 		}

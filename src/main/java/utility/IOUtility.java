@@ -41,6 +41,10 @@ public class IOUtility {
 		return new DataInputStream(new BufferedInputStream(new FileInputStream(fp)));
 	}
 	
+	public static BufferedInputStream getBis(String fp) throws Exception {
+		return new BufferedInputStream(new FileInputStream(fp));
+	}
+	
 	public static DataOutputStream getDGZos(String fp) throws Exception{
 		return new DataOutputStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(fp))));
 	}

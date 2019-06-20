@@ -117,9 +117,11 @@ public class RunRecord {
 	public long NumAccessPid = 0;
 	
 	public long TimePNIORead = 0;
-	public long NumPNNidDisPair = 0;
+	public long NumPNPidDatePair = 0;
+	public long NumBytePNRead = 0;
 	
 	public String getHeader() {
+		
 		return "id,timeBspSearchWid2DateNid,numBspWid2DateWid,timeBspBuidingWid2DateNid,timeBspGetPN,timeBspGetW2PReach,"
 				+ "numCptMaxQueueSize,numCptQueueRemove,timeCptQueueRemove,"
 				+ "numCptQueuePut,timeCptQueuePut,numLastQueue,"
@@ -137,7 +139,7 @@ public class RunRecord {
 				+ "queueLastValue,kthScore,resultSize,timeP2PInSemanticTree,NumTotalSearchNid,NumInRangeSearchNid,"
 				+ "AvgNumBfsNid,AvgLevelBfs,"
 				+ "NumTestRtreeNode,NumTestPid,NumAccessPid,"
-				+ "TimePNIORead,NumPNNidDisPair,"
+				+ "TimePNIORead,NumPNPidDatePair,NumBytePNRead,"
 				+ "\n";
 	}
 	
@@ -164,7 +166,7 @@ public class RunRecord {
 						   String.valueOf(AvgLevelBfs/numGetSemanticTree) + ",";
 		str += String.valueOf(NumTestRtreeNode) + "," + String.valueOf(NumTestPid) + "," +
 				String.valueOf(NumAccessPid) + "," + 
-				String.valueOf(TimePNIORead) + "," + String.valueOf(NumPNNidDisPair) + "," +
+				String.valueOf(TimePNIORead) + "," + String.valueOf(NumPNPidDatePair) + "," + String.valueOf(NumBytePNRead) + "," + 
 				"\n";
 		return str;
 	}

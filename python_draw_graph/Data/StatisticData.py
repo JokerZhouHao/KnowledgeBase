@@ -58,7 +58,13 @@ class Data:
                 data.timeTotal += int(strArr[32])
                 data.timeOther += (int(strArr[32]) - int(strArr[28]))
                 data.numCptTotalReach2Wids += (int(strArr[12]))
-                data.NumTestPid += (int(strArr[42]))
+                data.timeBspGetPN += (int(strArr[4]))
+                data.timeCptPid2Wids += (int(strArr[14]))
+                if len(strArr) >= 43:
+                    data.NumTestPid += (int(strArr[42]))
+                if len(strArr) >= 45:
+                    data.TimePNIORead += (int(strArr[44]))
+                    data.NumPNNidDisPair += (int(strArr[45]))
         data.numAccessedRTreeNode /= index
         data.numTQSP /= index
         data.timeSemantic /= index
@@ -66,6 +72,10 @@ class Data:
         data.timeOther /= index
         data.numCptTotalReach2Wids /= index
         data.NumTestPid /= index
+        data.timeBspGetPN /= index
+        data.timeCptPid2Wids /= index
+        data.TimePNIORead /= index
+        data.NumPNNidDisPair /= index
         data.numSample = index
         return  data
 
