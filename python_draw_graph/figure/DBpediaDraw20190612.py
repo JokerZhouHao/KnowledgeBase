@@ -4,8 +4,8 @@ import time
 import random
 from matplotlib import interactive
 from Data.StatisticData import Data
-from utility import PathUtility
 from utility import Global
+from utility import PathUtility
 
 BAR_FONT_SIZE = 25
 
@@ -867,7 +867,7 @@ class LineChart:
 
         wfs = [100, 250, 500, 1000, 10000, 100000, 1000000]
 
-        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\wf\\'
+        base_dir = 'D:\\nowMask\\KnowledgeBase\\sample_result\\DBpedia_single_date\\new20190612\\wf1\\'
         search_name = None
         if search_type==0:
             search_name = r'$SPTD^*$'
@@ -1047,11 +1047,11 @@ class LineChart:
 
 
 ######### 画radius_len柱状图 ################
-# Bar.draw_radius_len(0, 30000, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
-# Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
+Bar.draw_radius_len(0, 30000, ftype='alpha_len_SPTD*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTDStar.pdf')
+Bar.draw_radius_len(1, 10000, ftype='alpha_len_SPTR*', fpath=PathUtility.figure_path() + 'AlphaLenBar_RuntimeDBpedia_SPTRStar.pdf')
 
 ######## 画WORD_FREQUENCY折线图 ##############
-LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
+# LineChart.draw_word_frequency(base_y=0, search_type=0, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_Date.pdf')
 # LineChart.draw_word_frequency(base_y=3800, search_type=1, rotation=45, fpath=PathUtility.figure_path() + 'WordFrequency_RuntimeDBpediaVB_SPTRStar1.pdf')
 
 ######### 画top-k柱状图 #################

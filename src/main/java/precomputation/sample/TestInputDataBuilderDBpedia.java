@@ -84,10 +84,10 @@ public class TestInputDataBuilderDBpedia {
 		int r = 3;
 		int k = 5;
 		int nw = 3;
-		int rLen = 10000;
-		int maxDataSpan = 50000000;
-		int wfs[] = {50, 100, 250, 500, 1000, 10000, 100000, 1000000};
-		int dr = 7;
+		int rLen = 10000000;
+		int maxDataSpan = 300;
+		int wfs[] = {100, 250, 500, 1000, 10000, 100000, 1000000};
+		int dr = 3;
 		
 		List<String> lines = new ArrayList<>();
 		
@@ -293,7 +293,7 @@ public class TestInputDataBuilderDBpedia {
 	
 	public static void main(String[] args) throws Exception{
 //		generateRLen();
-//		generateWf();
+		generateWf();
 //		generateK();
 //		generateNW();
 //		generateDr();

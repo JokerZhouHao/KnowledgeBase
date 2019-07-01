@@ -319,6 +319,7 @@ public class SPBest implements SPInterface{
 				}
 			}
 		}
+		
 		if(Global.isTest) {
 			qp.rr.timeBspGetW2PReach = qp.rr.getTimeSpan();
 			qp.rr.setFrontTime();

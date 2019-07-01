@@ -25,6 +25,8 @@ class Data:
 
         self.TimePNIORead = 0
         self.NumPNNidDisPair = 0
+        self.NumBytePNRead = 0
+
 
     # 计算所需字段的平均值
     @staticmethod
@@ -150,6 +152,7 @@ class Data:
                 if len(strArr) >= 45:
                     data.TimePNIORead += (int(strArr[44]))
                     data.NumPNNidDisPair += (int(strArr[45]))
+                    data.NumBytePNRead += (int(strArr[46]))
 
         index = num
         data.numAccessedRTreeNode /= index
@@ -163,6 +166,7 @@ class Data:
         data.timeCptPid2Wids /= index
         data.TimePNIORead /= index
         data.NumPNNidDisPair /= index
+        data.NumBytePNRead /= index
         data.numSample = index
         return  data
 
@@ -173,11 +177,11 @@ class Data:
     def __str__(self):
         strs = ''
         strs = strs + self.filePath + '\n'
-        strs += 'numSample  numAccessedRTreeNode  numTQSP  timeSemantic   timeOther   timeTotal   numCptTotalReach2Wids   NumTestPid   timeBspGetPN   timeCptPid2Wids  TimePNIORead  NumPNNidDisPair\n'
-        strs += "%-11.0d%-22.0d%-9.0d%-15.0d%-12.0d%-12.0d%-19.0d%-18.0d%-15.0d%-17.0d%-14.0d%-15.0d"%(self.numSample,
+        strs += 'numSample  numAccessedRTreeNode  numTQSP  timeSemantic   timeOther   timeTotal   numCptTotalReach2Wids   NumTestPid   timeBspGetPN   timeCptPid2Wids  TimePNIORead  NumPNNidDisPair  NumBytePNRead\n'
+        strs += "%-11.0d%-22.0d%-9.0d%-15.0d%-12.0d%-12.0d%-19.0d%-18.0d%-15.0d%-17.0d%-14.0d%-17.0d%-13.0d"%(self.numSample,
                 self.numAccessedRTreeNode, self.numTQSP, self.timeSemantic, self.timeOther, self.timeTotal,
                 self.numCptTotalReach2Wids, self.NumTestPid, self.timeBspGetPN, self.timeCptPid2Wids,
-                self.TimePNIORead, self.NumPNNidDisPair) + '\n'
+                self.TimePNIORead, self.NumPNNidDisPair, self.NumBytePNRead) + '\n'
         return strs
 
 # data = Data.getData(0, 500, 1, 1, 5)

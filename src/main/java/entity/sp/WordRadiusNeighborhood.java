@@ -111,6 +111,7 @@ public class WordRadiusNeighborhood {
 				for(k=0; k<numDates; k++) {
 					tempList.add(bb.getInt());
 				}
+				
 				eachLayerWN[i].put(pid, tempList);
 			}
 		}

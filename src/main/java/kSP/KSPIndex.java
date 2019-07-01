@@ -772,7 +772,7 @@ public class KSPIndex {
 			} else if(null == (distance=w2pReachable[i].get(place))) {
 				return this.pid2WidPathDis;
 			} else	{
-				if(place < 0 || qp.optMethod == OptMethod.O2)	this.pid2WidPathDis[i] = -1;	// rtree节点
+				if(place < 0)	this.pid2WidPathDis[i] = -1;	// rtree节点
 				else	this.pid2WidPathDis[i] = distance <= (Global.MAX_BFS_LEVEL + 1) ? distance : (Global.MAX_BFS_LEVEL + 1);
 			}
 		}
