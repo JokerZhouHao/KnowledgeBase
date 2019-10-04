@@ -11,7 +11,7 @@ import utility.Global;
  * 记录BFS访问过的Wid
  * @author Monica
  *
- */
+ */    
 public class BFSWidRecoder {
 	
 	private Boolean[] noAccessedNids = new Boolean[Global.numKeywords];
